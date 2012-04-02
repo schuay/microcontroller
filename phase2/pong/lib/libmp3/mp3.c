@@ -10,7 +10,6 @@
 #define bsyncHigh()	MP3_PORT |= (1<<BSYNC)
 #define clearINT0Flag()	GIFR = (1<<INTF0)
 
-static uint16_t sciRead(uint8_t addr);
 static void sciWrite(uint8_t addr, uint16_t data);
 static void mp3WaitBusy(void);
 static void (*dataRequest)(void);
@@ -46,21 +45,6 @@ void sciWrite(uint8_t addr, uint16_t data) {
 	spiSend((uint8_t)((data>>8) & 0xff));
 	spiSend((uint8_t)((data>>0) & 0xff));
 	mp3CSHigh();
-}
-
-uint16_t sciRead(uint8_t addr) {
-	uint16_t value;
-
-	mp3WaitBusy();
-
-	mp3CSLow();
-	spiSend(OP_READ);
-	spiSend(addr);
-	value = spiReceive() << 8;
-	value |= spiReceive();
-	mp3CSHigh();
-
-	return value;
 }
 
 void mp3Init(void (*dataRequestCallback)(void)) {

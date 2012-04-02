@@ -106,7 +106,7 @@ error_t wiiUserSetLeds(uint8_t wii, uint8_t bitmask, void (*setLedsCallback)(uin
 	return status;
 }
 
-error_t wiiUserSetAccel(uint8_t wii, uint8_t enable, void (*setAccelCallback)(uint8_t, error_t))
+error_t wiiUserSetAccel(uint8_t wii, uint8_t enable __attribute__ ((unused)), void (*setAccelCallback)(uint8_t, error_t))
 {
 #ifndef NDEBUG
 	if (wii >= WII)

@@ -17,7 +17,7 @@ typedef volatile struct buffer
 
 static buffer_t *volatile _first = 0, *volatile _last = (buffer_t *)1;
 
-static buffer_t _command = { 17, { [1] = 5, 4, 13, [10] = 24, 204, 1 } };
+static buffer_t _command = { 17, { [1] = 5, 4, 13, [10] = 24, 204, 1 }, 0 };
 
 static volatile uint8_t _create = WII;
 static volatile uint16_t _handle[] = { [0 ... WII - 1] = 0xF000 };
