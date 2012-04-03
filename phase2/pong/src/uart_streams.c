@@ -15,14 +15,15 @@ static int uart_putchar(char c, FILE *stream) {
     return 0;
 }
 
-static FILE uart_stdout = FDEV_SETUP_STREAM(uart_putchar,
+static FILE uart_stream = FDEV_SETUP_STREAM(uart_putchar,
         NULL, _FDEV_SETUP_WRITE);
 
 void uart_streams_init(void) {
     struct uart_conf conf;
     memset(&conf, 0, sizeof(conf));
     conf.ucsrnb = TransmitterEnable;
-
     uart0_init(&conf);
-    stdout = &uart_stdout;
+
+    stderr = &uart_stream;
+    stdout = &uart_stream;
 }

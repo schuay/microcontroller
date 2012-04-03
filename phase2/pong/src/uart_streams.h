@@ -3,7 +3,11 @@
 
 #include <stdio.h>
 
-/* Sets up stdout to use UART0.
+/* This macro enables usage of stderr for assert() failures if
+ * this header is included BEFORE assert.h. */
+#define __ASSERT_USE_STDERR
+
+/* Sets up stderr and stdout to use UART0.
  * Interrupts need to be disabled. */
 void uart_streams_init(void);
 
