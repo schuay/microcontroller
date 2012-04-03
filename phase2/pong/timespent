@@ -1,0 +1,128 @@
+writing makefile, compile libs: 2h
+early uart experiments (@home): 2h
+early ringbuffer experiments: 1h
+polish uart streams (intr driven): 3-4h
+basic timer routine: 2-3h
+basic lcd2x16 routines: 2-3h
+initial pong logic and fns: 2-3h
+GLCD trial and error: 7h
+    spent an entire day trying to get the lcd to display a single dot. in the
+    end, ondra saved the day by pointing out that RST must be set to 1, not 0
+doxygen setup and initial comments: 1h
+(blind) timing tweaks GLCD: 1h
+    disassemble obj file and add nops according to timing specification, in the
+    assumption that a cycle takes 62.5 ns. implemented without access to
+    oscilloscope, so this will need to be verified later.
+add receiving code GLCD: 1h
+    again, implemented without GLCD. verify that this works at lab ASAP
+bresenham's line algorithm GLCD: .5h
+    copied from wikipedia article
+convert GLCD to required API: 2h
+    maybe i should've read the spec more carefully.  this is basically just
+    shifting existing code blocks around and renaming things.
+fix most GLCD home implementation bugs at lab: 4h
+    this again shows us that implementing without the possibility to test takes
+    way more time than if everything would've been written here. things like
+    reading from PORTA instead of PINA, '<' instead of '>=', etc.. take ages to
+    figure out after a long coding session, but should be simple if tested and
+    implemented incrementally.
+
+    additionally, i ran into a weird issue with task_logic() being run twice
+    during each tick().  WTF?? i don't understand what's happening there.
+
+    the basic glcd functions seem to be mostly working, except that setPixel
+    doesn't read the current state from the correct position, it's offset by 1
+    or -1.. 
+
+    reading from display ram needs to be done twice to work... why?
+
+    fixed a couple of bugs in drawLine, added tests for glcd display functions
+fix embarassing + elusive duplicate struct bug: 1h
+    no, the linker doesn't seem to warn about having nonstatic anonymous struct
+    variables of the same name in two object files.
+make uart and timer initialization generic: 1.5h
+    i've wanted it this way all along but didn't know how to store the pointer
+    (and didn't really try to find out)
+check timing of glcd send/recv with oscilloscope: 1.5h
+    first, i was puzzled by how long it took. then somebody pointed out that
+    my uart data reg empty intr kept firing and slowing everything down.
+further work on bt uart: 1h
+    spec is confusing, and other people in the lab are having lots of troubles
+    with this.  do a little further work, then move on to
+spi / mp3 basics: 1h
+    implement spi send/receive/init and run the sinus test. use code provided
+    by atmega manual. finally something works without hours of guessing
+
+04/09
+adc volume control: 1h
+    spent some more time debugging since this 1) doesn't seem to work without
+    the reference voltage set to VCC, and 2) the ADC knob on my board seems to
+    be a little wonky and keeps jumping between values. other boards are more
+    consistent.
+mp3 playback: 1h
+    this was also relatively nice and easy. at first, i didn't convert
+    into block addresses.
+yet more work with bt uart: 2h
+    by now, we can actually see some stuff like the controller mac address
+    being sent back and forth. we are still too slow. hardware flow ctl is not
+    yet implemented.
+analyse received bt packets: 1h
+    trying to figure out what's still keeping the wiimote from connecting.
+
+    the first packet is not interesting (value 0x0f in state 0x04 is ignored)
+
+    rcvCallback state 0x0 value 0x4
+    rcvCallback state 0x4 value 0xf
+    rcvCallback state 0x14 value 0x4
+    rcvCallback state 0x24 value 0x0
+    rcvCallback state 0x24 value 0x1
+    rcvCallback state 0x24 value 0x5
+    rcvCallback state 0x24 value 0x4
+
+    however, the second packet is. value 0x03 in state 0x03 means its a connection
+    packet. the length is stated in state 0x14: 11 bytes. however, in this case,
+    we only received 10 bytes and event() is never called.
+
+    rcvCallback state 0x0 value 0x4
+    rcvCallback state 0x4 value 0x3
+    rcvCallback state 0x14 value 0xb
+    rcvCallback state 0x24 value 0x4
+    rcvCallback state 0x24 value 0x0
+    rcvCallback state 0x24 value 0x0
+    rcvCallback state 0x24 value 0x46
+    rcvCallback state 0x24 value 0x5e
+                                        <- missing packet here
+    rcvCallback state 0x24 value 0xa3
+    rcvCallback state 0x24 value 0xbd
+    rcvCallback state 0x24 value 0x58
+    rcvCallback state 0x24 value 0x1
+    rcvCallback state 0x24 value 0x0
+
+    this means we are still too slow.
+make bt_hal a little more efficient: 3h
+    reimplement lighter ringbuffer
+    move RX complete interrupt routine to bt_hal
+    this is fast enough that we can reenable the rest of the functionality
+    however, for some reason we never get a connection event, only disconnection.
+    why?
+figure out a little more about wiimote connection: 1h
+    apparently, a connection is only established if the sync button is pressed.
+    button reception works. 
+    turning on acceleration events doesn't. my guess is that it's caused by the
+    ignored flow control
+enable wiimote accel: 0.5h
+    oh, it can't be because of flow control since we still have those handy debug
+    printf's.
+    enabling accel works when starting the request after leds have been enabled.
+    the implementation seems to be fast enough, even with accel on.
+review lcd timing: 1h
+    again, this took longer than usual because for some reason i haven't figured out yet,
+    the timings in the the datasheet seem way too short. nothing works unless
+    there is at least a delay of 50 us in send_nibble (which is a lot)
+documentation: 0.5h
+flesh out game logic: 2h
+    draw rudimentary board (keep it simple, only ball and 2 paddles)
+    make ball more visible
+    disable constant mp3 playback
+    single paddle movement
+    beginning of score logic
