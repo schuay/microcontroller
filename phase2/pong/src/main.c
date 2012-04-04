@@ -6,37 +6,66 @@
 #include "timer.h"
 #include "lcd.h"
 #include "adc.h"
+#include "pong.h"
 
-static volatile uint8_t cntr = 0;
+enum task_flags {
+    RunLogic = 1 << 0,
+    ADCWaiting = 1 << 1,
+};
 
-void printmsg(void) {
-    adc_start_conversion();
-    printf_P(PSTR("Hello, world! %d\n"), ++cntr);
+struct {
+    uint8_t flags;
+    uint16_t adc_result;
+} glb;
+
+static void tick(void) {
+    glb.flags |= RunLogic;
 }
 
-void adc_done(uint16_t result) {
-    printf_P(PSTR("ADC result: %d\n"), result);
+static void adc_done(uint16_t result) {
+    glb.adc_result = result;
+    glb.flags |= ADCWaiting;
 }
 
-int main(void) {
+static void init(void) {
     sleep_enable();
     uart_streams_init();
     lcd_init();
+    pong_init();
 
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
 
+    struct timer_conf conf = { 1, 1000, tick };
+    timer_set(&conf);
+}
+
+static void task_logic(void) {
+    pong_ball_step();
+    pong_print();
+}
+
+static void task_adc(void) {
+    printf_P(PSTR("ADC Result: %d\n"), glb.adc_result);
+}
+
+static void run_tasks(void) {
+    if (glb.flags & RunLogic) {
+        glb.flags &= ~RunLogic;
+        task_logic();
+    }
+    if (glb.flags & ADCWaiting) {
+        task_adc();
+        glb.flags &= ~ADCWaiting;
+    }
+}
+
+int main(void) {
+    init();
     sei();
 
-    struct timer_conf conf = { 1, 1000, printmsg };
-    timer_set(&conf);
-    lcd_putchar('a', 0, 0);
-    lcd_putchar('b', 0, 1);
-    lcd_putchar('c', 1, 0);
-    lcd_putchar('d', 1, 1);
-    lcd_putchar('1', 0, 2);
-
     for (;;) {
+        run_tasks();
         sleep_cpu();
     }
 
