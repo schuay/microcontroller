@@ -2,8 +2,9 @@
 #include <avr/interrupt.h>
 
 #include "uart.h"
+#include "common.h"
 
-#define BAUD 9600
+#define BAUD 115200
 
 static intr_handler_t udri0_handler;
 
