@@ -1,7 +1,7 @@
 #ifndef UART_H
 #define UART_H
 
-typedef void (*intr_handler_t)(void);
+#include "common.h"
 
 enum ucsrnbflags {
     ReceiverEnable = _BV(RXEN0),

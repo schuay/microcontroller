@@ -3,7 +3,6 @@
 
 #include "uart.h"
 
-#define F_CPU 16000000
 #define BAUD 9600
 
 static intr_handler_t udri0_handler;
