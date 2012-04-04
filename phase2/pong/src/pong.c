@@ -4,6 +4,11 @@
 
 #include "pong.h"
 
+/* Dummy functions allow us to link to all
+ * project libs until we implement them. */
+void spiSend(uint8_t data __attribute__ ((unused))) {}
+uint8_t spiReceive(void) { return 0; }
+
 struct pong_state_t {
     /* Field */
     uint8_t width, height;  /* Board dimensions, including: */

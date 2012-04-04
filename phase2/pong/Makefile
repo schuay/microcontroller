@@ -30,7 +30,7 @@ $(libs):
 	$(MAKE) --directory=$@ $(TARGET)
 
 $(APP).elf: $(libs) $(objects)
-	$(GCC) $(LDFLAGS) $(objects) -o $@
+	$(GCC) $(LDFLAGS) $(objects) $(libobjects) -o $@
 
 %.o: %.c
 	$(GCC) $(CFLAGS) $< -o $@
