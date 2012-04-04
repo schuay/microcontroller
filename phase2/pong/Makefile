@@ -17,7 +17,7 @@ libs = $(lib_mp3) $(lib_wiimote) $(lib_sdcard)
 libobjects = $(lib_glcd)/libglcd.a $(lib_mp3)/mp3.o \
 			 $(lib_wiimote)/libwiimote.a $(lib_sdcard)/sdcard.o
 source = src/uart.c src/ringbuffer.c src/uart_streams.c src/main.c \
-		 src/lcd.c
+		 src/lcd.c src/timer.c
 objects = $(source:.c=.o)
 
 .PHONY: all $(libs)
