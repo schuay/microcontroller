@@ -1,6 +1,8 @@
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "uart_streams.h"
+#include <assert.h>
 
 #include "ringbuffer.h"
 
