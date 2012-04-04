@@ -5,6 +5,7 @@
 #include "common.h"
 
 #define BAUD 115200
+#define BAUD_TOL 3
 
 static intr_handler_t udri0_handler;
 
