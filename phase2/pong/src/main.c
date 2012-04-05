@@ -7,6 +7,7 @@
 #include "lcd.h"
 #include "adc.h"
 #include "pong.h"
+#include "glcd.h"
 
 enum task_flags {
     RunLogic = 1 << 0,
@@ -41,8 +42,11 @@ static void init(void) {
 }
 
 static void task_logic(void) {
+    static int xy = 0;
     pong_ball_step();
     pong_print();
+    glcd_set_pixel(xy, xy);
+    xy++;
 }
 
 static void task_adc(void) {
@@ -62,6 +66,7 @@ static void run_tasks(void) {
 
 int main(void) {
     init();
+    glcd_init();
     sei();
 
     for (;;) {
