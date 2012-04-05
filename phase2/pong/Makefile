@@ -4,7 +4,7 @@ GCC = avr-gcc
 MCU = atmega1280
 
 CFLAGS = -mmcu=$(MCU) -Wall -Wextra -Werror -pedantic -Wstrict-prototypes -Os \
-		 -std=gnu99 -frename-registers -fshort-enums -fpack-struct -c
+		 -Iinclude -std=gnu99 -frename-registers -fshort-enums -fpack-struct -c
 LDFLAGS = -mmcu=$(MCU) -Wl,-u,vfprintf -lprintf_min 
 
 APP = avr-pong
