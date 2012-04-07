@@ -1,5 +1,6 @@
 PROG = avrprog2
 GCC = avr-gcc
+DOXYGEN = doxygen
 
 MCU = atmega1280
 
@@ -20,9 +21,12 @@ source = src/uart.c src/ringbuffer.c src/uart_streams.c src/main.c \
 		 src/lcd.c src/timer.c src/adc.c src/pong.c src/glcd.c
 objects = $(source:.c=.o)
 
-.PHONY: all $(libs)
+.PHONY: all $(libs) doc
 
 all: $(APP).elf
+
+doc:
+	$(DOXYGEN)
 
 recursive: $(libs)
 
@@ -41,3 +45,4 @@ install: $(APP).elf
 clean:
 	$(MAKE) recursive TARGET=clean
 	$(RM) -f $(objects) $(APP).elf
+	$(RM) -rf doc/
