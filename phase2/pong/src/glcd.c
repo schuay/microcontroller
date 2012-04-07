@@ -92,6 +92,8 @@ void glcdDrawRect(const xy_point p1, const xy_point p2, draw_fn drawPx) {
     glcdDrawLine(p2a, p1, drawPx);
 }
 
-/*
-void glcdDrawCircle(const xy_point c, const uint8_t radius, draw_fn drawPx);
-*/
+void glcdDrawCircle(const xy_point c, const uint8_t radius, draw_fn drawPx) {
+    xy_point p1 = { c.x - radius, c.y - radius };
+    xy_point p2 = { c.x + radius, c.y + radius };
+    glcdDrawRect(p1, p2, drawPx);
+}
