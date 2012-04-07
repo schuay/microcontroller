@@ -41,6 +41,7 @@ static void init(void) {
     sleep_enable();
     uart_streams_init();
     lcd_init();
+    glcdInit();
     pong_init();
 
     wiiUserInit(rcvButton, rcvAccel);
@@ -56,7 +57,7 @@ static void task_logic(void) {
     static int xy = 0;
     pong_ball_step();
     pong_print();
-    glcd_set_pixel(xy, xy);
+    glcdSetPixel(xy, xy);
     xy++;
 }
 
@@ -77,7 +78,6 @@ static void run_tasks(void) {
 
 int main(void) {
     init();
-    glcd_init();
     sei();
 
     for (;;) {

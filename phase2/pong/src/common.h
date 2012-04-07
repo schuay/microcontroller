@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdint.h>
+
 #define F_CPU 16000000L
 
 typedef void (*intr_handler_t)(void);
