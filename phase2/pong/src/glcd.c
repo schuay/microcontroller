@@ -42,9 +42,9 @@ enum GLCDInstructions {
     DisplayStartLine = EXT 0b11000000,
 };
 
-static void _glcd_send_ctl(uint8_t chips, uint8_t cmd);
+static void _glcd_send_ctl(uint8_t chip, uint8_t cmd);
 static void _glcd_send(uint8_t ctl, uint8_t data);
-static void _glcd_send_data(uint8_t chips, uint8_t data);
+static void _glcd_send_data(uint8_t chip, uint8_t data);
 static void _glcd_set_pos(uint8_t x, uint8_t y);
 
 #define WIDTH (128)
@@ -102,19 +102,19 @@ void glcd_init(void) {
 
 /**
  * Writes data into the GLCD display RAM.
- * chips is either CS0 or CS1.
+ * chip is either CS0 or CS1.
  */
-void _glcd_send_data(uint8_t chips, uint8_t data) {
-    _glcd_send(_BV(chips) | _BV(RS), data);
+void _glcd_send_data(uint8_t chip, uint8_t data) {
+    _glcd_send(_BV(chip) | _BV(RS), data);
 }
 
 /**
  * Sends an instruction to the GLCD.
- * @param chips is either CS0 or CS1.
+ * @param chip is either CS0 or CS1.
  * @param cmd is the command to send and will be written to PORTA.
  */
-static void _glcd_send_ctl(uint8_t chips, uint8_t cmd) {
-    _glcd_send(_BV(chips), cmd);
+static void _glcd_send_ctl(uint8_t chip, uint8_t cmd) {
+    _glcd_send(_BV(chip), cmd);
 }
 
 /**
