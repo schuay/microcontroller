@@ -42,10 +42,10 @@ enum GLCDInstructions {
     DisplayStartLine = EXT 0b11000000,
 };
 
-static void send_ctl(uint8_t chips, uint8_t cmd);
-static void send(uint8_t ctl, uint8_t data);
-static void send_data(uint8_t chips, uint8_t data);
-static void glcd_set_pos(uint8_t x, uint8_t y);
+static void _glcd_send_ctl(uint8_t chips, uint8_t cmd);
+static void _glcd_send(uint8_t ctl, uint8_t data);
+static void _glcd_send_data(uint8_t chips, uint8_t data);
+static void _glcd_set_pos(uint8_t x, uint8_t y);
 
 #define WIDTH (128)
 #define HEIGHT (64)
@@ -58,27 +58,27 @@ static void glcd_set_pos(uint8_t x, uint8_t y);
 #define ADDR(x, y) (x % PX_PER_CHIP)
 
 void glcd_set_pixel(uint8_t x, uint8_t y) {
-    glcd_set_pos(x, y);
-    send_data(CHIP(x, y), PIXL(x, y));
+    _glcd_set_pos(x, y);
+    _glcd_send_data(CHIP(x, y), PIXL(x, y));
 }
 
 void glcd_clr_screen(void) {
     for (int y = 0; y < 8; y++) {
-        glcd_set_pos(0, y * PX_PER_LINE);
-        glcd_set_pos(PX_PER_CHIP, y * PX_PER_LINE);
+        _glcd_set_pos(0, y * PX_PER_LINE);
+        _glcd_set_pos(PX_PER_CHIP, y * PX_PER_LINE);
         for (int x = 0; x < 64; x++) {
-            send_data(CS0, 0x00);
-            send_data(CS1, 0x00);
+            _glcd_send_data(CS0, 0x00);
+            _glcd_send_data(CS1, 0x00);
         }
     }
 }
 
-static void glcd_set_pos(uint8_t x, uint8_t y) {
+static void _glcd_set_pos(uint8_t x, uint8_t y) {
     assert(x < WIDTH);
     assert(y < HEIGHT);
     
-    send_ctl(CHIP(x, y), SetPage | PAGE(x, y));
-    send_ctl(CHIP(x, y), SetAddress | ADDR(x, y));
+    _glcd_send_ctl(CHIP(x, y), SetPage | PAGE(x, y));
+    _glcd_send_ctl(CHIP(x, y), SetAddress | ADDR(x, y));
 }
 
 void glcd_init(void) {
@@ -92,10 +92,10 @@ void glcd_init(void) {
     PORTE = (PORTE & PORTE_MSK) | _BV(RST);
     DDRE |= ~PORTE_MSK | _BV(RST);
 
-    send_ctl(CS0, DisplayOnOff | 0x01);
-    send_ctl(CS1, DisplayOnOff | 0x01);
-    send_ctl(CS0, DisplayStartLine | 0x00);
-    send_ctl(CS1, DisplayStartLine | 0x00);
+    _glcd_send_ctl(CS0, DisplayOnOff | 0x01);
+    _glcd_send_ctl(CS1, DisplayOnOff | 0x01);
+    _glcd_send_ctl(CS0, DisplayStartLine | 0x00);
+    _glcd_send_ctl(CS1, DisplayStartLine | 0x00);
 
     glcd_clr_screen();
 }
@@ -104,8 +104,8 @@ void glcd_init(void) {
  * Writes data into the GLCD display RAM.
  * chips is either CS0 or CS1.
  */
-void send_data(uint8_t chips, uint8_t data) {
-    send(_BV(chips) | _BV(RS), data);
+void _glcd_send_data(uint8_t chips, uint8_t data) {
+    _glcd_send(_BV(chips) | _BV(RS), data);
 }
 
 /**
@@ -113,8 +113,8 @@ void send_data(uint8_t chips, uint8_t data) {
  * @param chips is either CS0 or CS1.
  * @param cmd is the command to send and will be written to PORTA.
  */
-static void send_ctl(uint8_t chips, uint8_t cmd) {
-    send(_BV(chips), cmd);
+static void _glcd_send_ctl(uint8_t chips, uint8_t cmd) {
+    _glcd_send(_BV(chips), cmd);
 }
 
 /**
@@ -140,7 +140,7 @@ static void send_ctl(uint8_t chips, uint8_t cmd) {
  * in, out, andi, ori, or: 1 cycle
  * At 16 MHz, one cycle takes approximately 62.5 ns.
  */
-static void send(uint8_t ctl, uint8_t data) {
+static void _glcd_send(uint8_t ctl, uint8_t data) {
     /* Pull E low. 420 ns */
     clr_bit(PORTE, E);
 
