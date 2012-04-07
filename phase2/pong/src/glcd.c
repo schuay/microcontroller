@@ -75,6 +75,18 @@ void glcd_set_pixel(uint8_t x, uint8_t y) {
     _glcd_send_data(CHIP(x, y), px | PIXL(x, y));
 }
 
+void glcd_draw_dot(uint8_t x, uint8_t y) {
+    if (x < 1 || x >= WIDTH - 1) {
+        return;
+    }
+    if (y < 1 || y >= HEIGHT - 1) {
+        return;
+    }
+    glcd_draw_line(x - 1, y - 1, x + 1, y - 1);
+    glcd_draw_line(x - 1, y, x + 1, y);
+    glcd_draw_line(x - 1, y + 1, x + 1, y + 1);
+}
+
 #define SWAP(x, y) do { uint8_t tmp = x; x = y; y = tmp; } while (false);
 
 /**

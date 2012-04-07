@@ -16,6 +16,11 @@ void glcd_set_pixel(uint8_t x, uint8_t y);
 void glcd_draw_line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
 
 /**
+ * Draws a 3x3 block centered at (x, y).
+ */
+void glcd_draw_dot(uint8_t x, uint8_t y);
+
+/**
  * Clears the screen.
  */
 void glcd_clr_screen(void);
