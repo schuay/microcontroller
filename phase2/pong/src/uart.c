@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "timer.h"
 #include "util.h"
 #include "uart.h"
 #include "common.h"
@@ -14,15 +15,13 @@ static recv_handler_t rxci3_handler;
 #define BAUD 1048576 /* 1 MBit */
 #define BAUD_TOL 5
 
-error_t uart3_init(intr_handler_t send_callback, recv_handler_t recv_callback) {
-    assert(send_callback != 0);
-    assert(recv_callback != 0);
+void uart3_init(const struct uart_conf *conf) {
+    assert(conf != 0);
 
-    udri3_handler = send_callback;
-    rxci3_handler = recv_callback;
+    udri3_handler = conf->data_reg_empty_handler;
+    rxci3_handler = conf->rx_complete_handler;
 
-    UCSR0B = ReceiverEnable | TransmitterEnable | RXCompleteIntrEnable
-             | DataRegEmptyIntrEnable;
+    UCSR3B = conf->ucsrnb;
 
 #include <util/setbaud.h>
     UBRR3 = UBRR_VALUE;
@@ -31,17 +30,14 @@ error_t uart3_init(intr_handler_t send_callback, recv_handler_t recv_callback) {
 #else
     UCSR3A &= ~_BV(U2X3);
 #endif
-
-    return SUCCESS;
 }
 
-error_t halWT41FcUartInit(void (*sndCallback)(void), void (*rcvCallback)(uint8_t)) {
-    return uart3_init(sndCallback, rcvCallback);
+ISR(USART3_RX_vect, ISR_BLOCK) {
+    rxci3_handler(UDR3);
 }
 
-error_t halWT41FcUartSend(uint8_t byte) {
-    byte = byte;
-    return SUCCESS;
+ISR(USART3_UDRE_vect, ISR_BLOCK) {
+    udri3_handler();
 }
 
 #undef BAUD

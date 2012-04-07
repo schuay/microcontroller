@@ -14,9 +14,11 @@ enum ucsrnbflags {
 struct uart_conf {
     uint8_t ucsrnb;
     intr_handler_t data_reg_empty_handler;
+    recv_handler_t rx_complete_handler;
 };
 
 /* Interrupts must be disabled. */
 void uart0_init(const struct uart_conf *conf);
+void uart3_init(const struct uart_conf *conf);
 
 #endif /* UART_H */
