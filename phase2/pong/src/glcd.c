@@ -35,6 +35,12 @@ enum GLCDPinsA {
     D7,
 };
 
+enum StatusFlags {
+    Reset = PA4,
+    OnOff = PA5,
+    Busy = PA7,
+};
+
 enum GLCDInstructions {
     DisplayOnOff = EXT 0b00111110,
     SetAddress = EXT 0b01000000,
@@ -45,6 +51,9 @@ enum GLCDInstructions {
 static void _glcd_send_ctl(uint8_t chip, uint8_t cmd);
 static void _glcd_send(uint8_t ctl, uint8_t data);
 static void _glcd_send_data(uint8_t chip, uint8_t data);
+static uint8_t _glcd_recv(uint8_t ctl);
+static uint8_t _glcd_recv_status(uint8_t chip);
+static uint8_t _glcd_recv_data(uint8_t chip);
 static void _glcd_set_pos(uint8_t x, uint8_t y);
 
 #define WIDTH (128)
@@ -59,7 +68,8 @@ static void _glcd_set_pos(uint8_t x, uint8_t y);
 
 void glcd_set_pixel(uint8_t x, uint8_t y) {
     _glcd_set_pos(x, y);
-    _glcd_send_data(CHIP(x, y), PIXL(x, y));
+    uint8_t px = _glcd_recv_data(CHIP(x, y));
+    _glcd_send_data(CHIP(x, y), px | PIXL(x, y));
 }
 
 void glcd_clr_screen(void) {
@@ -82,15 +92,19 @@ static void _glcd_set_pos(uint8_t x, uint8_t y) {
 }
 
 void glcd_init(void) {
-    PORTA = 0x00;
-    DDRA = 0xff;
-
     /* Setup PORTE. Note the special handling of RST.
      * For convenience, PORTE_MSK pretends that RST doesn't
      * belong to the GLCD (we should never touch it).
      * However, we need to set it up as output and pull it high. */
     PORTE = (PORTE & PORTE_MSK) | _BV(RST);
     DDRE |= ~PORTE_MSK | _BV(RST);
+
+    /* Busy wait for initialization. Should status be read
+     * before *every* operation? */
+    uint8_t status;
+    do {
+       status = _glcd_recv_status(CS0);
+    } while (status & (_BV(Reset) | _BV(Busy)));
 
     _glcd_send_ctl(CS0, DisplayOnOff | 0x01);
     _glcd_send_ctl(CS1, DisplayOnOff | 0x01);
@@ -122,18 +136,20 @@ static void _glcd_send_ctl(uint8_t chip, uint8_t cmd) {
  * file and inserting NOPs as needed:
  *
  * \code
-    00000000 <send>:
+    00000000 <_glcd_send>:
        0:   76 98           cbi     0x0e, 6 ; 14
-       2:   9e b1           in      r25, 0x0e       ; 14
-       4:   93 78           andi    r25, 0x83       ; 131
-       6:   90 68           ori     r25, 0x80       ; 128
-       8:   8c 77           andi    r24, 0x7C       ; 124
-       a:   98 2b           or      r25, r24
-       c:   9e b9           out     0x0e, r25       ; 14
-       e:   62 b9           out     0x02, r22       ; 2
-      10:   76 9a           sbi     0x0e, 6 ; 14
-      12:   76 98           cbi     0x0e, 6 ; 14
-      14:   08 95           ret
+       2:   9f ef           ldi     r25, 0xFF       ; 255
+       4:   91 b9           out     0x01, r25       ; 1
+       6:   2e b1           in      r18, 0x0e       ; 14
+       8:   23 78           andi    r18, 0x83       ; 131
+       a:   20 68           ori     r18, 0x80       ; 128
+       c:   8c 77           andi    r24, 0x7C       ; 124
+       e:   28 2b           or      r18, r24
+      10:   2e b9           out     0x0e, r18       ; 14
+      12:   62 b9           out     0x02, r22       ; 2
+      14:   76 9a           sbi     0x0e, 6 ; 14
+      16:   76 98           cbi     0x0e, 6 ; 14
+      18:   08 95           ret
  * \endcode
  *
  * cpi, sbi: 2 cycles
@@ -144,7 +160,8 @@ static void _glcd_send(uint8_t ctl, uint8_t data) {
     /* Pull E low. 420 ns */
     clr_bit(PORTE, E);
 
-    _NOP();
+    /* Set PORTA to output. */
+    DDRA = 0xff;
 
     /* Set data. 140 ns */
     PORTE = (PORTE & PORTE_MSK) | (ctl & ~PORTE_MSK);
@@ -158,4 +175,48 @@ static void _glcd_send(uint8_t ctl, uint8_t data) {
 
     /* Pull E low. */
     clr_bit(PORTE, E);
+}
+
+/**
+ * Reads status from selected chip.
+ */
+static uint8_t _glcd_recv_status(uint8_t chip) {
+    return _glcd_recv(_BV(chip) | _BV(RW));
+}
+
+/**
+ * Reads display RAM contents at current address
+ * from selected chip.
+ */
+static uint8_t _glcd_recv_data(uint8_t chip) {
+    return _glcd_recv(_BV(chip) | _BV(RW) | _BV(RS));
+}
+
+/**
+ * Sends the ctl instruction to the GLCD and
+ * returns read data from PORTA.
+ */
+static uint8_t _glcd_recv(uint8_t ctl) {
+    /* Pull E low. 420 ns */
+    clr_bit(PORTE, E);
+
+    /* Set PORTA to input. */
+    DDRA = 0x00;
+
+    /* Set data. 140 ns */
+    PORTE = (PORTE & PORTE_MSK) | (ctl & ~PORTE_MSK);
+
+    /* Pull E high. 320 ns */
+    set_bit(PORTE, E);
+
+    _NOP(); _NOP(); _NOP();
+    _NOP(); _NOP();
+
+    /* Read data. */
+    uint8_t data = PORTA;
+
+    /* Pull E low. */
+    clr_bit(PORTE, E);
+
+    return data;
 }
