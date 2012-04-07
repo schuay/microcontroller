@@ -147,7 +147,7 @@ static void _glcd_send(uint8_t ctl, uint8_t data) {
     _NOP();
 
     /* Set data. 140 ns */
-    PORTE = (PORTE & PORTE_MSK) | (ctl & ~PORTE_MSK) | _BV(RST);
+    PORTE = (PORTE & PORTE_MSK) | (ctl & ~PORTE_MSK);
     PORTA = data;
 
     /* Pull E high. 420 ns */
