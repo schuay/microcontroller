@@ -43,9 +43,9 @@ void glcdClearPixel(const uint8_t x, const uint8_t y);
 void glcdInvertPixel(const uint8_t x, const uint8_t y);
 
 void glcdDrawLine(const xy_point p1, const xy_point p2, draw_fn drawPx);
+void glcdDrawRect(const xy_point p1, const xy_point p2, draw_fn drawPx);
 /*
-void glcdDrawRect(const xy_point p1, const yx_point p2, draw_fn drawPx);
-void glcdDrawLine(const xy_point c, const uint8_t radius, draw_fn drawPx);
+void glcdDrawCircle(const xy_point c, const uint8_t radius, draw_fn drawPx);
 */
 
 /* Not implemented

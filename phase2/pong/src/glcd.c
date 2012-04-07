@@ -83,7 +83,15 @@ void glcdInvertPixel(const uint8_t x, const uint8_t y) {
     halGlcdWriteData(px ^ PIXL(x, y));
 }
 
+void glcdDrawRect(const xy_point p1, const xy_point p2, draw_fn drawPx) {
+    xy_point p1a = { p2.x, p1.y };
+    xy_point p2a = { p1.x, p2.y };
+    glcdDrawLine(p1, p1a, drawPx);
+    glcdDrawLine(p1a, p2, drawPx);
+    glcdDrawLine(p2, p2a, drawPx);
+    glcdDrawLine(p2a, p1, drawPx);
+}
+
 /*
-void glcdDrawRect(const xy_point p1, const yx_point p2, draw_fn drawPx);
-void glcdDrawLine(const xy_point c, const uint8_t radius, draw_fn drawPx);
+void glcdDrawCircle(const xy_point c, const uint8_t radius, draw_fn drawPx);
 */
