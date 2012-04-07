@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
+#include <avr/cpufunc.h>
 
 #include "common.h"
 #include <util/delay.h>
@@ -111,28 +112,45 @@ static void send_ctl(uint8_t chips, uint8_t cmd) {
     send(chips, cmd);
 }
 
+/**
+ * The exact timing is achieved by disassembling the optimized object
+ * file and inserting NOPs as needed:
+ *
+ * \code
+    00000000 <send>:
+       0:   76 98           cbi     0x0e, 6 ; 14
+       2:   9e b1           in      r25, 0x0e       ; 14
+       4:   93 78           andi    r25, 0x83       ; 131
+       6:   90 68           ori     r25, 0x80       ; 128
+       8:   8c 77           andi    r24, 0x7C       ; 124
+       a:   98 2b           or      r25, r24
+       c:   9e b9           out     0x0e, r25       ; 14
+       e:   62 b9           out     0x02, r22       ; 2
+      10:   76 9a           sbi     0x0e, 6 ; 14
+      12:   76 98           cbi     0x0e, 6 ; 14
+      14:   08 95           ret
+ * \endcode
+ *
+ * cpi, sbi: 2 cycles
+ * in, out, andi, ori, or: 1 cycle
+ * At 16 MHz, one cycle takes approximately 62.5 ns.
+ */
 static void send(uint8_t ctl, uint8_t data) {
-    /* Pull E low. */
+    /* Pull E low. 420 ns */
     clr_bit(PORTE, E);
 
-    _delay_us(2);
-    
-    /* Set data. */
+    _NOP();
+
+    /* Set data. 140 ns */
     PORTE = (PORTE & PORTE_MSK) | (ctl & ~PORTE_MSK) | _BV(RST);
-
-    _delay_us(2);
-
     PORTA = data;
 
-    _delay_us(2);
-
-    /* Pull E high. */
+    /* Pull E high. 420 ns */
     set_bit(PORTE, E);
 
-    _delay_us(2);
+    _NOP(); _NOP(); _NOP();
+    _NOP(); _NOP(); _NOP();
 
     /* Pull E low. */
     clr_bit(PORTE, E);
-
-    _delay_us(2);
 }
