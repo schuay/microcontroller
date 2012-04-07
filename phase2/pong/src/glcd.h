@@ -11,6 +11,11 @@
 void glcd_set_pixel(uint8_t x, uint8_t y);
 
 /**
+ * Draws a line from (x0, y0) to (x1, y1).
+ */
+void glcd_draw_line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
+
+/**
  * Clears the screen.
  */
 void glcd_clr_screen(void);
