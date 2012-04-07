@@ -3,10 +3,7 @@
 #include <avr/cpufunc.h>
 
 #include "common.h"
-#include <util/delay.h>
-
 #include "glcd.h"
-
 #include "uart_streams.h"
 #include <assert.h>
 
@@ -88,13 +85,12 @@ void glcd_init(void) {
     PORTA = 0x00;
     DDRA = 0xff;
 
-    PORTE &= PORTE_MSK;
-    DDRE |= ~PORTE_MSK;
-
-    /* Make sure RST is high. */
-    set_bit(PORTE, RST);
-
-    _delay_ms(40);
+    /* Setup PORTE. Note the special handling of RST.
+     * For convenience, PORTE_MSK pretends that RST doesn't
+     * belong to the GLCD (we should never touch it).
+     * However, we need to set it up as output and pull it high. */
+    PORTE = (PORTE & PORTE_MSK) | _BV(RST);
+    DDRE |= ~PORTE_MSK | _BV(RST);
 
     send_ctl(_BV(CS0), DisplayOnOff | 0x01);
     send_ctl(_BV(CS1), DisplayOnOff | 0x01);
