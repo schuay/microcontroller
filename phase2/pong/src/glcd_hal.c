@@ -1,10 +1,12 @@
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
 #include <avr/cpufunc.h>
+#include <avr/pgmspace.h>
 #include <string.h>
 
 #include "glcd_hal.h"
 #include "common.h"
+#include <util/delay.h>
 #include "uart_streams.h"
 #include <assert.h>
 
@@ -183,9 +185,14 @@ static void _glcd_send(uint8_t ctl, uint8_t data) {
 
 static void _glcd_busy_wait(uint8_t chip) {
     uint8_t status;
-    do {
+    for (uint8_t i = 0; i < 255; i++) {
        status = _glcd_recv_status(chip);
-    } while (status & (_BV(Reset) | _BV(Busy)));
+       if (!(status & (_BV(Reset) | _BV(Busy)))) {
+           return;
+       }
+       _delay_us(2);
+    }
+    fprintf_P(stderr, PSTR("GLCD busy wait timed out.\n"));
 }
 
 /**
