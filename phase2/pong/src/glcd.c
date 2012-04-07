@@ -54,6 +54,7 @@ static void _glcd_send_data(uint8_t chip, uint8_t data);
 static uint8_t _glcd_recv(uint8_t ctl);
 static uint8_t _glcd_recv_status(uint8_t chip);
 static uint8_t _glcd_recv_data(uint8_t chip);
+static void _glcd_busy_wait(uint8_t chip);
 static void _glcd_set_pos(uint8_t x, uint8_t y);
 
 #define WIDTH (128)
@@ -99,13 +100,6 @@ void glcd_init(void) {
     PORTE = (PORTE & PORTE_MSK) | _BV(RST);
     DDRE |= ~PORTE_MSK | _BV(RST);
 
-    /* Busy wait for initialization. Should status be read
-     * before *every* operation? */
-    uint8_t status;
-    do {
-       status = _glcd_recv_status(CS0);
-    } while (status & (_BV(Reset) | _BV(Busy)));
-
     _glcd_send_ctl(CS0, DisplayOnOff | 0x01);
     _glcd_send_ctl(CS1, DisplayOnOff | 0x01);
     _glcd_send_ctl(CS0, DisplayStartLine | 0x00);
@@ -119,6 +113,7 @@ void glcd_init(void) {
  * chip is either CS0 or CS1.
  */
 void _glcd_send_data(uint8_t chip, uint8_t data) {
+    _glcd_busy_wait(chip);
     _glcd_send(_BV(chip) | _BV(RS), data);
 }
 
@@ -128,6 +123,7 @@ void _glcd_send_data(uint8_t chip, uint8_t data) {
  * @param cmd is the command to send and will be written to PORTA.
  */
 static void _glcd_send_ctl(uint8_t chip, uint8_t cmd) {
+    _glcd_busy_wait(chip);
     _glcd_send(_BV(chip), cmd);
 }
 
@@ -175,6 +171,13 @@ static void _glcd_send(uint8_t ctl, uint8_t data) {
 
     /* Pull E low. */
     clr_bit(PORTE, E);
+}
+
+static void _glcd_busy_wait(uint8_t chip) {
+    uint8_t status;
+    do {
+       status = _glcd_recv_status(chip);
+    } while (status & (_BV(Reset) | _BV(Busy)));
 }
 
 /**
