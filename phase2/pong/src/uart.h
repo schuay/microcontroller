@@ -5,7 +5,10 @@
 
 enum ucsrnbflags {
     ReceiverEnable = _BV(RXEN0),
-    TransmitterEnable = _BV(TXEN0)
+    TransmitterEnable = _BV(TXEN0),
+    DataRegEmptyIntrEnable = _BV(UDRIE0),
+    TXCompleteIntrEnable = _BV(TXCIE0),
+    RXCompleteIntrEnable = _BV(RXCIE0),
 };
 
 struct uart_conf {

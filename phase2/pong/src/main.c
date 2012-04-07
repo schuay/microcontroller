@@ -2,6 +2,8 @@
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 
+#include "wii_user.h"
+
 #include "uart_streams.h"
 #include "timer.h"
 #include "lcd.h"
@@ -28,11 +30,20 @@ static void adc_done(uint16_t result) {
     glb.flags |= ADCWaiting;
 }
 
+void rcvButton(uint8_t wii, uint16_t button_states) {
+    printf_P(PSTR("Received button %d %d\n"), wii, button_states);
+}
+void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
+    printf_P(PSTR("Received button accel %d %d %d %d\n"), wii, x, y, z);
+}
+
 static void init(void) {
     sleep_enable();
     uart_streams_init();
     lcd_init();
     pong_init();
+
+    wiiUserInit(rcvButton, rcvAccel);
 
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
