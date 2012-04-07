@@ -9,6 +9,7 @@
 #include "common.h"
 
 static intr_handler_t udri0_handler;
+static recv_handler_t rxci0_handler;
 static intr_handler_t udri3_handler;
 static recv_handler_t rxci3_handler;
 
@@ -49,6 +50,7 @@ void uart0_init(const struct uart_conf *conf) {
     UCSR0B = conf->ucsrnb;
 
     udri0_handler = conf->data_reg_empty_handler;
+    rxci0_handler = conf->rx_complete_handler;
 
 #include <util/setbaud.h>
     UBRR0 = UBRR_VALUE;
@@ -57,6 +59,10 @@ void uart0_init(const struct uart_conf *conf) {
 #else
     UCSR0A &= ~_BV(U2X0);
 #endif
+}
+
+ISR(USART0_RX_vect, ISR_BLOCK) {
+    rxci0_handler(UDR3);
 }
 
 ISR(USART0_UDRE_vect, ISR_BLOCK) {

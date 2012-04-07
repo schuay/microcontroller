@@ -19,9 +19,7 @@ static FILE uart_stream = FDEV_SETUP_STREAM(uart_putchar,
         NULL, _FDEV_SETUP_WRITE);
 
 void uart_streams_init(void) {
-    struct uart_conf conf;
-    memset(&conf, 0, sizeof(conf));
-    conf.ucsrnb = TransmitterEnable;
+    struct uart_conf conf = { conf.ucsrnb = TransmitterEnable, 0, 0 };
     uart0_init(&conf);
 
     stderr = &uart_stream;
