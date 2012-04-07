@@ -54,7 +54,7 @@ static void glcd_set_pos(uint8_t x, uint8_t y);
 
 #define PAGE(x, y) (y / PX_PER_LINE)
 #define PIXL(x, y) _BV(y % PX_PER_LINE)
-#define CHIP(x, y) _BV(CS1 - x / PX_PER_CHIP)
+#define CHIP(x, y) (CS1 - x / PX_PER_CHIP)
 #define ADDR(x, y) (x % PX_PER_CHIP)
 
 void glcd_set_pixel(uint8_t x, uint8_t y) {
@@ -67,8 +67,8 @@ void glcd_clr_screen(void) {
         glcd_set_pos(0, y * PX_PER_LINE);
         glcd_set_pos(PX_PER_CHIP, y * PX_PER_LINE);
         for (int x = 0; x < 64; x++) {
-            send_data(_BV(CS0), 0x00);
-            send_data(_BV(CS1), 0x00);
+            send_data(CS0, 0x00);
+            send_data(CS1, 0x00);
         }
     }
 }
@@ -92,20 +92,29 @@ void glcd_init(void) {
     PORTE = (PORTE & PORTE_MSK) | _BV(RST);
     DDRE |= ~PORTE_MSK | _BV(RST);
 
-    send_ctl(_BV(CS0), DisplayOnOff | 0x01);
-    send_ctl(_BV(CS1), DisplayOnOff | 0x01);
-    send_ctl(_BV(CS0), DisplayStartLine | 0x00);
-    send_ctl(_BV(CS1), DisplayStartLine | 0x00);
+    send_ctl(CS0, DisplayOnOff | 0x01);
+    send_ctl(CS1, DisplayOnOff | 0x01);
+    send_ctl(CS0, DisplayStartLine | 0x00);
+    send_ctl(CS1, DisplayStartLine | 0x00);
 
     glcd_clr_screen();
 }
 
+/**
+ * Writes data into the GLCD display RAM.
+ * chips is either CS0 or CS1.
+ */
 void send_data(uint8_t chips, uint8_t data) {
-    send(chips | _BV(RS), data);
+    send(_BV(chips) | _BV(RS), data);
 }
 
+/**
+ * Sends an instruction to the GLCD.
+ * @param chips is either CS0 or CS1.
+ * @param cmd is the command to send and will be written to PORTA.
+ */
 static void send_ctl(uint8_t chips, uint8_t cmd) {
-    send(chips, cmd);
+    send(_BV(chips), cmd);
 }
 
 /**
