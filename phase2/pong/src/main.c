@@ -11,6 +11,8 @@
 #include "adc.h"
 #include "pong.h"
 #include "glcd.h"
+#include "sdcard.h"
+#include "spi.h"
 
 enum task_flags {
     RunLogic = 1 << 0,
@@ -44,6 +46,8 @@ static void init(void) {
     lcd_init();
     glcdInit();
     pong_init();
+    spi_init();
+    sdcardInit();
 
     wiiUserInit(rcvButton, rcvAccel);
 
