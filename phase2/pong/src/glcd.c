@@ -22,7 +22,7 @@ void glcdInit(void) {
  * http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
  */
 void glcdDrawLine(const xy_point p1, const xy_point p2, draw_fn drawPx) {
-    uint8_t x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.x;
+    uint8_t x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.y;
     const bool steep = abs(y1 - y0) > abs(x1 - x0);
     if (steep) {
         SWAP(x0, y0);
@@ -34,12 +34,12 @@ void glcdDrawLine(const xy_point p1, const xy_point p2, draw_fn drawPx) {
     }
 
     const uint8_t deltax = x1 - x0;
-    const uint8_t deltay = y1 - y0;
-    int16_t error = deltax >> 1;
+    const uint8_t deltay = abs(y1 - y0);
+    int16_t error = deltax / 2;
     const int8_t ystep = (y0 < y1 ? 1 : -1);
     int8_t y = y0;
 
-    for (uint8_t x = x0; x <= x1; x++) {
+    for (uint8_t x = x0; ; x++) {
         if (steep) {
             drawPx(y, x);
         } else {
@@ -49,6 +49,10 @@ void glcdDrawLine(const xy_point p1, const xy_point p2, draw_fn drawPx) {
         if (error < 0) {
             y += ystep;
             error += deltax;
+        }
+
+        if (x == x1) {
+            break;
         }
     }
 }
