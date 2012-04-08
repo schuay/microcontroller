@@ -49,8 +49,8 @@ static void init(void) {
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
 
-    struct timer_conf conf = { 1, 1000, tick };
-    timer_set(&conf);
+    struct timer_conf conf = { false, 1000, tick };
+    timer1_set(&conf);
 }
 
 static void task_logic(void) {
@@ -66,10 +66,13 @@ static void task_adc(void) {
 }
 
 static void run_tasks(void) {
+    printf(".");
     if (glb.flags & RunLogic) {
         glb.flags &= ~RunLogic;
+        printf("X\n");
         task_logic();
     }
+
     if (glb.flags & ADCWaiting) {
         task_adc();
         glb.flags &= ~ADCWaiting;
@@ -79,6 +82,8 @@ static void run_tasks(void) {
 int main(void) {
     init();
     sei();
+
+    printf_P(PSTR("AVR Pong starting up...\n"));
 
     for (;;) {
         run_tasks();

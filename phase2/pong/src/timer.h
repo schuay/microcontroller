@@ -6,11 +6,12 @@
 #include "common.h"
 
 struct timer_conf {
-    uint8_t timer;
+    bool once;
     uint16_t ms;
     intr_handler_t output_cmp_handler;
 };
 
-bool timer_set(const struct timer_conf *conf);
+bool timer1_set(const struct timer_conf *conf);
+bool timer3_set(const struct timer_conf *conf);
 
 #endif /* TIMER_H */
