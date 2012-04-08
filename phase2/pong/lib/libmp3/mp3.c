@@ -1,5 +1,7 @@
 #include "mp3.h"
 
+#define F_CPU (16000000L)
+
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
