@@ -1,6 +1,7 @@
 #include <avr/sleep.h>
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
+#include <string.h>
 
 #include "wii_user.h"
 
@@ -51,6 +52,8 @@ static void init(void) {
 
     struct timer_conf conf = { false, 5, tick };
     timer1_set(&conf);
+
+    memset((void *)&glb, 0, sizeof(glb));
 }
 
 static void task_logic(void) {
