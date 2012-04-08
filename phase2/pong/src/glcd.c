@@ -63,13 +63,18 @@ void glcdFillScreen(const uint8_t pattern) {
 }
 
 void glcdSetPixel(const uint8_t x, const uint8_t y) {
-    halGlcdSetAddress(x, y);
+    if (halGlcdSetAddress(x, y) == 1) {
+        return;
+    }
     uint8_t px = halGlcdReadData();
     halGlcdSetAddress(x, y);
     halGlcdWriteData(px | PIXL(x, y));
 }
 
 void glcdClearPixel(const uint8_t x, const uint8_t y) {
+    if (halGlcdSetAddress(x, y) == 1) {
+        return;
+    }
     halGlcdSetAddress(x, y);
     uint8_t px = halGlcdReadData();
     halGlcdSetAddress(x, y);
@@ -77,6 +82,9 @@ void glcdClearPixel(const uint8_t x, const uint8_t y) {
 }
 
 void glcdInvertPixel(const uint8_t x, const uint8_t y) {
+    if (halGlcdSetAddress(x, y) == 1) {
+        return;
+    }
     halGlcdSetAddress(x, y);
     uint8_t px = halGlcdReadData();
     halGlcdSetAddress(x, y);

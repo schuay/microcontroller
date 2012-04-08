@@ -3,6 +3,7 @@
 #include <avr/cpufunc.h>
 #include <avr/pgmspace.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "glcd_hal.h"
 #include "common.h"
@@ -67,6 +68,7 @@ static uint8_t _glcd_recv_status(uint8_t chip);
 static uint8_t _glcd_recv_data(uint8_t chip);
 static void _glcd_busy_wait(uint8_t chip);
 static void _glcd_inc_addr(void);
+static void _glcd_set_addr(void);
 
 uint8_t halGlcdInit(void) {
     /* Setup PORTE. Note the special handling of RST.
@@ -88,22 +90,38 @@ uint8_t halGlcdInit(void) {
 }
 
 uint8_t halGlcdSetAddress(const uint8_t xCol, const uint8_t yPage) {
-    if (xCol < WIDTH || yPage < HEIGHT) {
+    if (xCol >= WIDTH || yPage >= HEIGHT) {
         return 1;
     }
-    
-    _glcd_send_ctl(CHIP(xCol, yPage), SetPage | PAGE(xCol, yPage));
-    _glcd_send_ctl(CHIP(xCol, yPage), SetAddress | ADDR(xCol, yPage));
 
     glb.x = xCol;
     glb.y = yPage;
 
+    _glcd_set_addr();
+
     return 0;
 }
 
+static void _glcd_set_addr(void) {
+    _glcd_send_ctl(CHIP(glb.x, glb.y), SetPage | PAGE(glb.x, glb.y));
+    _glcd_send_ctl(CHIP(glb.x, glb.y), SetAddress | ADDR(glb.x, glb.y));
+}
+
 static void _glcd_inc_addr(void) {
-    glb.x = (glb.x + 1) % WIDTH;
-    glb.y = (glb.y + 1) % HEIGHT;
+    bool reset_addr = false;
+
+    glb.x++;
+    if (glb.x == PX_PER_CHIP) {
+        reset_addr = true;
+    } else if (glb.x == WIDTH) {
+        glb.x = 0;
+        glb.y = (glb.y + PX_PER_LINE) % HEIGHT;
+        reset_addr = true;
+    }
+
+    if (reset_addr) {
+        _glcd_set_addr();
+    }
 }
 
 uint8_t halGlcdWriteData(const uint8_t data) {
@@ -192,7 +210,7 @@ static void _glcd_busy_wait(uint8_t chip) {
        }
        _delay_us(2);
     }
-    fprintf_P(stderr, PSTR("GLCD busy wait timed out.\n"));
+    fprintf_P(stderr, PSTR("GLCD busy wait timed out, last status: %d.\n"), status);
 }
 
 /**
@@ -207,6 +225,7 @@ static uint8_t _glcd_recv_status(uint8_t chip) {
  * from selected chip.
  */
 static uint8_t _glcd_recv_data(uint8_t chip) {
+    _glcd_busy_wait(chip);
     return _glcd_recv(_BV(chip) | _BV(RW) | _BV(RS));
 }
 
@@ -231,7 +250,7 @@ static uint8_t _glcd_recv(uint8_t ctl) {
     _NOP(); _NOP();
 
     /* Read data. */
-    uint8_t data = PORTA;
+    uint8_t data = PINA;
 
     /* Pull E low. */
     clr_bit(PORTE, E);
