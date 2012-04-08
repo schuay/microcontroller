@@ -246,8 +246,12 @@ static uint8_t _glcd_recv(uint8_t ctl) {
     /* Set PORTA to input. */
     DDRA = 0x00;
 
+    _NOP(); _NOP();
+
     /* Set data. 140 ns */
     PORTE = (PORTE & PORTE_MSK) | (ctl & ~PORTE_MSK);
+
+    _NOP(); _NOP();
 
     /* Pull E high. 320 ns */
     set_bit(PORTE, E);
