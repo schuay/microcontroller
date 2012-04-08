@@ -8,63 +8,59 @@
 #include "uart.h"
 #include "common.h"
 
-static intr_handler_t udri0_handler;
-static recv_handler_t rxci0_handler;
-static intr_handler_t udri3_handler;
-static recv_handler_t rxci3_handler;
+static volatile uint8_t *UCSRnA[] = { &UCSR0A, &UCSR1A, &UCSR2A, &UCSR3A };
+static volatile uint8_t *UCSRnB[] = { &UCSR0B, &UCSR1B, &UCSR2B, &UCSR3B };
+static volatile uint16_t *UBRRn[] = { &UBRR0, &UBRR1, &UBRR2, &UBRR3 };
+static volatile uint8_t *UDRn[] = { &UDR0, &UDR1, &UDR2, &UDR3 };
 
-#define BAUD 1048576 /* 1 MBit */
+static intr_handler_t udri_handler[UartNEnd];
+static recv_handler_t rxci_handler[UartNEnd];
+
+#define BAUD 115200 /* 1 MBit */
 #define BAUD_TOL 5
 
-void uart3_init(const struct uart_conf *conf) {
+void uart_init(const struct uart_conf *conf) {
     assert(conf != 0);
+    assert(conf->uart < UartNEnd);
 
-    udri3_handler = conf->data_reg_empty_handler;
-    rxci3_handler = conf->rx_complete_handler;
+    enum UartN n = conf->uart;
 
-    UCSR3B = conf->ucsrnb;
+    udri_handler[n] = conf->data_reg_empty_handler;
+    rxci_handler[n] = conf->rx_complete_handler;
 
-#include <util/setbaud.h>
-    UBRR3 = UBRR_VALUE;
-#if USE_2X
-    UCSR3A |= _BV(U2X3);
-#else
-    UCSR3A &= ~_BV(U2X3);
-#endif
-}
-
-ISR(USART3_RX_vect, ISR_BLOCK) {
-    rxci3_handler(UDR3);
-}
-
-ISR(USART3_UDRE_vect, ISR_BLOCK) {
-    udri3_handler();
-}
-
-#undef BAUD
-#undef BAUD_TOL
-#define BAUD 115200
-#define BAUD_TOL 3
-
-void uart0_init(const struct uart_conf *conf) {
-    UCSR0B = conf->ucsrnb;
-
-    udri0_handler = conf->data_reg_empty_handler;
-    rxci0_handler = conf->rx_complete_handler;
-
-#include <util/setbaud.h>
-    UBRR0 = UBRR_VALUE;
-#if USE_2X
-    UCSR0A |= _BV(U2X0);
-#else
-    UCSR0A &= ~_BV(U2X0);
-#endif
+    *UCSRnA[n] = (conf->double_speed ? _BV(U2X0) : 0);
+    *UCSRnB[n] = conf->ucsrnb;
+    *UBRRn[n] = conf->ubrrn;
 }
 
 ISR(USART0_RX_vect, ISR_BLOCK) {
-    rxci0_handler(UDR3);
+    rxci_handler[Uart0](*UDRn[Uart0]);
+}
+
+ISR(USART1_RX_vect, ISR_BLOCK) {
+    rxci_handler[Uart1](*UDRn[Uart1]);
+}
+
+ISR(USART2_RX_vect, ISR_BLOCK) {
+    rxci_handler[Uart2](*UDRn[Uart2]);
+}
+
+ISR(USART3_RX_vect, ISR_BLOCK) {
+    rxci_handler[Uart3](*UDRn[Uart3]);
 }
 
 ISR(USART0_UDRE_vect, ISR_BLOCK) {
-    udri0_handler();
+    udri_handler[Uart0]();
+}
+
+ISR(USART1_UDRE_vect, ISR_BLOCK) {
+    udri_handler[Uart1]();
+}
+
+ISR(USART2_UDRE_vect, ISR_BLOCK) {
+    udri_handler[Uart2]();
+}
+
+ISR(USART3_UDRE_vect, ISR_BLOCK) {
+    udri_handler[Uart3]();
 }

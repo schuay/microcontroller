@@ -22,11 +22,20 @@ error_t halWT41FcUartInit(intr_handler_t sndCallback, recv_handler_t rcvCallback
     timer_set(&tc);
 
     /* Init UART3. */
+#define BAUD 1000000
+#include <util/setbaud.h>
     struct uart_conf uc = {
-        ReceiverEnable | TransmitterEnable
-            | RXCompleteIntrEnable | DataRegEmptyIntrEnable,
-        sndCallback, rcvCallback };
-    uart3_init(&uc);
+        Uart3,
+        ReceiverEnable | TransmitterEnable | RXCompleteIntrEnable | DataRegEmptyIntrEnable,
+        UBRR_VALUE,
+#if USE_2X
+        true,
+#else
+        false,
+#endif
+        sndCallback,
+        rcvCallback };
+    uart_init(&uc);
 
     return SUCCESS;
 }
