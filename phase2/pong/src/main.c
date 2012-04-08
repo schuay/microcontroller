@@ -151,6 +151,8 @@ int main(void) {
 
     printf_P(PSTR("AVR Pong starting up...\n"));
 
+    adc_start_conversion();
+
     for (;;) {
         run_tasks();
         sleep_cpu();
