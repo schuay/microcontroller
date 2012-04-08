@@ -18,8 +18,8 @@ error_t halWT41FcUartInit(intr_handler_t sndCallback, recv_handler_t rcvCallback
     /* Pull P5 low for 5ms to reset bluetooth module. */
     clr_bit(PORTJ, PJ5);
     
-    struct timer_conf tc = { true, 5, _pullPJ5High };
-    timer3_set(&tc);
+    struct timer_conf tc = { Timer3, true, 5, _pullPJ5High };
+    timer_set(&tc);
 
     /* Init UART3. */
     struct uart_conf uc = {

@@ -50,8 +50,8 @@ static void init(void) {
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
 
-    struct timer_conf conf = { false, 5, tick };
-    timer1_set(&conf);
+    struct timer_conf conf = { Timer1, false, 5, tick };
+    timer_set(&conf);
 
     memset((void *)&glb, 0, sizeof(glb));
 }
