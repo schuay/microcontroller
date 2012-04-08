@@ -31,6 +31,7 @@ static void _pullPJ5High(void) {
 /* TODO: debug. */
 static recv_handler_t _recv_callback;
 static void _recv_handler(uint8_t data) {
+    /* OVERRUN flag uart */
     printf("bt recvd: %x\n", data);
     if (!ringbuffer_put(_rbuf, data)) {
         /* TODO: Set CTS HIGH if < 5 bytes free */
@@ -88,6 +89,7 @@ error_t halWT41FcUartInit(intr_handler_t sndCallback,
 }
 
 error_t halWT41FcUartSend(uint8_t byte) {
+    /* Don't call callback until after first send. */
     byte = byte;
     return SUCCESS;
 }
