@@ -130,7 +130,13 @@ uint8_t halGlcdWriteData(const uint8_t data) {
     return 0;
 }
 
+/**
+ * For some reason, reading display RAM needs to be done twice to return
+ * the actual contents of the current address. TODO
+ */
 uint8_t halGlcdReadData(void) {
+    (void)_glcd_recv_data(CHIP(glb.x, glb.y));
+    _glcd_set_addr();
     uint8_t data = _glcd_recv_data(CHIP(glb.x, glb.y));
     _glcd_inc_addr();
     return data;

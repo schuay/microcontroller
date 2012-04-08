@@ -44,7 +44,9 @@ static void init(void) {
     glcdInit();
     pong_init();
 
+    /*
     wiiUserInit(rcvButton, rcvAccel);
+    */
 
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
@@ -54,11 +56,14 @@ static void init(void) {
 }
 
 static void task_logic(void) {
-    static int xy = 0;
-    pong_ball_step();
-    pong_print();
-    glcdSetPixel(xy, xy);
-    xy++;
+    static int x = 0;
+    static int y = 0;
+    glcdSetPixel(x, y);
+    y += 2;
+    if (y >= 64) {
+        y = 0;
+        x += 2;
+    }
 }
 
 static void task_adc(void) {
