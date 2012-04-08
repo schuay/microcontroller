@@ -19,7 +19,7 @@
                                       It's low active and should never be
                                       touched. */
 
-struct {
+static struct {
     uint8_t x, y;
 } glb;
 

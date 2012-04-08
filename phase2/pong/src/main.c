@@ -16,7 +16,7 @@ enum task_flags {
     ADCWaiting = 1 << 1,
 };
 
-struct {
+static volatile struct {
     uint8_t flags;
     uint16_t adc_result;
 } glb;
@@ -44,9 +44,7 @@ static void init(void) {
     glcdInit();
     pong_init();
 
-    /*
     wiiUserInit(rcvButton, rcvAccel);
-    */
 
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
@@ -127,17 +125,21 @@ static void task_adc(void) {
 }
 
 static void run_tasks(void) {
-    printf(".");
+    cli();
     if (glb.flags & RunLogic) {
         glb.flags &= ~RunLogic;
-        printf("X\n");
+        sei();
         task_logic();
     }
 
+    cli();
     if (glb.flags & ADCWaiting) {
-        task_adc();
         glb.flags &= ~ADCWaiting;
+        sei();
+        task_adc();
     }
+
+    sei();
 }
 
 int main(void) {
