@@ -51,18 +51,74 @@ static void init(void) {
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
 
-    struct timer_conf conf = { false, 1000, tick };
+    struct timer_conf conf = { false, 5, tick };
     timer1_set(&conf);
 }
 
 static void task_logic(void) {
+    static int mode = 3;
     static int x = 0;
     static int y = 0;
-    glcdSetPixel(x, y);
-    y += 2;
-    if (y >= 64) {
-        y = 0;
-        x += 2;
+    static xy_point x0 = { 0, 0 };
+    static xy_point x1 = { 5, 5 };
+
+    switch (mode) {
+    case 0:
+        glcdSetPixel(x, y);
+        y += 2;
+        if (y >= 64) {
+            y -= 64;
+            x += 2;
+        }
+        if (x >= 128) {
+            mode++;
+            x = 0;
+            y = 1;
+        }
+        break;
+    case 1:
+        glcdInvertPixel(x, y);
+        y += 2;
+        if (y >= 64) {
+            y -= 64;
+            x += 2;
+        }
+        if (x >= 128) {
+            mode++;
+            x = y = 0;
+        }
+        break;
+    case 2:
+        glcdClearPixel(x, y);
+        y += 2;
+        if (y >= 64) {
+            y -= 64;
+            x += 2;
+        }
+        if (x >= 128) {
+            mode++;
+            x = y = 1;
+            glcdFillScreen(0x00);
+        }
+        break;
+    case 3:
+        glcdDrawLine(x0, x1, glcdSetPixel);
+        x0.y += 5;
+        x1.y += 5;
+        if (x1.y >= 64) {
+            x1.y = 5;
+            x0.y = 0;
+            x1.x += 10;
+            x0.x += 10;
+        }
+        if (x1.x >= 128) {
+            mode++;
+            x = y = 0;
+            glcdFillScreen(0x00);
+        }
+        break;
+    default:
+        mode = 0;
     }
 }
 
