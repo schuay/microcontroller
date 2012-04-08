@@ -48,7 +48,7 @@ static void init(void) {
     glcdInit();
     pong_init();
     spi_init();
-    sdcardInit();
+    sdcardInit();   /* Note: this seems to hang with no board attached. */
     mp3Init(NULL);  /* TODO callback */
 
     wiiUserInit(rcvButton, rcvAccel);
