@@ -13,6 +13,7 @@
 #include "glcd.h"
 #include "sdcard.h"
 #include "spi.h"
+#include "mp3.h"
 
 enum task_flags {
     RunLogic = 1 << 0,
@@ -48,6 +49,7 @@ static void init(void) {
     pong_init();
     spi_init();
     sdcardInit();
+    mp3Init(NULL);  /* TODO callback */
 
     wiiUserInit(rcvButton, rcvAccel);
 
@@ -156,6 +158,9 @@ int main(void) {
     printf_P(PSTR("AVR Pong starting up...\n"));
 
     adc_start_conversion();
+
+    mp3SetVolume(150);
+    mp3StartSineTest();
 
     for (;;) {
         run_tasks();
