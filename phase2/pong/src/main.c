@@ -2,11 +2,10 @@
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <string.h>
-#include <assert.h>
-
-#include "wii_user.h"
 
 #include "uart_streams.h"
+#include <assert.h>
+
 #include "timer.h"
 #include "lcd.h"
 #include "adc.h"
@@ -15,6 +14,7 @@
 #include "sdcard.h"
 #include "spi.h"
 #include "mp3.h"
+#include "wii_user.h"
 
 enum task_flags {
     RunLogic = 1 << 0,
