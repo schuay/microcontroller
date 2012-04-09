@@ -228,6 +228,7 @@ static void rcvCallback(uint8_t value)
 	static uint8_t _state, _length, _offset;
 	static union { struct { uint8_t connection, data[27]; } data;
 		struct { uint8_t code, parameters[29]; } event; } _union;
+	printf("rcvCallback state 0x%x value 0x%x\n", _state, value);
 	do
 	{
 		if (_state != 0x42)

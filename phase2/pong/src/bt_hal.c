@@ -59,7 +59,6 @@ static void _recv_handler(uint8_t data) {
     while (ringbuffer_get(_rbuf, &byte)) {
         sei();
         _recv_callback(byte);
-        printf("bt recvd: %x\n", byte);
     }
 
     cli();
