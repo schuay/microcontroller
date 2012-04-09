@@ -1,6 +1,13 @@
 #ifndef UART_STREAMS_H
 #define UART_STREAMS_H
 
+/**
+ * @file uart_streams.h
+ *
+ * Provides a simple stderr/stdout stream which prints
+ * over UART0.
+ */
+
 #include <stdio.h>
 
 /**

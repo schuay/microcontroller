@@ -39,11 +39,31 @@ void glcdFillScreen(const uint8_t pattern);
  * Sets the pixel located at coordinates (x, y).
  */
 void glcdSetPixel(const uint8_t x, const uint8_t y);
+
+/**
+ * Clears the pixel located ad coordinates (x, y).
+ */
 void glcdClearPixel(const uint8_t x, const uint8_t y);
+
+/**
+ * Inverts the pixel located ad coordinates (x, y).
+ */
 void glcdInvertPixel(const uint8_t x, const uint8_t y);
 
+/**
+ * Draws a line from p1 to p2 using the specified drawing function.
+ */
 void glcdDrawLine(const xy_point p1, const xy_point p2, draw_fn drawPx);
+
+/**
+ * Draws a rectangle with corners p1 and p2 using the specified drawing
+ * function.
+ */
 void glcdDrawRect(const xy_point p1, const xy_point p2, draw_fn drawPx);
+
+/**
+ * Draws a circle with center c and the specified radius and drawing function.
+ */
 void glcdDrawCircle(const xy_point c, const uint8_t radius, draw_fn drawPx);
 
 /* Not implemented

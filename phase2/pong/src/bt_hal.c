@@ -24,15 +24,28 @@ enum BTPins {
  */
 static uint8_t _send_buffer;
 
-/* TODO: debug. */
+/** Store handlers passed into halWT41FcUartInit. */
 static recv_handler_t _recv_callback;
 static intr_handler_t _send_callback;
 
+/**
+ * This flag protects access to the ringbuffer.
+ * Reads/writes *must* occur with interrupts disabled.
+ */
 static bool _processing = false;
 
+/** The ringbuffer size.
+ * Must be 2^n (we exploit that in rb_put and rb_get.
+ */
 #define RB_SIZE (128) /* Must be 2^n */
+
+/** The ringbuffer data. */
 static uint8_t rb_data[RB_SIZE];
+
+/** The index of the the next ringbuffer read. */
 static uint8_t rb_read = 0;
+
+/** The index of the the next ringbuffer write. */
 static uint8_t rb_write = 0;
 
 /**
@@ -70,7 +83,7 @@ inline static uint8_t rb_data_slots(void) {
  */
 inline static void rb_put(uint8_t byte) {
     rb_data[rb_write++] = byte;
-    rb_write &= RB_SIZE - 1;
+    rb_write &= RB_SIZE - 1;   /* rb_write = rb_write % RB_SIZE */
 }
 
 /**
@@ -82,7 +95,9 @@ inline static void rb_get(uint8_t *byte) {
     rb_read = (rb_read + 1) & (RB_SIZE - 1);
 }
 
+/** The number of free slots at which flow control is turned on. */
 #define CTS_HIGH (5)
+/** The number of free slots at which flow control is turned off. */
 #define CTS_LOW (RB_SIZE / 2)
 
 /**

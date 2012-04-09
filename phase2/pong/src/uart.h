@@ -1,6 +1,12 @@
 #ifndef UART_H
 #define UART_H
 
+/**
+ * @file uart.h
+ *
+ * Handles setting up UART modules.
+ */
+
 #include <stdbool.h>
 
 #include "common.h"
@@ -49,6 +55,9 @@ struct uart_conf {
     recv_handler_t rx_complete_handler;
 };
 
+/**
+ * Sets up a UART module as specified by conf.
+ */
 void uart_init(const struct uart_conf *conf);
 
 #endif /* UART_H */
