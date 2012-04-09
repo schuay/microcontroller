@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <util/atomic.h>
 #include <avr/interrupt.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -28,9 +29,11 @@ void uart_init(const struct uart_conf *conf) {
     udri_handler[n] = conf->data_reg_empty_handler;
     rxci_handler[n] = conf->rx_complete_handler;
 
-    *UCSRnA[n] = (conf->double_speed ? _BV(U2X0) : 0);
-    *UCSRnB[n] = conf->ucsrnb;
-    *UBRRn[n] = conf->ubrrn;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        *UCSRnA[n] = (conf->double_speed ? _BV(U2X0) : 0);
+        *UCSRnB[n] = conf->ucsrnb;
+        *UBRRn[n] = conf->ubrrn;
+    }
 }
 
 ISR(USART0_RX_vect, ISR_BLOCK) {

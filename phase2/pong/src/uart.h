@@ -49,7 +49,6 @@ struct uart_conf {
     recv_handler_t rx_complete_handler;
 };
 
-/* Interrupts must be disabled. */
 void uart_init(const struct uart_conf *conf);
 
 #endif /* UART_H */
