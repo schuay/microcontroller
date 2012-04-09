@@ -15,6 +15,8 @@ void adc_init(const struct adc_conf *conf) {
     adc_handler = conf->conv_cmpl_handler;
 
     ADCSRA |= _BV(ADIE);
+
+    /* TODO: Set up for internal reference voltage. */
 }
 
 void adc_start_conversion(void) {
