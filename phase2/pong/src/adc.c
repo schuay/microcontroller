@@ -14,9 +14,13 @@ void adc_init(const struct adc_conf *conf) {
 
     adc_handler = conf->conv_cmpl_handler;
 
-    ADCSRA |= _BV(ADIE);
+    /* Apparently, there is no way to set up a reference voltage
+     * so that it works no matter how the AREF pin is set up.
+     * If REFS1:REFS0 is 0:0, AREF needs to be set to VCC.
+     * 1:0 and 1:1 may not be used if an external reference
+     * voltage is being applied to the AREF pin (see p289). */
 
-    /* TODO: Set up for internal reference voltage. */
+    ADCSRA |= _BV(ADIE);
 }
 
 void adc_start_conversion(void) {
