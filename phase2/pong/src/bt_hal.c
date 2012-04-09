@@ -113,12 +113,20 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
     sei();
 
     uint8_t byte;
+    uint8_t size;
 
     /* Disable interrupts while accessing ring buffer. */
     cli();
-    while (rb_data_slots() != 0) {
+    while ((size = rb_data_slots()) != 0) {
         rb_get(&byte);
         sei();
+        /* Putting the CTS code outside the critical section *should*
+         * be ok since only one "thread" is in this section at a time and
+         * if the flow control is set to off, we shouldn't be getting any
+         * new data. If any bugs pop up though, let's keep this in mind. */
+        if (size == CTS_LOW) {
+            clr_bit(PORTJ, CTS);
+        }
         _recv_callback(byte);
     }
 
@@ -127,8 +135,6 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
      * returning from this. */
     cli();
     _processing = false;
-
-    /* TODO: Set CTS LOW if >= RB_SIZE / 2 bytes free. */
 }
 
 /**
