@@ -22,11 +22,14 @@ enum task_flags {
 
 static volatile struct {
     uint8_t flags;
+    uint8_t ticks;
     uint16_t adc_result;
+    uint8_t volume;
 } glb;
 
 static void tick(void) {
     glb.flags |= RunLogic;
+    glb.ticks++;
 }
 
 static void adc_done(uint16_t result) {
@@ -50,6 +53,7 @@ static void init(void) {
     spi_init();
     sdcardInit();   /* Note: this seems to hang with no board attached. */
     mp3Init(NULL);  /* TODO callback */
+    mp3SetVolume(0);
 
     wiiUserInit(rcvButton, rcvAccel);
 
@@ -129,8 +133,14 @@ static void task_logic(void) {
     }
 }
 
+#define ADC_UPPER (1023)
 static void task_adc(void) {
-    printf_P(PSTR("ADC Result: %d\n"), glb.adc_result);
+    uint8_t vol = (glb.adc_result >= ADC_UPPER ? 0xFF : glb.adc_result / 4);
+    if (vol != glb.volume) {
+        mp3SetVolume(vol);
+        glb.volume = vol;
+        printf_P(PSTR("Volume: %d\n"), vol);
+    }
 }
 
 static void run_tasks(void) {
@@ -139,6 +149,12 @@ static void run_tasks(void) {
         glb.flags &= ~RunLogic;
         sei();
         task_logic();
+    }
+
+    cli();
+    if (glb.ticks % 50 == 0) {
+        sei();
+        adc_start_conversion();
     }
 
     cli();
@@ -157,9 +173,6 @@ int main(void) {
 
     printf_P(PSTR("AVR Pong starting up...\n"));
 
-    adc_start_conversion();
-
-    mp3SetVolume(150);
     mp3StartSineTest();
 
     for (;;) {

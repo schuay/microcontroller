@@ -5,6 +5,8 @@
  * @file adc.h
  *
  * Handles analog to digital conversions.
+ * Note: It seems like voltage reference needs to be
+ * set to VCC for this to work.
  */
 
 typedef void (*adc_conv_cmpl_handler_t)(uint16_t);
