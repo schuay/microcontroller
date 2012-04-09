@@ -37,10 +37,10 @@ static void adc_done(uint16_t result) {
     glb.flags |= ADCWaiting;
 }
 
-void rcvButton(uint8_t wii, uint16_t button_states) {
+static void rcvButton(uint8_t wii, uint16_t button_states) {
     printf_P(PSTR("Received button %d %d\n"), wii, button_states);
 }
-void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
+static void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
     printf_P(PSTR("Received button accel %d %d %d %d\n"), wii, x, y, z);
 }
 
