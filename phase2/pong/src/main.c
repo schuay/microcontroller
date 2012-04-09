@@ -77,6 +77,7 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
     printf("wii %d connection state change: %s\n", wii,
            status == DISCONNECTED ? "disconnected" : "connected");
     if (status == DISCONNECTED) {
+        /* TODO: on disconnection, try periodically to get a connection. */
         return;
     }
     assert(wiiUserSetLeds(0, 0x01, NULL) == SUCCESS);
