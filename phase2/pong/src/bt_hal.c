@@ -143,8 +143,6 @@ static void _send_handler(void) {
          * When triggered, reenable DataRegEmptyIntr; */
     }
 
-    printf("bt sending: %x\n", _send_buffer);
-
     /* Actually send the requested byte.
      * Then, disable the interrupt until there is more data to send.
      */
