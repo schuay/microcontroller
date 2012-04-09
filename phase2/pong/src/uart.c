@@ -48,9 +48,11 @@ ISR(USART2_RX_vect, ISR_BLOCK) {
     rxci_handler[Uart2](*UDRn[Uart2]);
 }
 
+/*
 ISR(USART3_RX_vect, ISR_BLOCK) {
     rxci_handler[Uart3](*UDRn[Uart3]);
 }
+*/
 
 ISR(USART0_UDRE_vect, ISR_BLOCK) {
     udri_handler[Uart0]();
