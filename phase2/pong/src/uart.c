@@ -9,10 +9,10 @@
 #include "uart.h"
 #include "common.h"
 
-static volatile uint8_t *UCSRnA[] = { &UCSR0A, &UCSR1A, &UCSR2A, &UCSR3A };
-static volatile uint8_t *UCSRnB[] = { &UCSR0B, &UCSR1B, &UCSR2B, &UCSR3B };
-static volatile uint16_t *UBRRn[] = { &UBRR0, &UBRR1, &UBRR2, &UBRR3 };
-static volatile uint8_t *UDRn[] = { &UDR0, &UDR1, &UDR2, &UDR3 };
+static volatile uint8_t * const UCSRnA[] = { &UCSR0A, &UCSR1A, &UCSR2A, &UCSR3A };
+static volatile uint8_t * const UCSRnB[] = { &UCSR0B, &UCSR1B, &UCSR2B, &UCSR3B };
+static volatile uint16_t * const UBRRn[] = { &UBRR0, &UBRR1, &UBRR2, &UBRR3 };
+static volatile uint8_t * const UDRn[] = { &UDR0, &UDR1, &UDR2, &UDR3 };
 
 static intr_handler_t udri_handler[UartNEnd];
 static recv_handler_t rxci_handler[UartNEnd];
