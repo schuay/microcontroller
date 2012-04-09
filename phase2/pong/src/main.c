@@ -73,6 +73,11 @@ static void task_mp3(void) {
     } while (!mp3Busy());
 }
 
+static void wii_leds_set(uint8_t wii,
+                         error_t status __attribute__ ((unused))) {
+    assert(wiiUserSetAccel(wii, 0xff, NULL) == SUCCESS);
+}
+
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
     printf("wii %d connection state change: %s\n", wii,
            status == DISCONNECTED ? "disconnected" : "connected");
@@ -80,7 +85,7 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
         /* TODO: on disconnection, try periodically to get a connection. */
         return;
     }
-    assert(wiiUserSetLeds(0, 0x01, NULL) == SUCCESS);
+    assert(wiiUserSetLeds(wii, 0x01, wii_leds_set) == SUCCESS);
 }
 
 static void init(void) {
