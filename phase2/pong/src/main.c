@@ -2,6 +2,7 @@
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <string.h>
+#include <assert.h>
 
 #include "wii_user.h"
 
@@ -72,6 +73,10 @@ static void task_mp3(void) {
     } while (!mp3Busy());
 }
 
+static void wii_connection_change(uint8_t wii, connection_status_t status) {
+    printf("wii %d connection state change: %d\n", wii, status);
+}
+
 static void init(void) {
     sleep_enable();
     uart_streams_init();
@@ -83,7 +88,11 @@ static void init(void) {
     mp3Init(mp3_data_req);
     mp3SetVolume(0);
 
-    wiiUserInit(rcvButton, rcvAccel);
+    error_t ret = wiiUserInit(rcvButton, rcvAccel);
+    assert(ret == SUCCESS);
+    const uint8_t mac[] = { 0x58, 0xbd, 0xa3, 0x43, 0x5e, 0x46 };
+    ret = wiiUserConnect(0, mac, wii_connection_change);
+    assert(ret == SUCCESS);
 
     struct adc_conf ac = { adc_done };
     adc_init(&ac);
