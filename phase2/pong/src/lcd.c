@@ -93,12 +93,12 @@ void lcd_init(void) {
 }
 
 static void send_data(uint8_t data) {
-    PORTC |= _BV(RS);
+    set_bit(PORTC, RS);
     send_byte(data);
 }
 
 static void send_ctl(uint8_t cmd) {
-    PORTC &= ~_BV(RS);
+    clr_bit(PORTC, RS);
     send_byte(cmd);
 }
 
@@ -112,9 +112,9 @@ static void send_nibble(uint8_t nibble) {
      * of send_nibble to the next call of send_nibble, which
      * takes approximately 1312.5 ns so we should be good. */
 
-    PORTC |= _BV(E);
+    set_bit(PORTC, E);
     PORTC = (PORTC & msk) | (nibble & ~msk);
-    PORTC &= ~_BV(E);
+    clr_bit(PORTC, E);
 
     /* Contrary to the datasheet (?) and the comment above,
      * the lcd doesn't work without this delay. I'm not sure
