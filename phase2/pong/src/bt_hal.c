@@ -32,13 +32,12 @@ static uint8_t _send_buffer;
 static recv_handler_t _recv_callback;
 static intr_handler_t _send_callback;
 
+static bool _processing = false;
+
 static void _recv_handler(uint8_t data) {
     /* Display UART status on PORTH.
      * PH3: data overrun*/
     PORTH = UCSR3A;
-
-    /* For debugging purposes, call this here. */
-    _recv_callback(data);
 
     if (!ringbuffer_put(_rbuf, data)) {
         /* TODO: Set CTS HIGH if < 5 bytes free */
@@ -46,10 +45,26 @@ static void _recv_handler(uint8_t data) {
         set_bit(PORTJ, CTS);
     }
 
-    /* Reenable interrupts after critical work is done. */
+    if (_processing) {
+        return;
+    }
+
+    _processing = true;
+
     sei();
 
-    printf("bt recvd: %x\n", data);
+    uint8_t byte;
+
+    cli();
+    while (ringbuffer_get(_rbuf, &byte)) {
+        sei();
+        _recv_callback(byte);
+        printf("bt recvd: %x\n", byte);
+    }
+
+    cli();
+    _processing = false;
+    sei();
 
     /* TODO: Set CTS LOW if >= RB_SIZE / 2 bytes free. */
 }
