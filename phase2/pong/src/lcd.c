@@ -56,8 +56,6 @@ void lcd_clear(void) {
     send_ctl(ClearDisplay);
 }
 
-/* TODO: review timing. */
-
 void lcd_init(void) {
     const uint8_t msk = _BV(PC1) | _BV(PC0);
 
@@ -70,30 +68,28 @@ void lcd_init(void) {
     /* 8 bit data length. */
     send_nibble(FunctionSet | EXT 0b00010000);
 
-    _delay_ms(40);
+    _delay_us(39);
 
     /* 4 bit data length, 2 display lines, 5x11 font type. */
     send_ctl(FunctionSet | EXT 0b00001100);
 
-    _delay_ms(40);
+    _delay_us(39);
 
     send_ctl(FunctionSet | EXT 0b00001100);
 
-    _delay_ms(38);
+    _delay_us(37);
 
     /* Enable display. */
     send_ctl(DisplayControl | EXT 0b00000100);
 
-    _delay_ms(38);
+    _delay_us(37);
 
     lcd_clear();
 
-    _delay_ms(38);
+    _delay_us(1530);
 
     /* Entry mode set, shift cursor/DDRAM right.  */
     send_ctl(EntryModeSet | EXT 0b00000010);
-
-    _delay_ms(2);
 }
 
 static void send_data(uint8_t data) {
@@ -110,11 +106,21 @@ static void send_ctl(uint8_t cmd) {
 static void send_nibble(uint8_t nibble) {
     const uint8_t msk = 0x0F;
 
+    /* It looks like the only time constraint we need to
+     * worry about is the enable cycle time of 1200 ns.
+     * However, the disassembly shows 21 cycles between the start
+     * of send_nibble to the next call of send_nibble, which
+     * takes approximately 1312.5 ns so we should be good. */
+
     PORTC |= _BV(E);
     PORTC = (PORTC & msk) | (nibble & ~msk);
     PORTC &= ~_BV(E);
 
-    _delay_ms(2);
+    /* Contrary to the datasheet (?) and the comment above,
+     * the lcd doesn't work without this delay. I'm not sure
+     * why, especially because its over 50 times as much as
+     * specified. */
+    _delay_us(50);
 }
 
 static void send_byte(uint8_t packet) {
