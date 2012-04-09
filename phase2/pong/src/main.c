@@ -74,7 +74,8 @@ static void task_mp3(void) {
 }
 
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
-    printf("wii %d connection state change: %d\n", wii, status);
+    printf("wii %d connection state change: %s\n", wii,
+           status == DISCONNECTED ? "disconnected" : "connected");
 }
 
 static void init(void) {
