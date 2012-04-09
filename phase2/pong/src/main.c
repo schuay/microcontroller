@@ -44,7 +44,7 @@ static void rcvButton(uint8_t wii, uint16_t button_states) {
 }
 
 static void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
-    printf_P(PSTR("Received button accel %d %d %d %d\n"), wii, x, y, z);
+    printf_P(PSTR("Received accel %d %d %d %d\n"), wii, x, y, z);
 }
 
 static void mp3_data_req(void) {
