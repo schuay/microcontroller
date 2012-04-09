@@ -35,18 +35,18 @@ static intr_handler_t _send_callback;
 static bool _processing = false;
 
 /** The ringbuffer size.
- * Must be 2^n (we exploit that in rb_put and rb_get.
+ * Must be 2^n (we exploit that in _rb_put and _rb_get.
  */
 #define RB_SIZE (128) /* Must be 2^n */
 
 /** The ringbuffer data. */
-static uint8_t rb_data[RB_SIZE];
+static uint8_t _rb_data[RB_SIZE];
 
 /** The index of the the next ringbuffer read. */
-static uint8_t rb_read = 0;
+static uint8_t _rb_read = 0;
 
 /** The index of the the next ringbuffer write. */
-static uint8_t rb_write = 0;
+static uint8_t _rb_write = 0;
 
 /**
  * Returns the number of free slots.
@@ -55,44 +55,44 @@ static uint8_t rb_write = 0;
  * This lets us efficiently distinguish a full from an empty buffer.
  */
 inline static uint8_t rb_free_slots(void) {
-    if (rb_write >= rb_read) {
+    if (_rb_write >= _rb_read) {
         /* ..r..w.. : 4 free */
         /* b....... : 7 free (b := both) */
-        return RB_SIZE - rb_write + rb_read - 1;
+        return RB_SIZE - _rb_write + _rb_read - 1;
     }
     /* ..w..r.. : 2 free */
-    return rb_read - rb_write - 1;
+    return _rb_read - _rb_write - 1;
 }
 
 /**
  * Returns the number of filled slots.
  */
-inline static uint8_t rb_data_slots(void) {
-    if (rb_write >= rb_read) {
+inline static uint8_t _rb_data_slots(void) {
+    if (_rb_write >= _rb_read) {
         /* ..r..w.. : 3 data */
         /* b....... : 0 data (b := both) */
-        return rb_write - rb_read;
+        return _rb_write - _rb_read;
     }
     /* ..w..r.. : 5 data */
-    return RB_SIZE - rb_read + rb_write;
+    return RB_SIZE - _rb_read + _rb_write;
 }
 
 /**
  * Puts byte into the buffer.
  * The buffer must not be full.
  */
-inline static void rb_put(uint8_t byte) {
-    rb_data[rb_write++] = byte;
-    rb_write &= RB_SIZE - 1;   /* rb_write = rb_write % RB_SIZE */
+inline static void _rb_put(uint8_t byte) {
+    _rb_data[_rb_write++] = byte;
+    _rb_write &= RB_SIZE - 1;   /* _rb_write = _rb_write % RB_SIZE */
 }
 
 /**
  * Gets byte from the buffer.
  * The buffer must not be empty.
  */
-inline static void rb_get(uint8_t *byte) {
-    *byte = rb_data[rb_read];
-    rb_read = (rb_read + 1) & (RB_SIZE - 1);
+inline static void _rb_get(uint8_t *byte) {
+    *byte = _rb_data[_rb_read];
+    _rb_read = (_rb_read + 1) & (RB_SIZE - 1);
 }
 
 /** The number of free slots at which flow control is turned on. */
@@ -115,7 +115,7 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
         set_bit(PORTJ, CTS);
     }
 
-    rb_put(UDR3);
+    _rb_put(UDR3);
 
     if (_processing) {
         return;
@@ -132,8 +132,8 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
 
     /* Disable interrupts while accessing ring buffer. */
     cli();
-    while ((size = rb_data_slots()) != 0) {
-        rb_get(&byte);
+    while ((size = _rb_data_slots()) != 0) {
+        _rb_get(&byte);
         sei();
         /* Putting the CTS code outside the critical section *should*
          * be ok since only one "thread" is in this section at a time and
