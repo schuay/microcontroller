@@ -18,6 +18,7 @@
 enum task_flags {
     RunLogic = 1 << 0,
     ADCWaiting = 1 << 1,
+    MP3DataRequested = 1 << 2,
 };
 
 static volatile struct {
@@ -40,8 +41,35 @@ static void adc_done(uint16_t result) {
 static void rcvButton(uint8_t wii, uint16_t button_states) {
     printf_P(PSTR("Received button %d %d\n"), wii, button_states);
 }
+
 static void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
     printf_P(PSTR("Received button accel %d %d %d %d\n"), wii, x, y, z);
+}
+
+static void mp3_data_req(void) {
+    glb.flags |= MP3DataRequested;
+}
+
+/**
+ * Called when MP3 module requests new data.
+ * From observation, it looks like the module requests an entire
+ * MP3 at once, and only requests the next one once it is done playing the
+ * current file. The next file (if it is short enough) is sent all in one,
+ * meaning this function blocks until it's all transferred. */
+#define MP3_SD_BEGIN (3265536 / 32)
+#define MP3_SD_END ((7001088 + 36864) / 32)
+static void task_mp3(void) {
+    static uint32_t ptr = MP3_SD_BEGIN;
+    sdcard_block_t buf;
+    do {
+        if (sdcardReadBlock(ptr++, buf) != SUCCESS) {
+            printf_P(PSTR("Error receiving sdcard block\n"));
+        }
+        mp3SendMusic(buf);
+        if (ptr > MP3_SD_END) {
+            ptr = MP3_SD_BEGIN;
+        }
+    } while (!mp3Busy());
 }
 
 static void init(void) {
@@ -52,7 +80,7 @@ static void init(void) {
     pong_init();
     spi_init();
     sdcardInit();   /* Note: this seems to hang with no board attached. */
-    mp3Init(NULL);  /* TODO callback */
+    mp3Init(mp3_data_req);
     mp3SetVolume(0);
 
     wiiUserInit(rcvButton, rcvAccel);
@@ -158,6 +186,13 @@ static void run_tasks(void) {
     }
 
     cli();
+    if (glb.flags & MP3DataRequested) {
+        glb.flags &= ~MP3DataRequested;
+        sei();
+        task_mp3();
+    }
+
+    cli();
     if (glb.flags & ADCWaiting) {
         glb.flags &= ~ADCWaiting;
         sei();
@@ -172,8 +207,6 @@ int main(void) {
     sei();
 
     printf_P(PSTR("AVR Pong starting up...\n"));
-
-    mp3StartSineTest();
 
     for (;;) {
         run_tasks();
