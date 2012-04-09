@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <util/atomic.h>
+#include <stdio.h>
+#include <avr/pgmspace.h>
 #include <wii_bt.h>
 
 static void (*_sndCallback)(uint8_t);
@@ -204,7 +206,7 @@ static void receive_connection_response(uint8_t wii, uint8_t src, uint16_t dst)
 			return;
 		}
 	} while (0);
-	abort();
+	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 
 static void receive_configuration_request(uint8_t wii, uint8_t src)
@@ -231,8 +233,9 @@ static void receive_configuration_request(uint8_t wii, uint8_t src)
 				hci_number_of_completed_packets(wii);
 		}
 	}
-	else
-		abort();
+	else {
+		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	}
 }
 
 static void receive_configuration_response(uint8_t wii, uint8_t src)
@@ -259,8 +262,9 @@ static void receive_configuration_response(uint8_t wii, uint8_t src)
 				hci_number_of_completed_packets(wii);
 		}
 	}
-	else
-		abort();
+	else {
+		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	}
 }
 
 /*
@@ -292,7 +296,7 @@ static void receive_disconnection_request(uint8_t wii, uint8_t dst, uint16_t src
 			return;
 		}
 	} while (0);
-	abort();
+	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 */
 
@@ -367,5 +371,5 @@ void hci_receive(uint8_t wii, uint8_t length, const uint8_t data[])
 			return;
 		}
 	} while (0);
-	abort();
+	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }

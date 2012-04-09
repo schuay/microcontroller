@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <util/atomic.h>
+#include <stdio.h>
+#include <avr/pgmspace.h>
 #include <wii_user.h>
 
 static uint8_t _state[WII], _leds[WII], _rumbler[WII];
@@ -42,8 +44,9 @@ static void rcvCallback(uint8_t wii, uint8_t length, const uint8_t data[])
 	{
 		if (data[1] == 0x31)
 		{
-			if (length != 7)
-				abort();
+			if (length != 7) {
+				printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+			}
 			if (_rcvAccel)
 			{
 				uint16_t x = data[4] << 2 | (data[2] & 0x60) >> 5;
@@ -56,8 +59,9 @@ static void rcvCallback(uint8_t wii, uint8_t length, const uint8_t data[])
 		{
 			if (data[1] != 0x30)
 				return;
-			if (length != 4)
-				abort();
+			if (length != 4) {
+				printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+			}
 		}
 		if (_rcvButton)
 			_rcvButton(wii, (data[2] & 0x1f) << 8 | (data[3] & 0x9f));

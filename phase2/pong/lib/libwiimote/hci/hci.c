@@ -1,5 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <avr/pgmspace.h>
 #include <util/atomic.h>
 
 #include "hal_wt41_fc_uart.h"
@@ -65,8 +67,9 @@ static void transmit(buffer_t *buffer)
 error_t hci_create_connection(uint8_t wii, const uint8_t address[])
 {
 #ifndef NDEBUG
-	if (__builtin_expect(wii >= WII || !address, 0))
-		abort();
+	if (__builtin_expect(wii >= WII || !address, 0)) {
+		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	}
 #endif
 	ATOMIC_BLOCK(ATOMIC_FORCEON)
 	{
@@ -83,8 +86,9 @@ error_t hci_create_connection(uint8_t wii, const uint8_t address[])
 error_t hci_transmit(uint8_t wii, uint8_t length, const uint8_t data[])
 {
 #ifndef NDEBUG
-	if (__builtin_expect(wii >= WII || length > 27, 0))
-		abort();
+	if (__builtin_expect(wii >= WII || length > 27, 0)) {
+		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	}
 #endif
 	uint16_t handle;
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
@@ -191,21 +195,24 @@ static void event(uint8_t code, uint8_t length, const uint8_t parameters[])
 			uint8_t count = parameters[0];
 			for (uint8_t index = 0; index < count; index++)
 			{
-				if (parameters[3 + index * 4] != 1 || parameters[4 + index * 4])
-					abort();
+				if (parameters[3 + index * 4] != 1 || parameters[4 + index * 4]) {
+					printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+				}
 				union { uint8_t byte[2]; uint16_t word; } handle =
 					{ { parameters[1 + index * 4], parameters[2 + index * 4] } };
 				for (uint8_t wii = 0; wii < WII; wii++)
 				{
 					if (handle.word != _handle[wii])
 						continue;
-					if (!_packet[wii])
-						abort();
+					if (!_packet[wii]) {
+						printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+					}
 					buffer_t *next, *last;
 					ATOMIC_BLOCK(ATOMIC_FORCEON)
 						next = _data[wii].next, last = _last;
-					if (next || &_data[wii] == last)
-						abort();
+					if (next || &_data[wii] == last) {
+						printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+					}
 					_packet[wii] = false;
 					hci_number_of_completed_packets(wii);
 				}
@@ -213,7 +220,7 @@ static void event(uint8_t code, uint8_t length, const uint8_t parameters[])
 			return;
 		}
 	} while (0);
-	abort();
+	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 
 static void rcvCallback(uint8_t value)
@@ -300,7 +307,7 @@ static void rcvCallback(uint8_t value)
 		}
 		return;
 	} while (0);
-	abort();
+	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 
 error_t hci_init(void)
