@@ -162,9 +162,10 @@ static void task_logic(void) {
 }
 
 #define ADC_UPPER (1023)
+#define ADC_SMOOTHING (20)
 static void task_adc(void) {
     uint8_t vol = (glb.adc_result >= ADC_UPPER ? 0xFF : glb.adc_result / 4);
-    if (vol != glb.volume) {
+    if (abs(vol - glb.volume) > ADC_SMOOTHING) {
         mp3SetVolume(vol);
         glb.volume = vol;
         printf_P(PSTR("Volume: %d\n"), vol);
