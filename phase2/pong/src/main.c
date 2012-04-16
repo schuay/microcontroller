@@ -17,6 +17,8 @@
 #include "wii_user.h"
 #include "wiimotes.h"
 
+#define WIIMOTE_COUNT (2)
+
 enum task_flags {
     RunLogic = 1 << 0,
     ADCWaiting = 1 << 1,
@@ -76,10 +78,12 @@ static void task_mp3(void) {
 
 static void wii_leds_set(uint8_t wii,
                          error_t status __attribute__ ((unused))) {
+    assert(wii < WIIMOTE_COUNT);
     assert(wiiUserSetAccel(wii, 0xff, NULL) == SUCCESS);
 }
 
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
+    assert(wii < WIIMOTE_COUNT);
     printf("wii %d connection state change: %s\n", wii,
            status == DISCONNECTED ? "disconnected" : "connected");
     if (status == DISCONNECTED) {
