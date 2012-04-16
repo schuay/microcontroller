@@ -30,6 +30,7 @@ static volatile struct {
     uint8_t ticks;
     uint16_t adc_result;
     uint8_t volume;
+    connection_status_t connected[WIIMOTE_COUNT];
 } glb;
 
 static void tick(void) {
@@ -86,6 +87,7 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
     assert(wii < WIIMOTE_COUNT);
     printf("wii %d connection state change: %s\n", wii,
            status == DISCONNECTED ? "disconnected" : "connected");
+    glb.connected[wii] = status;
     if (status == DISCONNECTED) {
         /* TODO: on disconnection, try periodically to get a connection. */
         return;
