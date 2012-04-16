@@ -15,6 +15,7 @@
 #include "spi.h"
 #include "mp3.h"
 #include "wii_user.h"
+#include "wiimotes.h"
 
 enum task_flags {
     RunLogic = 1 << 0,
@@ -101,8 +102,7 @@ static void init(void) {
 
     error_t ret = wiiUserInit(rcvButton, rcvAccel);
     assert(ret == SUCCESS);
-    const uint8_t mac[] = { 0x58, 0xbd, 0xa3, 0x43, 0x5e, 0x46 };
-    ret = wiiUserConnect(0, mac, wii_connection_change);
+    ret = wiiUserConnect(0, wiimotes[0], wii_connection_change);
     assert(ret == SUCCESS);
 
     struct adc_conf ac = { adc_done };
