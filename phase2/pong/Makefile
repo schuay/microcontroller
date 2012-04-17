@@ -10,6 +10,7 @@ LDFLAGS = -mmcu=$(MCU) -Wl,-u,vfprintf -lprintf_min
 
 APP = avr-pong
 
+prot = protocol
 lib_mp3 = lib/libmp3
 lib_sdcard = lib/libsdcard
 lib_wiimote = lib/libwiimote
@@ -21,14 +22,17 @@ source = src/uart.c src/ringbuffer.c src/uart_streams.c src/main.c \
 		 src/bt_hal.c src/spi.c
 objects = $(source:.c=.o)
 
-.PHONY: all $(libs) doc
+.PHONY: all $(libs) doc protocol $(prot)
 
 all: $(APP).elf
 
 doc:
 	$(DOXYGEN)
 
-recursive: $(libs)
+protocol:
+	$(MAKE) --directory=$@ $(TARGET)
+
+recursive: $(libs) protocol
 
 $(libs):
 	$(MAKE) --directory=$@ $(TARGET)
