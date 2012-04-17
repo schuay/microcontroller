@@ -46,9 +46,11 @@ help:
 	@echo -e "\tprotocol \t generate .dvi, .ps, and .pdf files"
 	@echo -e "\tprint \t\t print the title page (you need to sign it!)"
 	@echo -e "\n\thelp \t\t list this text"
-	@echo -e "\tclean \t\t remove temporary files"
+	@echo -e "\tclean \t\t remove generated files"
 
 #------------------------------------------------------------------------------
 clean:
 #------------------------------------------------------------------------------
-	rm *.aux *.log *.dvi *.toc
+	rm -f $(PROJECT).aux $(PROJECT).log $(PROJECT).dvi $(PROJECT).toc \
+		$(PROJECT).pdf $(PROJECT).ps
+
