@@ -1,0 +1,318 @@
+%***************************************************************************
+% MCLab Protocol Template
+%
+% Embedded Computing Systems Group
+% Institute of Computer Engineering
+% TU Vienna
+%
+%---------------------------------------------------------------------------
+% Vers.	Author	Date	Changes
+% 1.0	bw	10.3.06	first version
+% 1.1	bw	25.4.06	listing is in a different directory
+% 1.2	bw	24.5.06	tutor has to be listed on title page
+% 1.3	bw	16.6.06	statement about no plagiarism on title page (sign it!)
+%---------------------------------------------------------------------------
+% Author names:
+%       bw      Bettina Weiss
+%***************************************************************************
+
+\documentclass[12pt,a4paper,titlepage,oneside]{article}
+\usepackage{graphicx}            % fuer Bilder
+\usepackage{epsfig}              % fuer EPS Bilder
+\usepackage{listings}            % fuer Programmlistings
+%\usepackage{german}              % fuer deutsche Umbrueche
+\usepackage[latin1]{inputenc}    % fuer Umlaute
+\usepackage{times}               % PDF files look good on screen
+\usepackage{amssymb,amsmath,amsthm}
+
+
+%***************************************************************************
+% note: the template is in English, but you can use German for your
+% protocol as well; in that case, remove the comment from the
+% \usepackage{german} line above
+%***************************************************************************
+
+
+%***************************************************************************
+% enter your data into the following fields
+%***************************************************************************
+\newcommand{\Vorname}{IhrVorname/Your First Name}
+\newcommand{\Nachname}{IhrNachname/YourSurname}
+\newcommand{\MatrNr}{3333333}
+\newcommand{\Email}{e3333333@student.tuwien.ac.at}
+\newcommand{\Part}{I}
+\newcommand{\Tutor}{NameIhresTutors/NameOfYourTutor}
+%***************************************************************************
+
+
+%***************************************************************************
+% generating the document from Protocol.tex:
+%       "latex Protocol"        generates a .dvi file
+%       "latex Protocol"        repeat to get correct table of contents
+%       "xdvi Protocol &"       shows the .dvi file on viewer
+%       "dvips Protocol.dvi -o Protocol.ps"      generates a postscript file
+%
+%***************************************************************************
+
+%---------------------------------------------------------------------------
+% include all the stuff that is the same for all protocols and students
+\input ProtocolHeader.tex
+%---------------------------------------------------------------------------
+
+\begin{document}
+
+%---------------------------------------------------------------------------
+% create titlepage and table of contents
+\MakeTitleAndTOC
+%---------------------------------------------------------------------------
+
+
+%***************************************************************************
+% This is where your protocol starts
+%***************************************************************************
+
+%***************************************************************************
+% remove the following lines from your own protocol file!
+%***************************************************************************
+
+{\bf Note:} This template is provided to show you how Latex works and may
+not contain all subsections your protocol should contain.
+
+
+%***************************************************************************
+\section{Overview}
+%***************************************************************************
+
+%---------------------------------------------------------------------------
+\subsection{Connections,  External Pullups/Pulldowns}
+%---------------------------------------------------------------------------
+
+\bConnections{What}{}
+PORTC & external Pulldown enabled on PC0,3-5,7 \\
+J12 & Connected to VCC \\
+\eConnections
+
+Write down all things we need to know to get your program running on our board. All non-standard external connections, all switches your program needs, \dots
+If we cannot figure out how we get your program running, we can not give you points for it.
+
+
+%---------------------------------------------------------------------------
+\subsection{Design Decisions}
+%---------------------------------------------------------------------------
+
+Here comes the design decisions that you made during programming.
+
+%---------------------------------------------------------------------------
+\subsection{Specialities}
+%---------------------------------------------------------------------------
+
+Does you solution have something special (positive or negative)?
+
+
+%***************************************************************************
+\section{Main Application}
+%***************************************************************************
+
+Describe your application.
+
+
+
+
+
+%***************************************************************************
+\section{Music Playback}
+%***************************************************************************
+
+%---------------------------------------------------------------------------
+\subsection{SPI}
+%---------------------------------------------------------------------------
+
+Explain your modules.
+
+%---------------------------------------------------------------------------
+\subsection{Playback}
+%---------------------------------------------------------------------------
+
+
+
+%***************************************************************************
+\section{WT41 HAL}
+%***************************************************************************
+
+
+
+
+%***************************************************************************
+\section{LC--Display}
+%***************************************************************************
+
+%---------------------------------------------------------------------------
+\subsection{GLCD}
+%---------------------------------------------------------------------------
+
+Explain your modules.
+
+%---------------------------------------------------------------------------
+\subsection{HAL GLCD}
+%---------------------------------------------------------------------------
+
+%---------------------------------------------------------------------------
+\subsection{Text Mode}
+%---------------------------------------------------------------------------
+
+
+
+%***************************************************************************
+\section{...explain your application modules ...}
+%***************************************************************************
+
+%***************************************************************************
+\section{...the above were only examples}
+%***************************************************************************
+
+
+
+%***************************************************************************
+\section{Problems}
+%***************************************************************************
+
+Put all problems you encountered into this section. This is important
+information, which allows us to determine where there are problems.
+(Don't worry, we don't take points.)
+
+
+%***************************************************************************
+\section{Work}
+%***************************************************************************
+
+Estimate the work you put into solving the Application.
+
+\begin{tabular}{|l|c|}
+\hline
+reading manuals, datasheets	& 10 h	\\
+program design			& 5 h	\\
+programming			& 10 h	\\
+debugging			& 30 h	\\
+questions, protocol		& 10 h	\\
+\hline
+{\bf Total}			& 65 h	\\
+\hline
+\end{tabular}
+
+
+
+%***************************************************************************
+\section{Theory Tasks}
+%***************************************************************************
+
+
+% Your answers should be brief but complete
+
+
+
+\QuText{
+\textbf{[2 Points] Buffersize and flow control:}
+Assume the UART Setup as in the Application setup, that is, $\mathit{BAUD}$ bit/sec, 8N1. Furthermore, assume the ring buffer we have implemented is empty at the beginning, $\mathit{Buffersize}$ bytes large, and for simplicity forget about all the hardware and software implementation details and assume the UART Module could directly write in the buffer the flow control is triggered in the moment the last empty place in the buffer is written. An element is removed from the buffer in the moment the corresponding callback is called.
+
+\begin{enumerate}
+
+\item As in the application, the receive callback function is issued subsequently for every received character. Assume the bluetooth module sends datagramms of length $DG_{length}>\mathit{Buffersize}$. Derive a formula for the upper bound on the execution duration of the callback function $t_{CB}$ such that if one datagram is sent, the flow control is \textbf{not} triggered. The formula should depend on $\mathit{BAUD}$, $\mathit{Buffersize}$, and $DG_{length}$. Note that a UART-Mode of 8N1 is specified! Please be very careful when building the formula not to make an off-by-one mistake.
+Additionally calculate the upper bound for the following values: $\mathit{BAUD}=10^{6}bit/sec$, $\mathit{Buffersize}=49Byte$, and $DG_{length}=64Byte$.
+
+\item Assume the previously mentioned datagramms come periodically every $P_{DG}$ seconds. Derive a formula for the upper bound on the execution duration of the callback function $t_{CB}'$ such that no matter how long the system runs the flow control will \textbf{never} be triggered. Additionally, calculate the upper bound using the values from before and assume $P_{DG}=2.5*10^{-3}s$
+
+\end{enumerate}
+}
+
+
+The answer to this question.
+If you have to include graphics (EPS files generated by gnuplot), here
+is how to do it:
+Figure~\ref{figPlot} shows the characteristic curve of ...
+
+\begin{figure}[htb]
+\epsfxsize=0.5\textwidth
+% change this factor to resize your figure
+\hfill
+\epsfbox{Plot.eps}
+\hfill\hbox{}
+\caption{Characteristic curve of ...}
+\label{figPlot}
+\end{figure}
+
+
+
+\QuText{
+\textbf{[1 Point] Pong vs.\ Billiard warmup:}
+In the following assume for simplicity that the playground of Pong is
+     a rectangle of height~1 and width~2 and that both players are
+     perfect, that is, they always hit the ball with the tennis
+     racket.
+Also assume, that there are no pixels, that is, we are playing in a
+     continuous environment.
+Thus, this scenario is equivalent to a billiard board of height~1 and
+     width~2 with one ball and no holes.
+The lower left corned has Cartesian coordinates~$(0,0)$, the upper left
+     corner~$(0,1)$ and the lower right corner~$(2,0)$.
+Further assume (as in billiard) that the incidence angle is equal to
+     the emergent angle whenever the ball hits a boundary or the
+     players' tennis rackets.
+In case the ball hits a corner, it thus simply reverts its direction
+     at the corner.
+The speed of the ball is constant during the whole game, i.e., we
+     assume zero friction.
+
+A game is called {\em periodic\/} if the ball repeatedly runs along
+     the same finite track over and over again.
+
+\medskip
+
+For each natural number~$n$ give an initial position and initial
+     direction of the ball such that it hits the border at least~$n$
+     times before it reaches the same initial position with the same
+     initial direction again (the game gets periodic). Prove that your solution is a majorizing series.
+}
+
+
+\QuText{
+\textbf{[2 Points] Pong vs.\ Billiard aperiodic gaming:}
+Give an initial position and initial direction of the ball such that
+     the ball will never reach the initial position again.
+Formally prove that your solution is correct.
+}
+
+
+
+
+
+%***************************************************************************
+\newpage
+\appendix
+\section{Listings}
+\small{
+%***************************************************************************
+
+Include EVERY source file of your Application (including headers)!!!
+And EVERY file you have modified!
+
+%---------------------------------------------------------------------------
+\subsection{Application}
+%---------------------------------------------------------------------------
+
+\lstinputlisting{../src/main.c}
+
+
+%---------------------------------------------------------------------------
+\subsection{SPI}
+%---------------------------------------------------------------------------
+
+
+%---------------------------------------------------------------------------
+\subsection{...}
+%---------------------------------------------------------------------------
+
+
+
+%***************************************************************************
+}% small
+\end{document}

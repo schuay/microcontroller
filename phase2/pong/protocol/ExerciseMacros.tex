@@ -1,0 +1,163 @@
+
+%---------------------------------------------------------------------------
+% section names
+\newcommand{\ListSection}[1]{
+  \subsubsection*{#1}
+
+  \begin{itemize}
+  \listspace
+}
+\newcommand{\EndList}{\end{itemize}}
+
+\newcommand{\EnumSection}[1]{
+  \subsubsection*{#1}
+
+  \begin{enumerate}
+  \listspace
+}
+\newcommand{\EndEnum}{\end{enumerate}}
+
+\newcommand{\Task}{\subsubsection*{Task} }
+\newcommand{\Pitfalls}{\ListSection{Pitfalls}}
+\newcommand{\Hints}{\ListSection{Hints}}
+\newcommand{\Remarks}{\ListSection{Remarks}}
+\newcommand{\References}{\ListSection{References}}
+\newcommand{\Questions}{\EnumSection{Questions} }
+\newcommand{\Keypad}{\medskip \noindent {\bf Keypad Assignment} }
+
+
+%---------------------------------------------------------------------------
+% helpful stuff
+\newcommand{\emn}[1]{{\em #1\/}}
+\newcommand{\listspace}{\itemsep -2pt}
+
+\newcommand{\Note}[1]{{\em #1}}
+
+\newcommand{\Comment}[1]{{\tiny #1}}
+
+\newcommand{\CommentOut}[1]{}
+
+
+%---------------------------------------------------------------------------
+% macros for often used terms
+\newcommand{\VCC}{{VCC ($+$)}}
+\newcommand{\GND}{{GND ($\perp$)}}
+
+\newcommand{\ATManual}{ATmega16 manual}
+\newcommand{\RefMotor}{Motor board description}
+
+\newcommand{\SDIO}{Simple I/O board}
+\newcommand{\ACtrl}{ATmega16 controller board}
+\newcommand{\UARTRS}{UART-RS232 board}
+\newcommand{\MotorDC}{L293 board}
+\newcommand{\MotorUCN}{UCN5804 board}
+\newcommand{\MotorStep}{MC3479 board}
+
+\newcommand{\SWCOMa}{SWCOM\_1-3}
+\newcommand{\SWCOMb}{SWCOM\_4-6}
+\newcommand{\BTNCOMa}{BTNCOM\_1-3}
+\newcommand{\BTNCOMb}{BTNCOM\_4-6}
+
+\newcommand{\PinSEG}{SEG\_DP:SEG\_A & PC7:0}
+\newcommand{\PinLED}{LED7:0 & PC7:0}
+\newcommand{\PinDIGIT}{CC\_DIGIT5:0 & PD7:2}
+\newcommand{\PinDIGIThalf}{CC\_DIGIT2:0 & PD4:2}
+\newcommand{\PinROW}{ROW3:0 & PB3:0}
+\newcommand{\PinCOL}{COL3:0 & PA7:4}
+\newcommand{\PinDC}{1A & OC1A \\ 2A & PD7 }
+\newcommand{\PinSTEP}{STEP & OC1A \\ DIR & PD7 }
+\newcommand{\PinPHOTOa}{PHA & ICP1 }
+
+\newcommand{\trev}[1]{{t^{(#1)}_{rev}}}  % time for revolution #1
+\newcommand{\vmot}[1]{{v^{(#1)}_{mot}}}  % motor speed in revolution #1
+
+\newcommand{\AND}{$\wedge$}
+\newcommand{\OR}{$\vee$}
+\newcommand{\NOT}{$\neg$}
+\newcommand{\XOR}{$\oplus$}
+\newcommand{\EQUIV}{$\Leftrightarrow$}
+
+
+%---------------------------------------------------------------------------
+% difficulty level
+\newcommand{\Level}[1]{
+  \noindent
+  {\bf Difficulty Level: #1}
+
+}
+\newcommand{\No}{0}
+\newcommand{\Beg}{1}
+\newcommand{\BI}{2}
+\newcommand{\Int}{3}
+\newcommand{\IE}{4}
+\newcommand{\Exp}{5}
+
+
+%---------------------------------------------------------------------------
+% based on
+\newcommand{\Based}[1]{
+
+  \noindent
+  {\bf Based on: #1}
+
+}
+
+
+%---------------------------------------------------------------------------
+% typical bases
+\newcommand{\BasicHW}{\ref{exHWStart}, \ref{exHWKnow}}
+\newcommand{\BasicIO}{\ref{exDIOSimple}}
+
+
+%---------------------------------------------------------------------------
+% pin connections
+\newcommand{\bConnections}[2]{
+  \subsubsection*{Pin Assignment}
+
+  \begin{tabular}{|l|l|}
+  \hline
+  #1 & #2 \\
+  \hline
+}
+
+\newcommand{\eConnections}{
+  \hline
+  \end{tabular}
+
+  \medskip
+}
+
+
+%---------------------------------------------------------------------------
+% exercise section with all data
+\newcommand{\exercise}[4] { % section name, label, DL, based on
+  \subsection{#1 (DL#3)}
+
+  \ifthenelse{\equal{#2}{}}
+    {}  % do nothing if label is empty
+    {\label{#2}}
+
+%  \Level{#3}
+
+  \ifthenelse{\equal{#4}{}}
+    {}  % do nothing if based-on string is empty
+    {\Based{#4}}
+}
+
+
+
+%---------------------------------------------------------------------------
+% questions about certain topics
+\newcommand{\MemoryQuestions}{
+\item How much static memory does your program use (in Bytes)?
+How many percent of the available memory does that take up?
+
+\item Estimate how much dynamic memory your program uses. Again,
+give the number in Bytes and as a percentage of the available memory.
+}
+
+\newcommand{\ApplQuestions}{
+\MemoryQuestions
+
+\item Roughly estimate the required processor load (in percent).
+}
