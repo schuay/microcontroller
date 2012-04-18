@@ -26,6 +26,11 @@ enum task_flags {
     MP3DataRequested = 1 << 2,
 };
 
+enum state {
+    GameRunning,
+    PointScored,
+};
+
 static volatile struct {
     uint8_t flags;
     uint8_t ticks;
@@ -33,6 +38,7 @@ static volatile struct {
     uint8_t volume;
     uint16_t buttons;
     connection_status_t connected[WIIMOTE_COUNT];
+    enum state st;
 } glb;
 
 static void tick(void) {
@@ -66,7 +72,7 @@ static void mp3_data_req(void) {
  * meaning this function blocks until it's all transferred. */
 #define MP3_SD_BEGIN (3265536 / 32)
 #define MP3_SD_END ((7001088 + 36864) / 32)
-static void __attribute__ ((unused)) task_mp3(void) {
+static void task_mp3(void) {
     static uint32_t ptr = MP3_SD_BEGIN;
     sdcard_block_t buf;
     do {
@@ -191,7 +197,10 @@ static void __attribute__ ((unused)) test_mode(void) {
 
 static void task_logic(void) {
     if (glb.ticks % 10 == 0) {
-        pong_ball_step();
+        if (pong_ball_step()) {
+            glb.st = PointScored;
+            return;
+        }
     }
     if (glb.buttons & BtnUp) {
         pong_move(0, Up);
@@ -216,11 +225,19 @@ static void task_adc(void) {
 }
 
 static void run_tasks(void) {
-    cli();
-    if (glb.flags & RunLogic) {
-        glb.flags &= ~RunLogic;
-        sei();
-        task_logic();
+    if (glb.st == GameRunning) {
+        cli();
+        if (glb.flags & RunLogic) {
+            glb.flags &= ~RunLogic;
+            sei();
+            task_logic();
+        }
+    } else if (glb.st == PointScored) {
+        cli();
+        if (glb.flags & MP3DataRequested) {
+            sei();
+            task_mp3();
+        }
     }
 
     cli();

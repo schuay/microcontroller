@@ -94,7 +94,16 @@ void pong_init(void) {
     state.dx = state.dy = 5;
 }
 
-void pong_ball_step(void) {
+static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
+    uint8_t miny = (y < nexty) ? y : nexty;
+    uint8_t maxy = (y < nexty) ? nexty : y;
+
+    return (miny <= pady && maxy >= pady)
+        || (miny <= pady + PADDLE_HEIGHT && maxy >= pady + PADDLE_HEIGHT)
+        || (miny >= pady && maxy <= pady + PADDLE_HEIGHT);
+}
+
+bool pong_ball_step(void) {
     assert(state.x < state.width);
     assert(state.y < state.height);
 
@@ -112,11 +121,19 @@ void pong_ball_step(void) {
     if (nextx <= 0) {
         state.dx = - state.dx;
         nextx = - nextx;
+        if (!_hit_paddle(state.lpady, state.y, nexty)) {
+            return true;
+        }
     } else if (nextx >= state.width - 1) {
         state.dx = - state.dx;
         nextx = 2 * (state.width - 1) - nextx;
+        if (!_hit_paddle(state.rpady, state.y, nexty)) {
+            return true;
+        }
     }
 
     state.x = nextx;
     state.y = nexty;
+
+    return false;
 }

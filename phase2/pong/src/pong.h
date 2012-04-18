@@ -1,6 +1,8 @@
 #ifndef PONG_H
 #define PONG_H
 
+#include <stdbool.h>
+
 enum direction {
     Up,
     Down,
@@ -8,7 +10,13 @@ enum direction {
 
 void pong_print(void);
 void pong_init(void);
-void pong_ball_step(void);
+
+/**
+ * Performs ball movement.
+ * @return Returns true if a player has scored, false otherwise.
+ */
+bool pong_ball_step(void);
+
 void pong_move(uint8_t player, enum direction dir);
 void pong_draw(void);
 
