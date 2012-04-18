@@ -24,6 +24,10 @@ void pong_print(void) {
     printf("x: %d y: %d\n", state.x, state.y);
 }
 
+void pong_move(uint8_t player, enum direction dir __attribute ((unused))) {
+    assert(player < 2);
+}
+
 void pong_init(void) {
     state.width = 128;
     state.height = 64;
