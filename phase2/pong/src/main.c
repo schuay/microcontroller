@@ -66,7 +66,7 @@ static void mp3_data_req(void) {
  * meaning this function blocks until it's all transferred. */
 #define MP3_SD_BEGIN (3265536 / 32)
 #define MP3_SD_END ((7001088 + 36864) / 32)
-static void task_mp3(void) {
+static void __attribute__ ((unused)) task_mp3(void) {
     static uint32_t ptr = MP3_SD_BEGIN;
     sdcard_block_t buf;
     do {
@@ -223,13 +223,6 @@ static void run_tasks(void) {
     if (glb.ticks % 50 == 0) {
         sei();
         adc_start_conversion();
-    }
-
-    cli();
-    if (glb.flags & MP3DataRequested) {
-        glb.flags &= ~MP3DataRequested;
-        sei();
-        task_mp3();
     }
 
     cli();
