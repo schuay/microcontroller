@@ -12,6 +12,14 @@
 #include "common.h"
 
 /**
+ * Wii button values as received by libwiimote.
+ */
+enum buttons {
+    Down = 1 << 10,
+    Up = 1 << 11,
+};
+
+/**
  * Sets up all used ports, configures UART3, and resets the bluetooth
  * board.
  *

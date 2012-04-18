@@ -30,6 +30,7 @@ static volatile struct {
     uint8_t ticks;
     uint16_t adc_result;
     uint8_t volume;
+    uint16_t buttons;
     connection_status_t connected[WIIMOTE_COUNT];
 } glb;
 
@@ -45,6 +46,7 @@ static void adc_done(uint16_t result) {
 
 static void rcvButton(uint8_t wii, uint16_t button_states) {
     printf_P(PSTR("Received button %d %d\n"), wii, button_states);
+    glb.buttons = button_states;
 }
 
 static void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
