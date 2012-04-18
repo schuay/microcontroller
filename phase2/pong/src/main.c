@@ -82,7 +82,6 @@ static void task_mp3(void) {
 static void wii_leds_set(uint8_t wii,
                          error_t status __attribute__ ((unused))) {
     assert(wii < WIIMOTE_COUNT);
-    assert(wiiUserSetAccel(wii, 0xff, NULL) == SUCCESS);
 }
 
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
