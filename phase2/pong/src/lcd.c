@@ -39,14 +39,30 @@ enum LCDInstructions {
     SetDDRAMAddr = 1 << 7,
 };
 
+#define COLS (16)
+#define ROWS (2)
+
 static void send_ctl(uint8_t cmd);
 static void send_data(uint8_t data);
 static void send_byte(uint8_t packet);
 static void send_nibble(uint8_t nibble);
 
+void lcd_putstr(const char *s, uint8_t row, uint8_t col) {
+    assert(s != NULL);
+    for (uint8_t i = 0; ; i++) {
+        if (s[i] == '\0') {
+            return;
+        }
+        if (col + i >= COLS) {
+            return;
+        }
+        lcd_putchar(s[i], row, col + i);
+    }
+}
+
 void lcd_putchar(char c, uint8_t row, uint8_t col) {
-    assert(row < 2);
-    assert(col < 16);
+    assert(row < ROWS);
+    assert(col < COLS);
 
     send_ctl(SetDDRAMAddr | (row << 6) | col);
     send_data(c);

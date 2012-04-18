@@ -15,6 +15,12 @@ void lcd_init(void);
 void lcd_putchar(char c, uint8_t row, uint8_t col);
 
 /**
+ * Prints s to (row, col) char by char,
+ * until either '\0' in s or the EOL is reached.
+ */
+void lcd_putstr(const char *s, uint8_t row, uint8_t col);
+
+/**
  * Clears the display.
  */
 void lcd_clear(void);
