@@ -73,6 +73,9 @@ void pong_draw(void) {
     glcdDrawLine(padrt, padrb, glcdSetPixel);
 
     glcdSetPixel(state.x, state.y);
+    glcdSetPixel(state.x + 1, state.y);
+    glcdSetPixel(state.x, state.y + 1);
+    glcdSetPixel(state.x + 1, state.y + 1);
 }
 
 void pong_init(void) {
