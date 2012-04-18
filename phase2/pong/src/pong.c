@@ -62,6 +62,7 @@ void pong_move(uint8_t player, enum direction dir __attribute ((unused))) {
 }
 
 void pong_draw(void) {
+    /* Clear screen. */
     glcdFillScreen(0x00);
 
     xy_point padlt = { 0, state.lpady },
@@ -69,9 +70,11 @@ void pong_draw(void) {
              padrt = { WIDTH - 1, state.rpady },
              padrb = { WIDTH - 1, state.rpady + PADDLE_HEIGHT };
 
+    /* Draw paddles. */
     glcdDrawLine(padlt, padlb, glcdSetPixel);
     glcdDrawLine(padrt, padrb, glcdSetPixel);
 
+    /* Draw ball. */
     glcdSetPixel(state.x, state.y);
     glcdSetPixel(state.x + 1, state.y);
     glcdSetPixel(state.x, state.y + 1);
