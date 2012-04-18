@@ -121,7 +121,7 @@ static void init(void) {
     memset((void *)&glb, 0, sizeof(glb));
 }
 
-static void task_logic(void) {
+static void test_mode(void) {
     static int mode = 3;
     static int x = 0;
     static int y = 0;
@@ -186,6 +186,10 @@ static void task_logic(void) {
     default:
         mode = 0;
     }
+}
+
+static void task_logic(void) {
+    test_mode();
 }
 
 #define ADC_UPPER (1023)
