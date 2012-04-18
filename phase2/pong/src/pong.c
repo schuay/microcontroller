@@ -2,7 +2,11 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "glcd.h"
+#include "glcd_hal.h"
 #include "pong.h"
+
+#define PADDLE_HEIGHT (10)
 
 struct pong_state_t {
     /* Field */
@@ -26,6 +30,49 @@ void pong_print(void) {
 
 void pong_move(uint8_t player, enum direction dir __attribute ((unused))) {
     assert(player < 2);
+    uint8_t *pady = NULL;
+
+    switch (player) {
+    case 0:
+        pady = &state.lpady;
+        break;
+    case 1:
+        pady = &state.rpady;
+        break;
+    default:
+        assert(0);
+    }
+
+    switch (dir) {
+    case Up:
+        if (*pady == 0) {
+            break;
+        }
+        (*pady)--;
+        break;
+    case Down:
+        if (*pady + PADDLE_HEIGHT == HEIGHT - 1) {
+            break;
+        }
+        (*pady)++;
+        break;
+    default:
+        assert(0);
+    }
+}
+
+void pong_draw(void) {
+    glcdFillScreen(0x00);
+
+    xy_point padlt = { 0, state.lpady },
+             padlb = { 0, state.lpady + PADDLE_HEIGHT },
+             padrt = { WIDTH - 1, state.rpady },
+             padrb = { WIDTH - 1, state.rpady + PADDLE_HEIGHT };
+
+    glcdDrawLine(padlt, padlb, glcdSetPixel);
+    glcdDrawLine(padrt, padrb, glcdSetPixel);
+
+    glcdSetPixel(state.x, state.y);
 }
 
 void pong_init(void) {

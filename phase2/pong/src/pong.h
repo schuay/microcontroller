@@ -10,5 +10,6 @@ void pong_print(void);
 void pong_init(void);
 void pong_ball_step(void);
 void pong_move(uint8_t player, enum direction dir);
+void pong_draw(void);
 
 #endif /* PONG_H */

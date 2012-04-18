@@ -16,6 +16,7 @@
 #include "mp3.h"
 #include "wii_user.h"
 #include "wiimotes.h"
+#include "bt_hal.h"
 
 #define WIIMOTE_COUNT (2)
 
@@ -121,7 +122,7 @@ static void init(void) {
     memset((void *)&glb, 0, sizeof(glb));
 }
 
-static void test_mode(void) {
+static void __attribute__ ((unused)) test_mode(void) {
     static int mode = 3;
     static int x = 0;
     static int y = 0;
@@ -189,7 +190,14 @@ static void test_mode(void) {
 }
 
 static void task_logic(void) {
-    test_mode();
+    pong_ball_step();
+    if (glb.buttons & BtnUp) {
+        pong_move(0, Up);
+    }
+    if (glb.buttons & BtnDown) {
+        pong_move(0, Down);
+    }
+    pong_draw();
 }
 
 #define ADC_UPPER (1023)

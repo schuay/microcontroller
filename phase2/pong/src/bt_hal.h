@@ -15,8 +15,8 @@
  * Wii button values as received by libwiimote.
  */
 enum buttons {
-    Down = 1 << 10,
-    Up = 1 << 11,
+    BtnDown = 1 << 10,
+    BtnUp = 1 << 11,
 };
 
 /**
