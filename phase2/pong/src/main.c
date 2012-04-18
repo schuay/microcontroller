@@ -190,14 +190,18 @@ static void __attribute__ ((unused)) test_mode(void) {
 }
 
 static void task_logic(void) {
-    pong_ball_step();
+    if (glb.ticks % 10 == 0) {
+        pong_ball_step();
+    }
     if (glb.buttons & BtnUp) {
         pong_move(0, Up);
     }
     if (glb.buttons & BtnDown) {
         pong_move(0, Down);
     }
-    pong_draw();
+    if (glb.ticks % 5 == 0) {
+        pong_draw();
+    }
 }
 
 #define ADC_UPPER (1023)
