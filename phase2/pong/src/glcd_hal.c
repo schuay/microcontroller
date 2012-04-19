@@ -27,12 +27,12 @@ static struct {
  *
  * Pin mappings are as follows: */
 enum GLCDPinsE {
-    CS0 = PE2,  /* Select Segment 1 - 64. */
-    CS1 = PE3,  /* Select Segment 65 - 128. */
+    CS0 = PE2,  /* Select Segment 1 - 64. LOW active. */
+    CS1 = PE3,  /* Select Segment 65 - 128. LOW active. */
     RS = PE4,   /* Register Select. 0: instr, 1: data */
     RW = PE5,   /* Read/Write: 0: write, 1: read */
     E = PE6,    /* Chip Enable. */
-    RST = PE7,  /* Reset. */
+    RST = PE7,  /* Reset. LOW active. */
 };
 
 enum GLCDPinsA {
