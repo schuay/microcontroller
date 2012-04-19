@@ -58,7 +58,7 @@
 \newcommand{\MatrNr}{0203440}
 \newcommand{\Email}{e0203440@student.tuwien.ac.at}
 \newcommand{\Part}{I}
-\newcommand{\Tutor}{???}
+\newcommand{\Tutor}{Patrik Fimml}
 %***************************************************************************
 
 
@@ -88,13 +88,6 @@
 % This is where your protocol starts
 %***************************************************************************
 
-%***************************************************************************
-% remove the following lines from your own protocol file!
-%***************************************************************************
-
-{\bf Note:} This template is provided to show you how Latex works and may
-not contain all subsections your protocol should contain.
-
 
 %***************************************************************************
 \section{Overview}
@@ -109,31 +102,233 @@ PORTC & external Pulldown enabled on PC0,3-5,7 \\
 J12 & Connected to VCC \\
 \eConnections
 
-Write down all things we need to know to get your program running on our board. All non-standard external connections, all switches your program needs, \dots
-If we cannot figure out how we get your program running, we can not give you points for it.
-
+All other peripherals are connected as described in the specification.
 
 %---------------------------------------------------------------------------
 \subsection{Design Decisions}
 %---------------------------------------------------------------------------
 
-Here comes the design decisions that you made during programming.
+\begin{itemize}
+
+
+ \item Performance considerations in the WT41 HAL module
+ 
+ This module requires high performance from the receive routines. Therefore,
+ implement ISR's directly in the module to avoid function pointer indirection.
+ Reenable interrupts in ISR's as early and often as possible. Focus on avoiding
+ overhead in the ringbuffer implementation instead of safety and modularity.
+ Let one 'thread' to process the ringbuffer contents while simultaneously
+ allowing new data to be written into the ringbuffer.
+ 
+ The transmit portions are much less critical.
+ 
+ 
+ \item Performance considerations in the ringbuffer implementation
+ 
+ At first, the ringbuffer was implemented as a separate module. When this
+ proved to be too slow, it was reimplemented as a part of the WT41 HAL module.
+ 
+ To discern empty and full states, we never fill the entire buffer. Therefore,
+ \_rb\_write == \_rb\_read is an empty buffer, and \_rb\_wrte == \_rb\_read - 1 a full buffer.
+ 
+ Read and write markers are integers marking the position in the array of the 
+ next read and write.
+ 
+ The ringbuffer size is a $2^n$ to allow for very efficient bit tricks for manipulating
+ ringbuffer markers.
+
+ 
+ \item GLCD drawing routines
+ 
+ The high level drawing routines use the standard Gresenham algorithms for line and circle
+ drawing. These avoid floating point math and are therefore very efficient for
+ microcontroller usage. Rectangles are drawn using the line drawing function.
+ 
+ 
+ \item Abstracting over GLCD chips
+ 
+ The next read / write (x, y) coordinate is stored within the GLCD HAL module and kept
+ up to date by the read and write functions. The correct chip and position is used
+ automatically. When end of line is reached, the next position is (0, y+1). When end of line
+ of the last line is reached, the next position is (0, 0).
+ 
+ For simplicity, always communicate with either chip 0 or chip 1, never both. This way,
+ we can use the same simple function interface for all communications.
+ 
+ 
+ \item Ensuring GLCD and LCD timings
+ 
+ Exact timings are achieved by writing the section in C, disassembling it, and inserting \_NOP()
+ calls as required. Calculate a single cycle as 62.5 ns.
+ 
+ Timings in the GLCD datasheet are more or less exact, while LCD timings sometimes seem to have
+ no relation to reality.
+ 
+ 
+ \item Text display
+ 
+ Text display has been implemented using the LCD, simply because that part was available for home
+ development and testing. 
+ 
+ 
+ \item Game mechanics
+ 
+ A very simple model has been chosen for ball movement: when hitting a surface, the ball
+ is reflected with the same out- as incoming angle. If the paddle is hit, add/subtract a little
+ from y-velocity depending on the hit location.
+ 
+ Paddle collision detection is also very basic. At every processing step, we know the current and next
+ $(x, y)$ coordinates. If either $x < 0$ (left of the table) or $x > \mathit{table_width}$ (right of the
+ table), check whether a part of the paddle is located between $y_{cur}$ and $y_{next}$. 
+ If yes, then a collision has occurred.
+ 
+ 
+ \item Game control
+ 
+ The game is controlled by pressing the up and down buttons on the wiimote. This was chosen
+ over accelerometer control, because \textellipsis well, because motion control sucks. Keep it simple!
+ 
+ 
+ \item Interface design
+ 
+ We stick to a very basic interface. There are only a couple of things we want to know:
+ Which controllers are connected? What's the score? Where are the paddles? Where is the ball?
+ 
+ The former are displayed on the LCD, and the latter on the GLCD. 
+ 
+ The GLCD displays only the paddles and the ball. Less drawing means better performance.
+ 
+ 
+ \item Generic setup routines
+ 
+ Generic setup routines are available for some hardware modules such as timers, UART,
+ and the ADC. These help encapsulate low level access and keep accesses from other modules clean,
+ simple, and easy to read. Options are available as needed, but most of them have been
+ left out for simplicity.
+ 
+ 
+ \item Debug output
+ 
+ Debugging is absolutely necessary when programming. We can't use a debugger (since we don't
+ have access to one), but we can at least enable debugging by printf's. To do this, set up a simple
+ UART stream for stdout and stderr. Busy waiting is used for UART transmissions, but the functionality
+ can be disabled entirely using compile time flags.
+ 
+ 
+ \item Timer calculation
+ 
+ Again, keep it simple by using a fixed prescaler factor of 1024, and only allow a limited range
+ of time settings.
+ 
+ 
+ \item MP3 playback
+ 
+ Playback is only started when a point has been scored. There is no game in progress while playing the MP3,
+ so we can transmit data as fast as we can until the entire sound has been played without slowing
+ down progress. In fact, it turns out that the MP3 delay feels just right between scoring and resetting
+ the board.
+ 
+ 
+ \item Scheduler
+ 
+ The scheduler consists of a timer interrupt triggered every 5 ms. It sets the RunLogic flag
+ and increments ticks. Some tasks are only performed every n ticks, which is achieved by
+ checking for $ticks mod n = 0$.
+ 
+ 
+ \item Error recovery
+ 
+ The only errors we can actually recover from are disconnections of wiimotes during the game.
+ If that occurs, playback is paused, and only resumed once all wiimotes are connected.
+ 
+ All other errors, such as disconnection of the bluetooth module, can cause the program to abort.
+ 
+ 
+ \item ADC
+ 
+ Every 50 ticks (250 ms), an ADC conversion is started. There is no point to check for volume changes
+ more often. Also, changes in value less then ADC\_SMOOTHING are ignored to avoid constant volume changes
+ because of cheap hardware.
+ 
+ 
+ \item Wiimote connection handling
+ 
+ Only a single wiimote connection can be established at a time. Handle connections by using the 
+ wii\_connection\_change callback. On every timeout of wiiUserConnect, the callback is executed.
+ On every (dis)connection, the callback is executed. So, all we need to do is check during the callback
+ if any wiimotes are still disconnected, and if yes, try to connect to the next one.
+ 
+ If all are connected, the game is set to GameRunning. Otherwise, the game is set to GamePaused. If
+ the current state is PointScored, defer all state changes.
+ 
+ 
+\end{itemize}
+
 
 %---------------------------------------------------------------------------
 \subsection{Specialities}
 %---------------------------------------------------------------------------
 
-Does you solution have something special (positive or negative)?
+\begin{itemize}
+ \item  The visual representation of the board is very basic and could be much better looking. After spending
+many hours on the drivers and other internals during vacation without tutor help, I didn't have much
+energy remaining for extras.
+
+ \item The driver implementation seems to be fairly clean and readable.
+ 
+ \item Debugging is simplified by using a UART stream. 
+ 
+ \item The UART bluetooth implementation is fast, yet simple.
+ 
+\end{itemize}
+
+
+
+%---------------------------------------------------------------------------
+\subsection{API Documentation}
+%---------------------------------------------------------------------------
+
+The API is documented using Doxygen, and can be generated by running make doc.
+It is then located in doc/html and doc/latex.
 
 
 %***************************************************************************
 \section{Main Application}
 %***************************************************************************
 
-Describe your application.
+The main application is controlled by a state machine consisting of the states 
+GamePaused, GameRunning, and PointScored.
 
 
+The startup state is GamePaused. In this state, nothing is drawn to the GLCD,
+game logic is paused, and connections are attempted.
+If both wiimotes are connected,
+the state is changed to GameRunning.
 
+In GameRunning, game logic is run, and the board is drawn to the LCD.
+If a wiimote is disconnected, go back to GamePaused.
+If a point is scored, enter PointScored.
+
+In PointScored, an MP3 sound is sent to the MP3 module. No game logic
+is run, nothing is drawn to the GLCD.
+Once the MP3 is finished playing, either go back to GameRunning
+if both wiimotes are still connected,
+or to GamePaused if a wiimote has disconnected.
+
+Once all initializations have been completed, the main loop is entered.
+It consists of several background tasks which are executed depending on 
+flags and the current state. A description of all tasks follows.
+
+At least once every 5 ms, the logic tasks are enabled. These are executed only in 
+the game running state and contain: input handling, game logic, and game rendering.
+Of these, game logic is only executed every 20th tick (this is responsible for game
+pace).
+
+In the PointScored state, MP3 data transmission is handled in task\_mp3().
+
+Every 50th tick, a new ADC conversion is started.
+
+Finally, ADC results are processed whenever one is waiting.
 
 
 %***************************************************************************
@@ -144,48 +339,121 @@ Describe your application.
 \subsection{SPI}
 %---------------------------------------------------------------------------
 
-Explain your modules.
+The SPI implementation consists of the two required functions spiReceive,
+spiSend, and initial setup in spi\_init. Busy waiting is used as allowed
+by the specification.
 
 %---------------------------------------------------------------------------
 \subsection{Playback}
 %---------------------------------------------------------------------------
 
+Whenever a point is scored, a single MP3 sound is sent to the MP3 module.
 
+This is achieved by continually reading a block from the SDCard and sending
+it to the MP3 module until mp3Busy() returns true. When the MP3 module
+requests more data the MP3DataRequested flag is set, and during the next main
+loop iteration data transfer to the MP3 module continues.
+
+Once the entire sound has been transferred, the state machine is switched back
+to the GameRunning state.
+
+The MP3DataRequested is ignored while the state machine is not in the
+PointScored state.
+
+This implementation avoids all complexities of handling MP3 data transfer
+while other background tasks are running by dedicating the state PointScored
+entirely to MP3 playback. It also feels natural to freeze the display for
+a few moments after scoring points, so this works out very well.
 
 %***************************************************************************
 \section{WT41 HAL}
 %***************************************************************************
 
+The WT41HAL module handles low level communications with the bluetooth module.
 
+Since transmission occurs at a very high rate and not keeping up with
+transmitted packets results in communication failure, performance is the
+main focus in this module.
+
+During initialization, the bluetooth module is reset. This is handled by
+Timer3, which is set to 5ms. UART3 is initialized once the bluetooth module
+has been reset. Other initialization tasks are handled in the actual 
+halWT41FcUartInit() function.
+
+In addition to halWT41FcUartInit(), halWt41FcUartSend is provided for use by
+libwii. 
+
+Communication with the bluetooth module takes place as follows:
+
+\begin{itemize}
+ \item Transmit
+
+ The next byte to be transmitted is kept in a buffer locally.
+ 
+ Whenever the UART data register is empty, meaning we are ready to send a 
+ byte of data to module, we send the buffered byte, disable the data register
+ empty interrupt, and call the provided callback to let libwii know we are ready
+ for more data. If RTS is set, use a pin change interrupt to wait for RTS to be
+ unset before continuing the transmission.
+ 
+ When libwii calls halWT41FcUartSend, the passed byte is buffered locally, and
+ the data register empty interrupt is reenabled.
+ 
+ \item Receive
+ 
+ Performance is critical in this section. Therefore, the receive done interrupt
+ service routine is implemented directly in the WT41 HAL module instead of relying
+ on function pointer indirection as all others do. We also reenable interrupts
+ as early and often as possible within this ISR.
+ 
+ When a byte has been received, first check whether there are more than CTS\_HIGH
+ byte free in our ringbuffer. If not, trigger flow control.
+ 
+ Next, store the byte into the buffer. If we are already busy processing the bytes
+ from the buffer, exit.
+ 
+ Otherwise, take bytes from the buffer one by one, and call the provided libwii 
+ callback. During this section, interrupts are enabled to allow new bytes to
+ be put into the buffer.
+ 
+ Once all bytes have been processed, exit.
+ 
+\end{itemize}
 
 
 %***************************************************************************
-\section{LC--Display}
+\section{LC-Display}
 %***************************************************************************
 
 %---------------------------------------------------------------------------
 \subsection{GLCD}
 %---------------------------------------------------------------------------
 
-Explain your modules.
+The GLCD implementation uses functions provided by the GLCD HAL to
+draw on the GLCD. Lines, rectangles, and circles are all achieved using
+Bresenham's algorithm without having to resort to floating point operations.
 
 %---------------------------------------------------------------------------
 \subsection{HAL GLCD}
 %---------------------------------------------------------------------------
 
+The GLCD HAL is responsible for low level tasks such as initializing the
+GLCD chips, setting addresses, and sending/receiving commands and display
+data. Busy waiting is used to ensure that the chips are ready to receive
+commands as specified.
+
+Communications with the chips are always either with chip 0 or chip 1,
+not both. This results in a slower fill screen operation, but simplifies
+the code.
+
 %---------------------------------------------------------------------------
-\subsection{Text Mode}
+\subsection{LCD}
 %---------------------------------------------------------------------------
 
+The LCD HAL is responsible for low level tasks such as initializing the
+LCD chips, setting addresses, and sending/receiving commands and display
+data.
 
-
-%***************************************************************************
-\section{...explain your application modules ...}
-%***************************************************************************
-
-%***************************************************************************
-\section{...the above were only examples}
-%***************************************************************************
 
 
 
@@ -193,26 +461,46 @@ Explain your modules.
 \section{Problems}
 %***************************************************************************
 
-Put all problems you encountered into this section. This is important
-information, which allows us to determine where there are problems.
-(Don't worry, we don't take points.)
+I encountered \emph{many} problems while working on avr-pong. Many of them
+were due to bad / insufficient / incorrect documentation. Some of them
+were caused by my own inexperience with microcontroller programming. Yet others
+were bugs that could turn up in any programming project.
+
+The first large hurdle was initializing the GLCD and displaying something on the
+screen. I spent around half a day wondering why it wouldn't work until figuring
+out that the RST pin was low active, and I'd been meticulously ensuring it 
+was always 0.
+
+Another issue with the GLCD was the undocumented necessity of double reads for
+correct data. No thanks to the available datasheets.
+
+The next issue I ran into was a (nonstatic) struct conflict the linker didn't warn
+me about (even with -Wall -Wextra -pedantic). This resulted in a flag being set
+in the main state struct which controlled when certain tasks would be executed.
+Very hard to track down.
+
+Bluetooth comms debugging also took a fair amount of time, especially due to having insufficient debug output. However, after optimizing the ringbuffer and interrupt, there was enough performance to avoid overruns.
+
+The LCD timings again seemed to be very poorly and incorrectly documented. Occasionally, I had to use over 50x the specified amount. Also, the setup of 4 bit mode was not described sufficiently.
+
+In general, programming it home and subsequently testing at the lab didn't work
+out well. I always spent more time debugging and fixing things at the lab
+than it would've taken to develop it all at the lab from the start.
 
 
 %***************************************************************************
 \section{Work}
 %***************************************************************************
 
-Estimate the work you put into solving the Application.
-
 \begin{tabular}{|l|c|}
 \hline
-reading manuals, datasheets	& 10 h	\\
-program design			& 5 h	\\
-programming			& 10 h	\\
+reading manuals, datasheets	& 2 h	\\
+program design			& 2 h	\\
+programming			& 20 h	\\
 debugging			& 30 h	\\
 questions, protocol		& 10 h	\\
 \hline
-{\bf Total}			& 65 h	\\
+{\bf Total}			& 64 h	\\
 \hline
 \end{tabular}
 
