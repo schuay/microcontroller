@@ -3,7 +3,6 @@
 * Comment all
 * Embed doxygen output in protocol
 * Decent wiimote (dis)connection handling
-* Fix LCD or implement GLCD text mode
 * Write rest of protocol
 * Theory tasks
 * Finish handling scores

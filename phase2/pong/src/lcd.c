@@ -79,11 +79,23 @@ void lcd_init(void) {
     PORTC &= msk;
     DDRC |= ~msk;
 
-    _delay_ms(40);
+    /* Datasheet: 40ms, Tutor: 50ms. */
+    _delay_ms(50);
 
-    /* 8 bit data length. */
+    /* 8 bit data length.
+     * Needs to be sent 3 times to account for all possible states
+     * of the LCD. */
     send_nibble(FunctionSet | EXT 0b00010000);
+    _delay_us(39);
 
+    send_nibble(FunctionSet | EXT 0b00010000);
+    _delay_us(39);
+
+    send_nibble(FunctionSet | EXT 0b00010000);
+    _delay_us(39);
+
+    /* Make sure the next send is received correctly in 4 bit mode. */
+    send_nibble(FunctionSet);
     _delay_us(39);
 
     /* 4 bit data length, 2 display lines, 5x11 font type. */
@@ -130,6 +142,10 @@ static void send_nibble(uint8_t nibble) {
 
     set_bit(PORTC, E);
     PORTC = (PORTC & msk) | (nibble & ~msk);
+
+    /* Short delay (again, this isn't documented but seems to be necessary). */
+    _delay_us(1);
+
     clr_bit(PORTC, E);
 
     /* Contrary to the datasheet (?) and the comment above,
