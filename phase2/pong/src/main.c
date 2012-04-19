@@ -93,8 +93,7 @@ static void wii_leds_set(uint8_t wii,
 
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
     assert(wii < WIIMOTE_COUNT);
-    printf("wii %d connection state change: %s\n", wii,
-           status == DISCONNECTED ? "disconnected" : "connected");
+    printf_P(PSTR("wii %d connection state change: %d\n"), wii, status);
     glb.connected[wii] = status;
     if (status == DISCONNECTED) {
         /* TODO: on disconnection, try periodically to get a connection. */

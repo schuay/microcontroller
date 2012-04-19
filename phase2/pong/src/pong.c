@@ -1,3 +1,5 @@
+#include <avr/pgmspace.h>
+
 #include "uart_streams.h"
 #include <assert.h>
 #include <stdio.h>
@@ -25,7 +27,7 @@ struct pong_state_t {
 static struct pong_state_t state;
 
 void pong_print(void) {
-    printf("x: %d y: %d\n", state.x, state.y);
+    printf_P(PSTR("x: %d y: %d\n"), state.x, state.y);
 }
 
 void pong_move(uint8_t player, enum direction dir __attribute ((unused))) {

@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 
 #include "uart_streams.h"
 #include <assert.h>
@@ -111,7 +112,7 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
     PORTH |= UCSR3A;
 
     if (rb_free_slots() < CTS_HIGH) {
-        printf("rbuf full\n");
+        printf_P(PSTR("rbuf full\n"));
         set_bit(PORTJ, CTS);
     }
 
@@ -158,7 +159,7 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
  */
 static void _send_handler(void) {
     if (PORTJ & _BV(RTS)) {
-        printf("RTS ON\n");
+        printf_P(PSTR("RTS ON\n"));
         /* Disable DataRegEmptyIntr;
          * Enable pin change intr on RTS;
          * When triggered, reenable DataRegEmptyIntr; */
