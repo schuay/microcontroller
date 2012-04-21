@@ -26,7 +26,26 @@ enum task_flags {
     MP3DataRequested = 1 << 2,
 };
 
+/**
+ * The game's state machine.
+ *
+ * The startup state is GamePaused. In this state, nothing is drawn to the GLCD,
+ * game logic is paused, and connections are attempted.
+ * If both wiimotes are connected,
+ * the state is changed to GameRunning.
+ *
+ * In GameRunning, game logic is run, and the board is drawn to the LCD.
+ * If a wiimote is disconnected, go back to GamePaused.
+ * If a point is scored, enter PointScored.
+ *
+ * In PointScored, an MP3 sound is sent to the MP3 module. No game logic
+ * is run, nothing is drawn to the GLCD.
+ * Once the MP3 is finished playing, either go back to GameRunning
+ * if both wiimotes are still connected,
+ * or to GamePaused if a wiimote has disconnected.
+ */
 enum state {
+    GamePaused,
     GameRunning,
     PointScored,
 };
