@@ -83,17 +83,21 @@ void pong_draw(void) {
     glcdSetPixel(state.x + 1, state.y + 1);
 }
 
+void pong_reset(void) {
+    state.lpady = state.rpady = (state.height - 2 * state.frame_height) / 2;
+
+    /* x, y, dx, dy TODO */
+    state.x = state.y = 1;
+    state.dx = state.dy = 5;
+}
+
 void pong_init(void) {
     state.width = 128;
     state.height = 64;
     state.frame_height = 1;
     state.horizontal_pad = 10;
 
-    state.lpady = state.rpady = (state.height - 2 * state.frame_height) / 2;
-
-    /* x, y, dx, dy TODO */
-    state.x = state.y = 1;
-    state.dx = state.dy = 5;
+    pong_reset();
 }
 
 static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {

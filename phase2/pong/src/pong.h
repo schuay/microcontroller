@@ -12,6 +12,12 @@ void pong_print(void);
 void pong_init(void);
 
 /**
+ * Resets the board to initial state for next point.
+ * Resets paddle, ball positions, but does not reset scores.
+ */
+void pong_reset(void);
+
+/**
  * Performs ball movement.
  * @return Returns true if a player has scored, false otherwise.
  */
