@@ -20,6 +20,9 @@ struct pong_state_t {
     /* Ball */
     uint8_t x, y;
     int8_t dx, dy;
+
+    /* Scores */
+    uint8_t p1, p2;
 };
 
 static struct pong_state_t state;
@@ -91,6 +94,8 @@ void pong_reset(void) {
 
 void pong_init(void) {
     pong_reset();
+
+    state.p1 = state.p2 = 0;
 }
 
 static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
@@ -117,16 +122,21 @@ bool pong_ball_step(void) {
         nexty = 2 * (HEIGHT - FRAME_HEIGHT - 1) - nexty;
     }
 
+    /* At left or right edge of board. */
     if (nextx <= 0) {
         state.dx = - state.dx;
         nextx = - nextx;
         if (!_hit_paddle(state.lpady, state.y, nexty)) {
+            /* P2 scored. */
+            state.p2++;
             return true;
         }
     } else if (nextx >= WIDTH - 1) {
         state.dx = - state.dx;
         nextx = 2 * (WIDTH - 1) - nextx;
         if (!_hit_paddle(state.rpady, state.y, nexty)) {
+            /* P1 scored. */
+            state.p1++;
             return true;
         }
     }
