@@ -107,7 +107,6 @@ inline static void _rb_get(uint8_t *byte) {
  * Re-enables DataRegEmptyIntr, and disables itself.
  */
 ISR(PCINT1_vect ,ISR_BLOCK) {
-    printf_P(PSTR("RTS HI->LO\n"));
     UCSR3B |= DataRegEmptyIntrEnable;
     clr_bit(PCICR, PCIE1);
 }
@@ -123,7 +122,6 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
     PORTH |= UCSR3A;
 
     if (rb_free_slots() < CTS_HIGH) {
-        printf_P(PSTR("rbuf full\n"));
         set_bit(PORTJ, CTS);
     }
 
@@ -173,7 +171,6 @@ static void _send_handler(void) {
         /* Disable DataRegEmptyIntr;
          * Enable pin change intr on RTS;
          * When triggered, reenable DataRegEmptyIntr; */
-        printf_P(PSTR("RTS ON\n"));
         UCSR3B &= ~DataRegEmptyIntrEnable;
         set_bit(PCICR, PCIE1);
     }
