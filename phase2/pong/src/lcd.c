@@ -70,6 +70,7 @@ void lcd_putchar(char c, uint8_t row, uint8_t col) {
 
 void lcd_clear(void) {
     send_ctl(ClearDisplay);
+    _delay_us(1530);
 }
 
 void lcd_init(void) {
@@ -113,8 +114,6 @@ void lcd_init(void) {
     _delay_us(37);
 
     lcd_clear();
-
-    _delay_us(1530);
 
     /* Entry mode set, shift cursor/DDRAM right.  */
     send_ctl(EntryModeSet | EXT 0b00000010);
