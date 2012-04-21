@@ -116,7 +116,11 @@ static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
         || (miny <= pady + PADDLE_HEIGHT && maxy >= pady + PADDLE_HEIGHT)
         || (miny >= pady && maxy <= pady + PADDLE_HEIGHT);
 }
+static void _alter_velocity(uint8_t pady) {
+    state.dy += (state.y - pady - PADDLE_HEIGHT / 2) / 2;
+}
 
+#define YLIMIT (10)
 bool pong_ball_step(void) {
     assert(state.x < WIDTH);
     assert(state.y < HEIGHT);
@@ -141,6 +145,8 @@ bool pong_ball_step(void) {
             state.p2++;
             return true;
         }
+        /* Hit paddle, alter velocity. */
+        _alter_velocity(state.lpady);
     } else if (nextx >= WIDTH - 1) {
         state.dx = - state.dx;
         nextx = 2 * (WIDTH - 1) - nextx;
@@ -149,6 +155,14 @@ bool pong_ball_step(void) {
             state.p1++;
             return true;
         }
+        /* Hit paddle, alter velocity. */
+        _alter_velocity(state.rpady);
+    }
+
+    if (state.dy < -YLIMIT) {
+        state.dy = -YLIMIT;
+    } else if (state.dy > YLIMIT) {
+        state.dy = YLIMIT;
     }
 
     state.x = nextx;
