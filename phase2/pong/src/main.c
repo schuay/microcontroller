@@ -278,7 +278,8 @@ int main(void) {
     sei();
 
     printf_P(PSTR("AVR Pong starting up...\n"));
-    lcd_putstr_P(PSTR("Starting up..."), 0, 0);
+    lcd_putstr_P(PSTR("AVR Pong"), 0, 0);
+    lcd_putstr_P(PSTR("Starting up..."), 1, 0);
 
     for (;;) {
         run_tasks();
