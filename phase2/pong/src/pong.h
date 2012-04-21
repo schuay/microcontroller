@@ -23,6 +23,11 @@ void pong_reset(void);
  */
 bool pong_ball_step(void);
 
+/**
+ * Writes current scores into p1 and p2.
+ */
+void pong_scores(uint8_t *p1, uint8_t *p2);
+
 void pong_move(uint8_t player, enum direction dir);
 void pong_draw(void);
 

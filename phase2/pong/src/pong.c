@@ -98,6 +98,11 @@ void pong_init(void) {
     state.p1 = state.p2 = 0;
 }
 
+void pong_scores(uint8_t *p1, uint8_t *p2) {
+    *p1 = state.p1;
+    *p2 = state.p2;
+}
+
 static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
     uint8_t miny = (y < nexty) ? y : nexty;
     uint8_t maxy = (y < nexty) ? nexty : y;

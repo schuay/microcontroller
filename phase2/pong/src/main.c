@@ -132,6 +132,10 @@ static void draw_lcd(void) {
     if (glb.connected[1] == CONNECTED) {
         lcd_putstr_P(PSTR("P2"), 0, 14);
     }
+    uint8_t p1, p2;
+    pong_scores(&p1, &p2);
+    lcd_putchar(p1 + '0', 1, 0);
+    lcd_putchar(p2 + '0', 1, 15);
 }
 
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
