@@ -89,9 +89,11 @@ static void mp3_data_req(void) {
  * MP3 at once, and only requests the next one once it is done playing the
  * current file. The next file (if it is short enough) is sent all in one,
  * meaning this function blocks until it's all transferred. */
-#define MP3_SD_BEGIN (3265536 / 32)
-#define MP3_SD_END ((7001088 + 36864) / 32)
+#define MP3_SD_BEGIN (5821440 / 32)
+#define MP3_SD_LEN (45056 / 32)
 static void task_mp3(void) {
+    assert(glb.st == PointScored);
+
     static uint32_t ptr = MP3_SD_BEGIN;
     sdcard_block_t buf;
     do {
@@ -99,8 +101,20 @@ static void task_mp3(void) {
             printf_P(PSTR("Error receiving sdcard block\n"));
         }
         mp3SendMusic(buf);
-        if (ptr > MP3_SD_END) {
+        /* Entire sound has been sent. */
+        if (ptr == MP3_SD_BEGIN + MP3_SD_LEN) {
             ptr = MP3_SD_BEGIN;
+
+            cli();
+            if (glb.connected[0] == DISCONNECTED
+                || glb.connected[1] == DISCONNECTED) {
+                glb.st = GamePaused;
+            } else {
+                glb.st = GameRunning;
+            }
+            sei();
+
+            break;
         }
     } while (!mp3Busy());
 }
@@ -110,7 +124,7 @@ static void wii_leds_set(uint8_t wii,
     assert(wii < WIIMOTE_COUNT);
 }
 
-static void wii_display_connection_status(void) {
+static void draw_lcd(void) {
     lcd_clear();
     if (glb.connected[0] == CONNECTED) {
         lcd_putstr_P(PSTR("P1"), 0, 0);
@@ -128,15 +142,18 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
         assert(wiiUserSetLeds(wii, _BV(wii), wii_leds_set) == SUCCESS);
     }
 
-    wii_display_connection_status();
+    draw_lcd();
 
     /* If any wiimotes are still disconnected, begin another connection attempt. */
     for (uint8_t i = 0; i < WIIMOTE_COUNT; i++) {
         if (glb.connected[i] == DISCONNECTED) {
             assert(wiiUserConnect(i, wiimotes[i], wii_connection_change) == SUCCESS);
-            break;
+            return;
         }
     }
+
+    /* All wiimotes are connected. */
+    glb.st = GameRunning;
 }
 
 static void init(void) {
@@ -234,6 +251,10 @@ static void __attribute__ ((unused)) test_mode(void) {
 static void task_logic(void) {
     if (glb.ticks % 10 == 0) {
         if (pong_ball_step()) {
+            /* A point has been scored.
+             * Display score, reset board, and enter PointScored state. */
+            draw_lcd();
+            pong_reset();
             glb.st = PointScored;
             return;
         }
@@ -261,19 +282,30 @@ static void task_adc(void) {
 }
 
 static void run_tasks(void) {
-    if (glb.st == GameRunning) {
+    cli();
+    enum state st = glb.st;
+    sei();
+
+    switch (st) {
+    case GameRunning:
         cli();
         if (glb.flags & RunLogic) {
             glb.flags &= ~RunLogic;
             sei();
             task_logic();
         }
-    } else if (glb.st == PointScored) {
+        break;
+    case PointScored:
         cli();
         if (glb.flags & MP3DataRequested) {
             sei();
             task_mp3();
         }
+        break;
+    case GamePaused:
+        break;
+    default:
+        assert(0);
     }
 
     cli();
