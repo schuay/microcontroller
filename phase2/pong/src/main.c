@@ -127,6 +127,9 @@ static void draw_lcd(void) {
     if (glb.connected[1] == CONNECTED) {
         lcd_putstr_P(PSTR("P2"), 0, 14);
     }
+    if (glb.connected[0] == DISCONNECTED || glb.connected[1] == DISCONNECTED) {
+        lcd_putstr_P(PSTR("Connecting"), 0, 3);
+    }
     uint8_t p1, p2;
     pong_scores(&p1, &p2);
     lcd_putchar(p1 + '0', 1, 0);
