@@ -55,7 +55,7 @@ static volatile struct {
     uint8_t ticks;
     uint16_t adc_result;
     uint8_t volume;
-    uint16_t buttons;
+    uint16_t buttons[WIIMOTE_COUNT];
     connection_status_t connected[WIIMOTE_COUNT];
     enum state st;
 } glb;
@@ -72,7 +72,7 @@ static void adc_done(uint16_t result) {
 
 static void rcvButton(uint8_t wii, uint16_t button_states) {
     printf_P(PSTR("Received button %d %d\n"), wii, button_states);
-    glb.buttons = button_states;
+    glb.buttons[wii] = button_states;
 }
 
 static void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
@@ -259,11 +259,13 @@ static void task_logic(void) {
             return;
         }
     }
-    if (glb.buttons & BtnUp) {
-        pong_move(0, Up);
-    }
-    if (glb.buttons & BtnDown) {
-        pong_move(0, Down);
+    for (uint8_t i = 0; i < WIIMOTE_COUNT; i++) {
+        if (glb.buttons[i] & BtnUp) {
+            pong_move(i, Up);
+        }
+        if (glb.buttons[i] & BtnDown) {
+            pong_move(i, Down);
+        }
     }
     if (glb.ticks % 5 == 0) {
         pong_draw();
