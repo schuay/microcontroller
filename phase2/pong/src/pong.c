@@ -88,9 +88,10 @@ void pong_draw(void) {
 void pong_reset(void) {
     state.lpady = state.rpady = (HEIGHT - 2 * FRAME_HEIGHT) / 2;
 
-    /* x, y, dx, dy TODO */
-    state.x = state.y = 1;
-    state.dx = state.dy = 5;
+    state.x = 1;
+    state.y = state.lpady + PADDLE_HEIGHT / 2;
+    state.dx = 5;
+    state.dy = 0;
 }
 
 void pong_init(void) {
