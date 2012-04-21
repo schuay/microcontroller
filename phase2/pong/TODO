@@ -2,7 +2,6 @@
 * Constants in PMEM
 * Comment all
 * Embed doxygen output in protocol
-* Decent wiimote (dis)connection handling
 * Write rest of protocol
 * Theory tasks
 * Finish handling scores

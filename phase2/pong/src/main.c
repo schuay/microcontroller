@@ -95,11 +95,17 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
     assert(wii < WIIMOTE_COUNT);
     printf_P(PSTR("wii %d connection state change: %d\n"), wii, status);
     glb.connected[wii] = status;
-    if (status == DISCONNECTED) {
-        /* TODO: on disconnection, try periodically to get a connection. */
-        return;
+    if (status == CONNECTED) {
+        assert(wiiUserSetLeds(wii, 0x01, wii_leds_set) == SUCCESS);
     }
-    assert(wiiUserSetLeds(wii, 0x01, wii_leds_set) == SUCCESS);
+
+    /* If any wiimotes are still disconnected, begin another connection attempt. */
+    for (uint8_t i = 0; i < WIIMOTE_COUNT; i++) {
+        if (glb.connected[i] == DISCONNECTED) {
+            assert(wiiUserConnect(i, wiimotes[i], wii_connection_change) == SUCCESS);
+            break;
+        }
+    }
 }
 
 static void init(void) {
