@@ -249,7 +249,7 @@ static void __attribute__ ((unused)) test_mode(void) {
 }
 
 static void task_logic(void) {
-    if (glb.ticks % 10 == 0) {
+    if (glb.ticks % 20 == 0) {
         if (pong_ball_step()) {
             /* A point has been scored.
              * Display score, reset board, and enter PointScored state. */
