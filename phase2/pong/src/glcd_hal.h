@@ -1,8 +1,21 @@
 #include <stdint.h>
 
+/**
+ * @file glcd_hal.h
+ *
+ * Low level handling of GLCD tasks.
+ */
+
+/** The total GLCD width (both chips). */
 #define WIDTH (128)
+
+/** The total GLCD height. */
 #define HEIGHT (64)
+
+/** The vertical number of pixels per line / block. */
 #define PX_PER_LINE (8)
+
+/** The horizontal number of pixels per chip. */
 #define PX_PER_CHIP (64)
 
 /**

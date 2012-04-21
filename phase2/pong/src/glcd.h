@@ -2,6 +2,12 @@
 #define GLCD_H
 
 /**
+ * @file glcd.h
+ *
+ * Handles all interaction with the GLCD.
+ */
+
+/**
  * Represents an unsigned 8bit point.
  */
 typedef struct xy_point_t
@@ -10,9 +16,8 @@ typedef struct xy_point_t
 } xy_point;
 
 /**
- * Handles all interaction with the GLCD.
+ * Represents a draw function, for example glcdSetPixel.
  */
-
 typedef void (*draw_fn)(const uint8_t, const uint8_t);
 
 /**

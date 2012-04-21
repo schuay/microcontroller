@@ -3,12 +3,25 @@
 
 #include <stdbool.h>
 
+/**
+ * @file pong.h
+ *
+ * Keeps track of and handles game state.
+ */
+
+/**
+ * Paddle movement directions.
+ */
 enum direction {
     Up,
     Down,
 };
 
 void pong_print(void);
+
+/**
+ * Initializes the game state for a new game.
+ */
 void pong_init(void);
 
 /**
@@ -33,7 +46,14 @@ void pong_scores(uint8_t *p1, uint8_t *p2);
  */
 bool pong_game_over(void);
 
+/**
+ * Moves the paddle belonging to player in direction dir.
+ */
 void pong_move(uint8_t player, enum direction dir);
+
+/**
+ * Draws the current state to the GLCD.
+ */
 void pong_draw(void);
 
 #endif /* PONG_H */

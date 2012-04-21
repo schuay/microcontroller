@@ -18,8 +18,18 @@
 #include "wiimotes.h"
 #include "bt_hal.h"
 
+/**
+ * @file main.c
+ *
+ * The glue between drivers and game logic.
+ * Handles high level tasks such as managing wiimote connections,
+ * the game state machine, running the main loop including background tasks, etc.
+ */
+
+/** The maximum count of connected wiimotes. */
 #define WIIMOTE_COUNT (2)
 
+/** Flags which are used to control task execution during the main loop. */
 enum task_flags {
     RunLogic = 1 << 0,
     ADCWaiting = 1 << 1,
@@ -50,39 +60,65 @@ enum state {
     PointScored,
 };
 
+/**
+ * This struct stores basically everything that is needed
+ * for high level game execution.
+ */
 static volatile struct {
-    uint8_t flags;
-    uint8_t ticks;
-    uint16_t adc_result;
-    uint8_t volume;
-    uint16_t buttons[WIIMOTE_COUNT];
-    connection_status_t connected[WIIMOTE_COUNT];
-    enum state st;
+    uint8_t flags; /**< Controls which tasks are executed during the main
+                        loop. */
+    uint8_t ticks; /**< Keeps track of how many ticks have passed. Some tasks
+                        are only executed once every n ticks. */
+    uint16_t adc_result; /**< The result of the latest ADC conversion. */
+    uint8_t volume; /**< The current volume. */
+    uint16_t buttons[WIIMOTE_COUNT]; /**< The status of wiimote buttons. */
+    connection_status_t connected[WIIMOTE_COUNT]; /**< The wiimote connection
+                                                       state. */
+    enum state st; /**< Current state of our state machine. */
 } glb;
 
+/**
+ * Our basic 'scheduler'. The main loop is executed (at least)
+ * once per tick. The game logic is executed exactly once per tick.
+ */
 static void tick(void) {
     glb.flags |= RunLogic;
     glb.ticks++;
 }
 
+/**
+ * Receives and stores ADC conversion results.
+ */
 static void adc_done(uint16_t result) {
     glb.adc_result = result;
     glb.flags |= ADCWaiting;
 }
 
+/**
+ * Receives and stores changes to the wii button states.
+ */
 static void rcvButton(uint8_t wii, uint16_t button_states) {
     printf_P(PSTR("Received button %d %d\n"), wii, button_states);
     glb.buttons[wii] = button_states;
 }
 
+/**
+ * Receives and stores changes to the wii accelerometer states.
+ */
 static void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
     printf_P(PSTR("Received accel %d %d %d %d\n"), wii, x, y, z);
 }
 
+/**
+ * Called when the MP3 module requests more data.
+ */
 static void mp3_data_req(void) {
     glb.flags |= MP3DataRequested;
 }
 
+/**
+ * Draws connected players and current scores to the LCD.
+ */
 static void draw_lcd(void) {
     lcd_clear();
     if (glb.connected[0] == CONNECTED) {
@@ -98,7 +134,11 @@ static void draw_lcd(void) {
 }
 
 /**
- * Called when MP3 module requests new data.
+ * Sends data to the MP3 module as long as it is ready for it,
+ * and the MP3 has not been fully transmitted.
+ * On completed transfers, switches the state back to GameRunning or
+ * GamePaused.
+ *
  * From observation, it looks like the module requests an entire
  * MP3 at once, and only requests the next one once it is done playing the
  * current file. The next file (if it is short enough) is sent all in one,
@@ -135,11 +175,24 @@ static void task_mp3(void) {
     } while (!mp3Busy());
 }
 
+/**
+ * Callback for reporting completion of setting wiimote leds.
+ */
 static void wii_leds_set(uint8_t wii,
                          error_t status __attribute__ ((unused))) {
     assert(wii < WIIMOTE_COUNT);
 }
 
+/**
+ * Callback for any changes in wiimote connection state.
+ *
+ * If a connection has been established, requests setting of appropriate led
+ * state.
+ * Updates the status shown on the LCD.
+ * Manages state according to whether all wiimotes are connected.
+ * Starts a new wiimote connection attempt as long as not all wiimotes
+ * are connected.
+ */
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
     assert(wii < WIIMOTE_COUNT);
     printf_P(PSTR("wii %d connection state change: %d\n"), wii, status);
@@ -162,6 +215,9 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
     glb.st = GameRunning;
 }
 
+/**
+ * Initializes all required subsystems.
+ */
 static void init(void) {
     sleep_enable();
     uart_streams_init();
@@ -187,6 +243,10 @@ static void init(void) {
     memset((void *)&glb, 0, sizeof(glb));
 }
 
+/**
+ * Runs a GLCD demo routine to test
+ * drawing of pixels and lines.
+ */
 static void __attribute__ ((unused)) test_mode(void) {
     static int mode = 3;
     static int x = 0;
@@ -254,6 +314,9 @@ static void __attribute__ ((unused)) test_mode(void) {
     }
 }
 
+/**
+ * Handles game movement, user input and game logic.
+ */
 static void task_logic(void) {
     if (glb.ticks % 20 == 0) {
         if (pong_ball_step()) {
@@ -282,6 +345,10 @@ static void task_logic(void) {
     }
 }
 
+/**
+ * Sets the volume to the scaled ADC result if it has changed
+ * at least ADC_SMOOTHING from the previous value.
+ */
 #define ADC_UPPER (1023)
 #define ADC_SMOOTHING (20)
 static void task_adc(void) {
@@ -293,6 +360,9 @@ static void task_adc(void) {
     }
 }
 
+/**
+ * Container of all tasks. Executed once per main loop iteration.
+ */
 static void run_tasks(void) {
     cli();
     enum state st = glb.st;

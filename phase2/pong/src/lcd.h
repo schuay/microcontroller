@@ -2,6 +2,12 @@
 #define LCD_H
 
 /**
+ * @file lcd.h
+ *
+ * Responsible for the 16x2 LCD.
+ */
+
+/**
  * Initializes the 16x2 character LCD to
  * 4 bit data length, 2 display lines, 5x11 font.
  * The display is enabled, cleared, and the cursor

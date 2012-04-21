@@ -11,14 +11,29 @@
 #include "uart_streams.h"
 #include <assert.h>
 
+/** Converts pixel coordinates to the corresponding page. */
 #define PAGE(x, y) (y / PX_PER_LINE)
-#define CHIP(x, y) (CS1 - x / PX_PER_CHIP)
-#define ADDR(x, y) (x % PX_PER_CHIP)
-#define EXT __extension__
-#define PORTE_MSK (EXT 0b10000011) /* NOTE: RST is also masked.
-                                      It's low active and should never be
-                                      touched. */
 
+/**
+ * Converts pixel coordinates to the corresponding chip.
+ * Note the reverse logic here: (0,0) returns CS1.
+ * This is because the chip is ORed bitwise into the command packet,
+ * and chip selects are LOW active.
+ */
+#define CHIP(x, y) (CS1 - x / PX_PER_CHIP)
+
+/** Converts pixel coordinates to the position within a block. */
+#define ADDR(x, y) (x % PX_PER_CHIP)
+
+/** Utility macro since __extension__ is looong. */
+#define EXT __extension__
+
+/**
+ * Zeroes represent the bits we can touch.
+ * NOTE: RST is also masked. It's low active and should never be touched. */
+#define PORTE_MSK (EXT 0b10000011)
+
+/** The last read / write position. */
 static struct {
     uint8_t x, y;
 } glb;

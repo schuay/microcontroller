@@ -45,6 +45,7 @@ bool timer_set(const struct timer_conf *conf) {
     return true;
 }
 
+/** Timer compare interrupt service routine. */
 ISR(TIMER1_COMPA_vect, ISR_BLOCK) {
     if (timerN_once[Timer1]) {
         clr_bit(*TIMSKn[Timer1], OCIE1A);
@@ -52,6 +53,7 @@ ISR(TIMER1_COMPA_vect, ISR_BLOCK) {
     ocieNa_handler[Timer1]();
 }
 
+/** Timer compare interrupt service routine. */
 ISR(TIMER3_COMPA_vect, ISR_BLOCK) {
     if (timerN_once[Timer3]) {
         clr_bit(*TIMSKn[Timer3], OCIE1A);
@@ -59,6 +61,7 @@ ISR(TIMER3_COMPA_vect, ISR_BLOCK) {
     ocieNa_handler[Timer3]();
 }
 
+/** Timer compare interrupt service routine. */
 ISR(TIMER4_COMPA_vect, ISR_BLOCK) {
     if (timerN_once[Timer4]) {
         clr_bit(*TIMSKn[Timer4], OCIE1A);
@@ -66,6 +69,7 @@ ISR(TIMER4_COMPA_vect, ISR_BLOCK) {
     ocieNa_handler[Timer4]();
 }
 
+/** Timer compare interrupt service routine. */
 ISR(TIMER5_COMPA_vect, ISR_BLOCK) {
     if (timerN_once[Timer5]) {
         clr_bit(*TIMSKn[Timer5], OCIE1A);

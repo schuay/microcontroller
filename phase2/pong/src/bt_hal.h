@@ -31,6 +31,10 @@ enum buttons {
  *        and then processed with interrupts enabled.
  */
 error_t halWT41FcUartInit(intr_handler_t sndCallback, recv_handler_t rcvCallback);
+
+/**
+ * Sends byte to the bluetooth module.
+ */
 error_t halWT41FcUartSend(uint8_t byte);
 
 #endif /* BT_HAL_H */

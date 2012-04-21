@@ -9,8 +9,15 @@
  * set to VCC for ADC to work.
  */
 
+/**
+ * The callback tpe used for reporting ADC results.
+ */
 typedef void (*adc_conv_cmpl_handler_t)(uint16_t);
 
+/**
+ * The ADC configuration struct.
+ * conf_cmpl_handler is called when results are available.
+ */
 struct adc_conf {
     adc_conv_cmpl_handler_t conv_cmpl_handler;
 };

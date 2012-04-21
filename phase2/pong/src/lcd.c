@@ -40,7 +40,10 @@ enum LCDInstructions {
     SetDDRAMAddr = 1 << 7,
 };
 
+/** The width of the LCD in characters. */
 #define COLS (16)
+
+/** The height of the LCD in characters. */
 #define ROWS (2)
 
 static void send_ctl(uint8_t cmd);
@@ -121,17 +124,25 @@ void lcd_init(void) {
     send_ctl(EntryModeSet | EXT 0b00000010);
 }
 
+/**
+ * Sends data to the LCD's display RAM.
+ */
 static void send_data(uint8_t data) {
     set_bit(PORTC, RS);
     send_byte(data);
 }
 
+/**
+ * Sends cmd to the LCD.
+ */
 static void send_ctl(uint8_t cmd) {
     clr_bit(PORTC, RS);
     send_byte(cmd);
 }
 
-/* Sends upper nibble. */
+/**
+ * Sends upper nibble.
+ */
 static void send_nibble(uint8_t nibble) {
     const uint8_t msk = 0x0F;
 
@@ -156,6 +167,9 @@ static void send_nibble(uint8_t nibble) {
     _delay_us(50);
 }
 
+/**
+ * Sends first the lower, then the upper nibble.
+ */
 static void send_byte(uint8_t packet) {
     send_nibble(packet);
     send_nibble(packet << 4);

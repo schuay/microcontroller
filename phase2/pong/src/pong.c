@@ -109,6 +109,12 @@ bool pong_game_over(void) {
     return state.p1 == MAX_POINTS || state.p2 == MAX_POINTS;
 }
 
+/**
+ * Returns true if the paddle was hit.
+ * @param pady The position of the paddle.
+ * @param y The current position of the ball.
+ * @param nexty The next position of the ball.
+ */
 static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
     uint8_t miny = (y < nexty) ? y : nexty;
     uint8_t maxy = (y < nexty) ? nexty : y;
@@ -117,6 +123,10 @@ static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
         || (miny <= pady + PADDLE_HEIGHT && maxy >= pady + PADDLE_HEIGHT)
         || (miny >= pady && maxy <= pady + PADDLE_HEIGHT);
 }
+
+/**
+ * Alters ball velocity depending on where the paddle was struck.
+ */
 static void _alter_velocity(uint8_t pady) {
     state.dy += (state.y - pady - PADDLE_HEIGHT / 2) / 2;
 }

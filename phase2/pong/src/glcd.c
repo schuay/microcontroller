@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -8,6 +9,10 @@
 #include "uart_streams.h"
 #include <assert.h>
 
+/**
+ * Converts pixel coordinates to the pixel representation
+ * within its block.
+ */
 #define PIXL(x, y) _BV(y % PX_PER_LINE)
 
 void glcdInit(void) {
@@ -15,6 +20,9 @@ void glcdInit(void) {
     glcdFillScreen(0x00);
 }
 
+/**
+ * Swaps the values of x and y.
+ */
 #define SWAP(x, y) do { uint8_t tmp = x; x = y; y = tmp; } while (false);
 
 /**

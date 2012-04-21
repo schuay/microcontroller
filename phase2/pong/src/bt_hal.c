@@ -36,7 +36,7 @@ static intr_handler_t _send_callback;
 static bool _processing = false;
 
 /** The ringbuffer size.
- * Must be 2^n (we exploit that in _rb_put and _rb_get.
+ * Must be 2^n (we exploit that in _rb_put and _rb_get).
  */
 #define RB_SIZE (128) /* Must be 2^n */
 
