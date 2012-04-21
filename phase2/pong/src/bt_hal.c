@@ -102,6 +102,17 @@ inline static void _rb_get(uint8_t *byte) {
 #define CTS_LOW (RB_SIZE / 2)
 
 /**
+ * The pin change interrupt responsible for watching
+ * for RTS changes from HIGH to LOW.
+ * Re-enables DataRegEmptyIntr, and disables itself.
+ */
+ISR(PCINT1_vect ,ISR_BLOCK) {
+    printf_P(PSTR("RTS HI->LO\n"));
+    UCSR3B |= DataRegEmptyIntrEnable;
+    clr_bit(PCICR, PCIE1);
+}
+
+/**
  * The UART 3 receive complete interrupt handler.
  * For efficiency, implement it in here instead of the default
  * generic handlers in uart.c to avoid losing time.
@@ -159,10 +170,12 @@ ISR(USART3_RX_vect, ISR_BLOCK) {
  */
 static void _send_handler(void) {
     if (PORTJ & _BV(RTS)) {
-        printf_P(PSTR("RTS ON\n"));
         /* Disable DataRegEmptyIntr;
          * Enable pin change intr on RTS;
          * When triggered, reenable DataRegEmptyIntr; */
+        printf_P(PSTR("RTS ON\n"));
+        UCSR3B &= ~DataRegEmptyIntrEnable;
+        set_bit(PCICR, PCIE1);
     }
 
     /* Actually send the requested byte.
@@ -218,6 +231,9 @@ error_t halWT41FcUartInit(intr_handler_t sndCallback,
      * Configure CTS and RST as output and set both to LOW. */
     PORTJ &= ~(_BV(CTS) | _BV(RST)); 
     DDRJ = (DDRJ | _BV(CTS) | _BV(RST)) & ~_BV(RTS);
+
+    /* Set up (but don't enable) the pin change interrupt on RTS. */
+    set_bit(PCMSK1, PCINT11);
 
     /* Pull RST low for 5ms to reset bluetooth module. */
     struct timer_conf tc = { Timer3, true, 5, _bt_continue_init };

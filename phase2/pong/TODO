@@ -1,4 +1,3 @@
-* Pin change interrupt (UART flow ctl)
 * Constants in PMEM
 * Comment all
 * Embed doxygen output in protocol
