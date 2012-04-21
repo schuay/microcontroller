@@ -17,8 +17,9 @@ void lcd_putchar(char c, uint8_t row, uint8_t col);
 /**
  * Prints s to (row, col) char by char,
  * until either '\0' in s or the EOL is reached.
+ * s is located in program space.
  */
-void lcd_putstr(const char *s, uint8_t row, uint8_t col);
+void lcd_putstr_P(const char *s, uint8_t row, uint8_t col);
 
 /**
  * Clears the display.

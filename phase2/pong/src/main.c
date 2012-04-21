@@ -94,10 +94,10 @@ static void wii_leds_set(uint8_t wii,
 static void wii_display_connection_status(void) {
     lcd_clear();
     if (glb.connected[0] == CONNECTED) {
-        lcd_putstr("P1", 0, 0);
+        lcd_putstr_P(PSTR("P1"), 0, 0);
     }
     if (glb.connected[1] == CONNECTED) {
-        lcd_putstr("P2", 0, 14);
+        lcd_putstr_P(PSTR("P2"), 0, 14);
     }
 }
 
@@ -278,7 +278,7 @@ int main(void) {
     sei();
 
     printf_P(PSTR("AVR Pong starting up...\n"));
-    lcd_putstr("Starting up...", 0, 0);
+    lcd_putstr_P(PSTR("Starting up..."), 0, 0);
 
     for (;;) {
         run_tasks();

@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 
 #include "common.h"
 #include <util/delay.h>
@@ -47,16 +48,17 @@ static void send_data(uint8_t data);
 static void send_byte(uint8_t packet);
 static void send_nibble(uint8_t nibble);
 
-void lcd_putstr(const char *s, uint8_t row, uint8_t col) {
+void lcd_putstr_P(const char *s, uint8_t row, uint8_t col) {
     assert(s != NULL);
     for (uint8_t i = 0; ; i++) {
-        if (s[i] == '\0') {
+        char c = pgm_read_byte(s + i);
+        if (c == '\0') {
             return;
         }
         if (col + i >= COLS) {
             return;
         }
-        lcd_putchar(s[i], row, col + i);
+        lcd_putchar(c, row, col + i);
     }
 }
 
