@@ -28,6 +28,11 @@ bool pong_ball_step(void);
  */
 void pong_scores(uint8_t *p1, uint8_t *p2);
 
+/**
+ * Returns true if either player has reached enough points to win the game.
+ */
+bool pong_game_over(void);
+
 void pong_move(uint8_t player, enum direction dir);
 void pong_draw(void);
 

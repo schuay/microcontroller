@@ -83,6 +83,20 @@ static void mp3_data_req(void) {
     glb.flags |= MP3DataRequested;
 }
 
+static void draw_lcd(void) {
+    lcd_clear();
+    if (glb.connected[0] == CONNECTED) {
+        lcd_putstr_P(PSTR("P1"), 0, 0);
+    }
+    if (glb.connected[1] == CONNECTED) {
+        lcd_putstr_P(PSTR("P2"), 0, 14);
+    }
+    uint8_t p1, p2;
+    pong_scores(&p1, &p2);
+    lcd_putchar(p1 + '0', 1, 0);
+    lcd_putchar(p2 + '0', 1, 15);
+}
+
 /**
  * Called when MP3 module requests new data.
  * From observation, it looks like the module requests an entire
@@ -114,6 +128,8 @@ static void task_mp3(void) {
             }
             sei();
 
+            draw_lcd();
+
             break;
         }
     } while (!mp3Busy());
@@ -122,20 +138,6 @@ static void task_mp3(void) {
 static void wii_leds_set(uint8_t wii,
                          error_t status __attribute__ ((unused))) {
     assert(wii < WIIMOTE_COUNT);
-}
-
-static void draw_lcd(void) {
-    lcd_clear();
-    if (glb.connected[0] == CONNECTED) {
-        lcd_putstr_P(PSTR("P1"), 0, 0);
-    }
-    if (glb.connected[1] == CONNECTED) {
-        lcd_putstr_P(PSTR("P2"), 0, 14);
-    }
-    uint8_t p1, p2;
-    pong_scores(&p1, &p2);
-    lcd_putchar(p1 + '0', 1, 0);
-    lcd_putchar(p2 + '0', 1, 15);
 }
 
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
@@ -258,7 +260,11 @@ static void task_logic(void) {
             /* A point has been scored.
              * Display score, reset board, and enter PointScored state. */
             draw_lcd();
-            pong_reset();
+            if (pong_game_over()) {
+                pong_init();
+            } else {
+                pong_reset();
+            }
             glb.st = PointScored;
             return;
         }

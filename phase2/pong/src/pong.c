@@ -12,6 +12,7 @@
 #define HEIGHT (64)
 #define FRAME_HEIGHT (1)
 #define PADDLE_HEIGHT (10)
+#define MAX_POINTS (5)
 
 struct pong_state_t {
     /* Paddles */
@@ -101,6 +102,10 @@ void pong_init(void) {
 void pong_scores(uint8_t *p1, uint8_t *p2) {
     *p1 = state.p1;
     *p2 = state.p2;
+}
+
+bool pong_game_over(void) {
+    return state.p1 == MAX_POINTS || state.p2 == MAX_POINTS;
 }
 
 static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
