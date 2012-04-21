@@ -91,6 +91,16 @@ static void wii_leds_set(uint8_t wii,
     assert(wii < WIIMOTE_COUNT);
 }
 
+static void wii_display_connection_status(void) {
+    lcd_clear();
+    if (glb.connected[0] == CONNECTED) {
+        lcd_putstr("P1", 0, 0);
+    }
+    if (glb.connected[1] == CONNECTED) {
+        lcd_putstr("P2", 0, 14);
+    }
+}
+
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
     assert(wii < WIIMOTE_COUNT);
     printf_P(PSTR("wii %d connection state change: %d\n"), wii, status);
@@ -98,6 +108,8 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
     if (status == CONNECTED) {
         assert(wiiUserSetLeds(wii, 0x01, wii_leds_set) == SUCCESS);
     }
+
+    wii_display_connection_status();
 
     /* If any wiimotes are still disconnected, begin another connection attempt. */
     for (uint8_t i = 0; i < WIIMOTE_COUNT; i++) {
@@ -266,6 +278,7 @@ int main(void) {
     sei();
 
     printf_P(PSTR("AVR Pong starting up...\n"));
+    lcd_putstr("Starting up...", 0, 0);
 
     for (;;) {
         run_tasks();
