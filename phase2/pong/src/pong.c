@@ -8,14 +8,12 @@
 #include "glcd_hal.h"
 #include "pong.h"
 
+#define WIDTH (128)
+#define HEIGHT (64)
+#define FRAME_HEIGHT (1)
 #define PADDLE_HEIGHT (10)
 
 struct pong_state_t {
-    /* Field */
-    uint8_t width, height;  /* Board dimensions, including: */
-    uint8_t frame_height;   /*  the height of the frame at the top and bottom, and */
-    uint8_t horizontal_pad; /*  the area behind the paddle. */
-
     /* Paddles */
     uint8_t lpady, rpady;
 
@@ -84,7 +82,7 @@ void pong_draw(void) {
 }
 
 void pong_reset(void) {
-    state.lpady = state.rpady = (state.height - 2 * state.frame_height) / 2;
+    state.lpady = state.rpady = (HEIGHT - 2 * FRAME_HEIGHT) / 2;
 
     /* x, y, dx, dy TODO */
     state.x = state.y = 1;
@@ -92,11 +90,6 @@ void pong_reset(void) {
 }
 
 void pong_init(void) {
-    state.width = 128;
-    state.height = 64;
-    state.frame_height = 1;
-    state.horizontal_pad = 10;
-
     pong_reset();
 }
 
@@ -110,18 +103,18 @@ static bool _hit_paddle(uint8_t pady, uint8_t y, uint8_t nexty) {
 }
 
 bool pong_ball_step(void) {
-    assert(state.x < state.width);
-    assert(state.y < state.height);
+    assert(state.x < WIDTH);
+    assert(state.y < HEIGHT);
 
     int16_t nextx = state.x + state.dx;
     int16_t nexty = state.y + state.dy;
 
-    if (nexty <= 0 + state.frame_height) {
+    if (nexty <= 0 + FRAME_HEIGHT) {
         state.dy = - state.dy;
-        nexty = state.frame_height - nexty;
-    } else if (nexty >= state.height - state.frame_height - 1) {
+        nexty = FRAME_HEIGHT - nexty;
+    } else if (nexty >= HEIGHT - FRAME_HEIGHT - 1) {
         state.dy = - state.dy;
-        nexty = 2 * (state.height - state.frame_height - 1) - nexty;
+        nexty = 2 * (HEIGHT - FRAME_HEIGHT - 1) - nexty;
     }
 
     if (nextx <= 0) {
@@ -130,9 +123,9 @@ bool pong_ball_step(void) {
         if (!_hit_paddle(state.lpady, state.y, nexty)) {
             return true;
         }
-    } else if (nextx >= state.width - 1) {
+    } else if (nextx >= WIDTH - 1) {
         state.dx = - state.dx;
-        nextx = 2 * (state.width - 1) - nextx;
+        nextx = 2 * (WIDTH - 1) - nextx;
         if (!_hit_paddle(state.rpady, state.y, nexty)) {
             return true;
         }
