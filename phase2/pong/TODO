@@ -4,9 +4,3 @@
 * Embed doxygen output in protocol
 * Write rest of protocol
 * Theory tasks
-* Finish handling scores
-    * Display current score
-    * Play sound
-    * Reset board
-    * Start new match
-* Handle game over
