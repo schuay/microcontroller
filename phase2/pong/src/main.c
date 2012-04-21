@@ -106,7 +106,7 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
     printf_P(PSTR("wii %d connection state change: %d\n"), wii, status);
     glb.connected[wii] = status;
     if (status == CONNECTED) {
-        assert(wiiUserSetLeds(wii, 0x01, wii_leds_set) == SUCCESS);
+        assert(wiiUserSetLeds(wii, _BV(wii), wii_leds_set) == SUCCESS);
     }
 
     wii_display_connection_status();
