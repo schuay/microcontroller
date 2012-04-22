@@ -622,6 +622,34 @@ For each natural number~$n$ give an initial position and initial
      initial direction again (the game gets periodic). Prove that your solution is a majorizing series.
 }
 
+%***************************************************************************
+% Theory task 2
+%***************************************************************************
+
+A path determined by an initial position and velocity can be visualized by imagining an
+endless row of tables next to each other. The top and bottom borders reflect the ball
+as expected, while left and right borders allow the ball to pass through.
+When imagining all odd tables (table 1, 3, ...) as mirrored along the vertical axis,
+this represents the full path.
+
+We can further reduce this representation by fixing the initial position at $p = (0,0)$, the x velocity $dx > 0$,
+and the y velocity $dy = 1$. The produced path is a triangle wave with a period of $2 * dx$. Contacts with the bottom and top
+borders occur every $dx$ units. The original position and velocity is reached when a contact point occurs at $4 * n$.
+
+Since we know the period of the wave $2 * dx$ and the position of returns to the original position $4 * n$, it is now easy to
+determine the number of traversed tables by using the least common multiple
+
+\begin{displaymath}
+    \mathit{traversed} = lcm(2 * dx, 4) = lcm(dx, 2)
+\end{displaymath}
+
+For simplicity, let's ignore contacts with upper and lower borders and only count horizontal contacts.
+Then, $\mathit{traversed} = \mathit{contacts}$. We can use this as a lower bound for the number of border hits.
+
+Now, if we assume $dx = n$, $\mathit{contacts} = lcm(n, 2) \geq n$, from which follows:
+
+For each natural number $n$, table borders will be hit at least $n$ times before teaching the initial position and initial velocity again, if
+the initial position is $p = (0, 0)$ and the initial velocity is $v = (n, 1)$.
 
 \QuText{
 \textbf{[2 Points] Pong vs.\ Billiard aperiodic gaming:}
@@ -629,6 +657,10 @@ Give an initial position and initial direction of the ball such that
      the ball will never reach the initial position again.
 Formally prove that your solution is correct.
 }
+
+%***************************************************************************
+% Theory task 3
+%***************************************************************************
 
 
 
