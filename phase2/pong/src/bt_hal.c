@@ -107,8 +107,8 @@ inline static void _rb_get(uint8_t *byte) {
  * Re-enables DataRegEmptyIntr, and disables itself.
  */
 ISR(PCINT1_vect ,ISR_BLOCK) {
-    UCSR3B |= DataRegEmptyIntrEnable;
     clr_bit(PCICR, PCIE1);
+    UCSR3B |= DataRegEmptyIntrEnable;
 }
 
 /**
@@ -173,6 +173,7 @@ static void _send_handler(void) {
          * When triggered, reenable DataRegEmptyIntr; */
         UCSR3B &= ~DataRegEmptyIntrEnable;
         set_bit(PCICR, PCIE1);
+        return;
     }
 
     /* Actually send the requested byte.
