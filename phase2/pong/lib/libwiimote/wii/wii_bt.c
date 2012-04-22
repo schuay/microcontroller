@@ -206,7 +206,7 @@ static void receive_connection_response(uint8_t wii, uint8_t src, uint16_t dst)
 			return;
 		}
 	} while (0);
-	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 
 static void receive_configuration_request(uint8_t wii, uint8_t src)
@@ -234,7 +234,7 @@ static void receive_configuration_request(uint8_t wii, uint8_t src)
 		}
 	}
 	else {
-		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+		debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 	}
 }
 
@@ -263,7 +263,7 @@ static void receive_configuration_response(uint8_t wii, uint8_t src)
 		}
 	}
 	else {
-		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+		debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 	}
 }
 
@@ -296,7 +296,7 @@ static void receive_disconnection_request(uint8_t wii, uint8_t dst, uint16_t src
 			return;
 		}
 	} while (0);
-	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 */
 
@@ -371,5 +371,5 @@ void hci_receive(uint8_t wii, uint8_t length, const uint8_t data[])
 			return;
 		}
 	} while (0);
-	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }

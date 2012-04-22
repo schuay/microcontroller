@@ -7,6 +7,7 @@
 #include "glcd.h"
 #include "glcd_hal.h"
 #include "pong.h"
+#include "common.h"
 
 #define WIDTH (128)
 #define HEIGHT (64)
@@ -29,7 +30,7 @@ struct pong_state_t {
 static struct pong_state_t state;
 
 void pong_print(void) {
-    printf_P(PSTR("x: %d y: %d\n"), state.x, state.y);
+    debug(PSTR("x: %d y: %d\n"), state.x, state.y);
 }
 
 void pong_move(uint8_t player, enum direction dir __attribute ((unused))) {

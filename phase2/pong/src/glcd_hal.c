@@ -231,7 +231,7 @@ static void _glcd_busy_wait(uint8_t chip) {
        }
        _delay_us(2);
     }
-    fprintf_P(stderr, PSTR("GLCD busy wait timed out, last status: %d.\n"), status);
+    debug(PSTR("GLCD busy wait timed out, last status: %d.\n"), status);
 }
 
 /**

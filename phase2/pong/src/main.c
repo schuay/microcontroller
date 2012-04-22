@@ -98,15 +98,18 @@ static void adc_done(uint16_t result) {
  * Receives and stores changes to the wii button states.
  */
 static void rcvButton(uint8_t wii, uint16_t button_states) {
-    printf_P(PSTR("Received button %d %d\n"), wii, button_states);
+    debug(PSTR("Received button %d %d\n"), wii, button_states);
     glb.buttons[wii] = button_states;
 }
 
 /**
  * Receives and stores changes to the wii accelerometer states.
  */
-static void rcvAccel(uint8_t wii, uint16_t x, uint16_t y, uint16_t z) {
-    printf_P(PSTR("Received accel %d %d %d %d\n"), wii, x, y, z);
+static void rcvAccel(uint8_t wii __attribute__ ((unused)),
+        uint16_t x __attribute__ ((unused)),
+        uint16_t y __attribute__ ((unused)),
+        uint16_t z __attribute__ ((unused))) {
+    debug(PSTR("Received accel %d %d %d %d\n"), wii, x, y, z);
 }
 
 /**
@@ -155,7 +158,7 @@ static void task_mp3(void) {
     sdcard_block_t buf;
     do {
         if (sdcardReadBlock(ptr++, buf) != SUCCESS) {
-            printf_P(PSTR("Error receiving sdcard block\n"));
+            debug(PSTR("Error receiving sdcard block\n"));
         }
         mp3SendMusic(buf);
         /* Entire sound has been sent. */
@@ -198,7 +201,7 @@ static void wii_leds_set(uint8_t wii,
  */
 static void wii_connection_change(uint8_t wii, connection_status_t status) {
     assert(wii < WIIMOTE_COUNT);
-    printf_P(PSTR("wii %d connection state change: %d\n"), wii, status);
+    debug(PSTR("wii %d connection state change: %d\n"), wii, status);
     glb.connected[wii] = status;
     if (status == CONNECTED) {
         assert(wiiUserSetLeds(wii, _BV(wii), wii_leds_set) == SUCCESS);
@@ -359,7 +362,7 @@ static void task_adc(void) {
     if (abs(vol - glb.volume) > ADC_SMOOTHING) {
         mp3SetVolume(vol);
         glb.volume = vol;
-        printf_P(PSTR("Volume: %d\n"), vol);
+        debug(PSTR("Volume: %d\n"), vol);
     }
 }
 
@@ -413,7 +416,7 @@ int main(void) {
     init();
     sei();
 
-    printf_P(PSTR("AVR Pong starting up...\n"));
+    debug(PSTR("AVR Pong starting up...\n"));
     lcd_putstr_P(PSTR("AVR Pong"), 0, 0);
     lcd_putstr_P(PSTR("Starting up..."), 1, 0);
 

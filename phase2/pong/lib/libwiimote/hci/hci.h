@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <util.h>
 
+#ifdef DEBUG
+#define debug(...) do { printf_P(__VA_ARGS__); } while(0);
+#else
+#define debug(...) do {} while(0);
+#endif
+
 #define CONNECTION_STATUS_T
 
 typedef enum {

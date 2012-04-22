@@ -45,7 +45,7 @@ static void rcvCallback(uint8_t wii, uint8_t length, const uint8_t data[])
 		if (data[1] == 0x31)
 		{
 			if (length != 7) {
-				printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+				debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 			}
 			if (_rcvAccel)
 			{
@@ -60,7 +60,7 @@ static void rcvCallback(uint8_t wii, uint8_t length, const uint8_t data[])
 			if (data[1] != 0x30)
 				return;
 			if (length != 4) {
-				printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+				debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 			}
 		}
 		if (_rcvButton)

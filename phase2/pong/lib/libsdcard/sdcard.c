@@ -4,7 +4,7 @@
 
 #ifdef DEBUG
 #include "printf.h"
-#define debug(...) printf(__VA_ARGS__)
+#define debug(...) printf_P(__VA_ARGS__)
 #else
 #define debug(...) do{}while(0);
 #endif
@@ -49,7 +49,7 @@ error_t sdcardInit() {
 
 	err = command(reset, &byte);
 	if (err != SUCCESS) {
-		debug("reset failed\n");
+		debug(PSTR("reset failed\n"));
 		goto error;
 	}
 
@@ -57,26 +57,26 @@ error_t sdcardInit() {
 	do {
 		err = command(app, &byte);
 		if (err != SUCCESS) {
-			debug("app failed\n");
+			debug(PSTR("app failed\n"));
 			goto error;
 		}
 		err = command(sendOpCond, &byte);
 		if (err != SUCCESS) {
-			debug("sendOpCond failed\n");
+			debug(PSTR("sendOpCond failed\n"));
 			goto error;
 		}
 		timeout--;
 	} while (byte != 0 && timeout > 0);
 
 	if (timeout == 0) {
-		debug("init failed\n");
+		debug(PSTR("init failed\n"));
 		err = E_TIMEOUT;
 		goto error;
 	}
 
 	err = command(setBlocklen, &byte);
 	if (err != SUCCESS) {
-		debug("setBlocklen failed\n");
+		debug(PSTR("setBlocklen failed\n"));
 	}
 
 error:
@@ -106,13 +106,13 @@ error_t sdcardReadBlock(uint32_t blockAddress, sdcard_block_t buffer) {
 
 	err = command(read, &byte);
 	if (err != SUCCESS) {
-		debug("read failed\n");
+		debug(PSTR("read failed\n"));
 		goto error;
 	}
 
 	err = waitOnNot(254);
 	if (err != SUCCESS) {
-		debug("wait on data failed\n");
+		debug(PSTR("wait on data failed\n"));
 		goto error;
 	}
 

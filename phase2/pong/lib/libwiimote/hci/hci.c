@@ -68,7 +68,7 @@ error_t hci_create_connection(uint8_t wii, const uint8_t address[])
 {
 #ifndef NDEBUG
 	if (__builtin_expect(wii >= WII || !address, 0)) {
-		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+		debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 	}
 #endif
 	ATOMIC_BLOCK(ATOMIC_FORCEON)
@@ -87,7 +87,7 @@ error_t hci_transmit(uint8_t wii, uint8_t length, const uint8_t data[])
 {
 #ifndef NDEBUG
 	if (__builtin_expect(wii >= WII || length > 27, 0)) {
-		printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+		debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 	}
 #endif
 	uint16_t handle;
@@ -196,7 +196,7 @@ static void event(uint8_t code, uint8_t length, const uint8_t parameters[])
 			for (uint8_t index = 0; index < count; index++)
 			{
 				if (parameters[3 + index * 4] != 1 || parameters[4 + index * 4]) {
-					printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+					debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 				}
 				union { uint8_t byte[2]; uint16_t word; } handle =
 					{ { parameters[1 + index * 4], parameters[2 + index * 4] } };
@@ -205,13 +205,13 @@ static void event(uint8_t code, uint8_t length, const uint8_t parameters[])
 					if (handle.word != _handle[wii])
 						continue;
 					if (!_packet[wii]) {
-						printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+						debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 					}
 					buffer_t *next, *last;
 					ATOMIC_BLOCK(ATOMIC_FORCEON)
 						next = _data[wii].next, last = _last;
 					if (next || &_data[wii] == last) {
-						printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+						debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 					}
 					_packet[wii] = false;
 					hci_number_of_completed_packets(wii);
@@ -220,7 +220,7 @@ static void event(uint8_t code, uint8_t length, const uint8_t parameters[])
 			return;
 		}
 	} while (0);
-	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 
 static void rcvCallback(uint8_t value)
@@ -307,7 +307,7 @@ static void rcvCallback(uint8_t value)
 		}
 		return;
 	} while (0);
-	printf_P(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
+	debug(PSTR("abort at %s:%d\n"), __FILE__, __LINE__); abort();
 }
 
 error_t hci_init(void)
