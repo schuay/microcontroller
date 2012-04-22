@@ -116,4 +116,36 @@ void glcdDrawCircle(const xy_point c, const uint8_t radius, draw_fn drawPx) {
     xy_point p1 = { c.x - radius, c.y - radius };
     xy_point p2 = { c.x + radius, c.y + radius };
     glcdDrawRect(p1, p2, drawPx);
+
+    int16_t f = 1 - radius;
+    uint16_t ddF_x = 1;
+    int16_t ddF_y = -2 * radius;
+    uint8_t x = 0;
+    uint8_t y = radius;
+
+    drawPx(c.x, c.y + radius);
+    drawPx(c.x, c.y - radius);
+    drawPx(c.x + radius, c.y);
+    drawPx(c.x - radius, c.y);
+
+    while(x < y)
+    {
+        if(f >= 0) 
+        {
+            y--;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x++;
+        ddF_x += 2;
+        f += ddF_x;    
+        drawPx(c.x + x, c.y + y);
+        drawPx(c.x - x, c.y + y);
+        drawPx(c.x + x, c.y - y);
+        drawPx(c.x - x, c.y - y);
+        drawPx(c.x + y, c.y + x);
+        drawPx(c.x - y, c.y + x);
+        drawPx(c.x + y, c.y - x);
+        drawPx(c.x - y, c.y - x);
+    }
 }
