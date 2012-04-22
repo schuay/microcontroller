@@ -529,6 +529,10 @@ Additionally calculate the upper bound for the following values: $\mathit{BAUD}=
 \end{enumerate}
 }
 
+%***************************************************************************
+% Theory task 1.1
+%***************************************************************************
+
 A 8N1 UART frame consists of 1 start bit, 8 data bits, and 1 stop bit = 10 bits.
 Thus, a transmission of $DG_{length}$ uses exactly
 
@@ -553,12 +557,39 @@ bytes to avoid triggering the flow control. Therefore, the upper bound for the
 callback function is
 
 \begin{displaymath}
-    t_{CB} = \frac{T_{time}}{DG_{length} - \mathit{Buffersize} + 1} = \frac{10 * DG_{length}}{\mathit{BAUD} * (DG_{length} - \mathit{Buffersize} + 1)}
+    t_{CB} = \frac{T_{time}}{DG_{length} - \mathit{Buffersize} + 1}
+           = \frac{10 * DG_{length}}{\mathit{BAUD} * (DG_{length} - \mathit{Buffersize} + 1)}
 \end{displaymath}
 
 
-For $\mathit{BAUD}=10^{6}bit/sec$, $\mathit{Buffersize}=49Byte$, and $DG_{length}=64Byte$, $t_{CB} = 4 * 10^{-5}$ seconds, or 40 $\mu$s.
+For $\mathit{BAUD}=10^{6}bit/sec$, $\mathit{Buffersize}=49Byte$, and
+$DG_{length}=64Byte$, $t_{CB} = 4 * 10^{-5}$ seconds, or 40 $\mu$s.
 
+%***************************************************************************
+% Theory task 1.2
+%***************************************************************************
+
+Now, assuming that such transmission occur regularly every $P_{DG}$ seconds,
+the callback needs to be short enough to handle a single transmission without
+overflow, and process an entire transmission in $P_{DG}$ seconds to avoid long
+term overflows.
+
+To process an entire transmission in $P_{DG}$ seconds, a callback needs to
+take at most
+
+\begin{displaymath}
+    \frac{P_{DG}}{DG_{length}}
+\end{displaymath}
+
+seconds.
+
+This, to fulfill both conditions, the upper bound for a callback is
+
+\begin{displaymath}
+    t_{CB}' = min(t_{CB}, \frac{P_{DG}}{DG_{length}})
+\end{displaymath}
+
+For $P_{DG}=2.5*10^{-3}s$ and the other values as in task 1.2, $t_{CB}' = 39.0625 * 10^{-6}$ seconds.
 
 \QuText{
 \textbf{[1 Point] Pong vs.\ Billiard warmup:}
