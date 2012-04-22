@@ -210,15 +210,21 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
     draw_lcd();
 
     /* If any wiimotes are still disconnected, begin another connection attempt. */
+    enum state st = GameRunning;
     for (uint8_t i = 0; i < WIIMOTE_COUNT; i++) {
         if (glb.connected[i] == DISCONNECTED) {
             assert(wiiUserConnect(i, wiimotes[i], wii_connection_change) == SUCCESS);
-            return;
+            st = GamePaused;
+            break;
         }
     }
 
-    /* All wiimotes are connected. */
-    glb.st = GameRunning;
+    /* MP3 playback, connection state is checked when done. */
+    if (glb.st == PointScored) {
+        return;
+    }
+
+    glb.st = st;
 }
 
 /**
