@@ -53,6 +53,7 @@ void pong_move(uint8_t player, enum direction dir);
 
 /**
  * Draws the current state to the GLCD.
+ * Uses difference drawing to save processing time.
  */
 void pong_draw(void);
 

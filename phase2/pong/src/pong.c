@@ -16,15 +16,26 @@
 #define MAX_POINTS (5)
 
 struct pong_state_t {
-    /* Paddles */
+    /* Paddle positions. */
     uint8_t lpady, rpady;
 
-    /* Ball */
+    /* Paddle positions at last rendering pass. */
+    uint8_t _lpady, _rpady;
+
+    /* Ball position. */
     uint8_t x, y;
+
+    /* Ball position at last rendering pass. */
+    uint8_t _x, _y;
+
+    /* Ball velocity. */
     int8_t dx, dy;
 
-    /* Scores */
+    /* Scores. */
     uint8_t p1, p2;
+
+    /* true if the screen should be cleared before rendering. */
+    bool clrscr;
 };
 
 static struct pong_state_t state;
@@ -67,23 +78,71 @@ void pong_move(uint8_t player, enum direction dir __attribute ((unused))) {
 }
 
 void pong_draw(void) {
-    /* Clear screen. */
-    glcdFillScreen(0x00);
+    /* Run all tasks? */
+    bool all = false;
 
-    xy_point padlt = { 0, state.lpady },
-             padlb = { 0, state.lpady + PADDLE_HEIGHT },
-             padrt = { WIDTH - 1, state.rpady },
-             padrb = { WIDTH - 1, state.rpady + PADDLE_HEIGHT };
+    /* Clear screen if requested. */
+    if (state.clrscr) {
+        glcdFillScreen(0x00);
+        state.clrscr = false;
+        all = true;
+    }
 
-    /* Draw paddles. */
-    glcdDrawLine(padlt, padlb, glcdSetPixel);
-    glcdDrawLine(padrt, padrb, glcdSetPixel);
+    /* Draw paddles if positions have changed. */
+    if (all || state._lpady != state.lpady) {
+        xy_point _padlt = { 0, state._lpady },
+                 _padlb = { 0, state._lpady + PADDLE_HEIGHT };
 
-    /* Draw ball. */
-    glcdSetPixel(state.x, state.y);
-    glcdSetPixel(state.x + 1, state.y);
-    glcdSetPixel(state.x, state.y + 1);
-    glcdSetPixel(state.x + 1, state.y + 1);
+        /* Clear previous paddles. */
+        glcdDrawLine(_padlt, _padlb, glcdClearPixel);
+
+        xy_point padlt = { 0, state.lpady },
+                 padlb = { 0, state.lpady + PADDLE_HEIGHT };
+
+        /* Draw paddles. */
+        glcdDrawLine(padlt, padlb, glcdSetPixel);
+
+        state._lpady = state.lpady;
+    }
+
+    if (all || state._rpady != state.rpady) {
+        xy_point _padrt = { WIDTH - 1, state._rpady },
+                 _padrb = { WIDTH - 1, state._rpady + PADDLE_HEIGHT };
+
+        /* Clear previous paddles. */
+        glcdDrawLine(_padrt, _padrb, glcdClearPixel);
+
+        xy_point padrt = { WIDTH - 1, state.rpady },
+                 padrb = { WIDTH - 1, state.rpady + PADDLE_HEIGHT };
+
+        /* Draw paddles. */
+        glcdDrawLine(padrt, padrb, glcdSetPixel);
+
+        state._rpady = state.rpady;
+    }
+
+    /* Draw ball if position has changed. */
+    if (all || state._x != state.x || state._y != state.y) {
+        /* Clear previous ball, but make sure not to mess with rendered
+         * paddles. */
+        if (state._x > 0 && state._x < WIDTH - 1) {
+            glcdClearPixel(state._x, state._y);
+            glcdClearPixel(state._x, state._y + 1);
+        }
+        if (state._x + 1 > 0 && state._x + 1 < WIDTH - 1) {
+            glcdClearPixel(state._x + 1, state._y);
+            glcdClearPixel(state._x + 1, state._y + 1);
+        }
+
+        /* Draw ball. */
+        glcdSetPixel(state.x, state.y);
+        glcdSetPixel(state.x + 1, state.y);
+        glcdSetPixel(state.x, state.y + 1);
+        glcdSetPixel(state.x + 1, state.y + 1);
+
+        state._x = state.x;
+        state._y = state.y;
+    }
 }
 
 void pong_reset(void) {
@@ -93,6 +152,8 @@ void pong_reset(void) {
     state.y = state.lpady + PADDLE_HEIGHT / 2;
     state.dx = 5;
     state.dy = 0;
+
+    state.clrscr = true;
 }
 
 void pong_init(void) {

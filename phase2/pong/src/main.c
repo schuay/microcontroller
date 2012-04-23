@@ -352,7 +352,7 @@ static void task_logic(void) {
             pong_move(i, Down);
         }
     }
-    if (glb.ticks % 5 == 0) {
+    if (glb.ticks % 3 == 0) {
         pong_draw();
     }
 }
