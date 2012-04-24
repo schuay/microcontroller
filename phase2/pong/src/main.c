@@ -344,15 +344,15 @@ static void task_logic(void) {
             return;
         }
     }
-    for (uint8_t i = 0; i < WIIMOTE_COUNT; i++) {
-        if (glb.buttons[i] & BtnUp) {
-            pong_move(i, Up);
-        }
-        if (glb.buttons[i] & BtnDown) {
-            pong_move(i, Down);
-        }
-    }
     if (glb.ticks % 3 == 0) {
+        for (uint8_t i = 0; i < WIIMOTE_COUNT; i++) {
+            if (glb.buttons[i] & BtnUp) {
+                pong_move(i, Up);
+            }
+            if (glb.buttons[i] & BtnDown) {
+                pong_move(i, Down);
+            }
+        }
         pong_draw();
     }
 }
