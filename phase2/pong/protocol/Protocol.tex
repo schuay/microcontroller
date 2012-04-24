@@ -24,6 +24,7 @@
 \usepackage[latin1]{inputenc}    % fuer Umlaute
 \usepackage{amssymb,amsmath,amsthm}
 \usepackage[usenames,dvipsnames]{color}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 
 \definecolor{Brown}{cmyk}{0,0.81,1,0.60}
 \definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
@@ -155,6 +156,9 @@ All other peripherals are connected as described in the specification.
  The high level drawing routines use the standard Gresenham algorithms for line and circle
  drawing. These avoid floating point math and are therefore very efficient for
  microcontroller usage. Rectangles are drawn using the line drawing function.
+
+ See \url{http://en.wikipedia.org/wiki/Bresenham's_line_algorithm} and
+ \url{http://en.wikipedia.org/wiki/Midpoint_circle_algorithm}.
  
  
  \item Abstracting over GLCD chips
