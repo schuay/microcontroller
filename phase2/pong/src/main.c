@@ -97,7 +97,7 @@ static void adc_done(uint16_t result) {
 /**
  * Receives and stores changes to the wii button states.
  */
-static void rcvButton(uint8_t wii, uint16_t button_states) {
+static void rcv_button(uint8_t wii, uint16_t button_states) {
     debug(PSTR("Received button %d %d\n"), wii, button_states);
     glb.buttons[wii] = button_states;
 }
@@ -105,7 +105,7 @@ static void rcvButton(uint8_t wii, uint16_t button_states) {
 /**
  * Receives and stores changes to the wii accelerometer states.
  */
-static void rcvAccel(uint8_t wii __attribute__ ((unused)),
+static void rcv_accel(uint8_t wii __attribute__ ((unused)),
         uint16_t x __attribute__ ((unused)),
         uint16_t y __attribute__ ((unused)),
         uint16_t z __attribute__ ((unused))) {
@@ -241,7 +241,7 @@ static void init(void) {
     mp3Init(mp3_data_req);
     mp3SetVolume(0);
 
-    error_t ret = wiiUserInit(rcvButton, rcvAccel);
+    error_t ret = wiiUserInit(rcv_button, rcv_accel);
     assert(ret == SUCCESS);
     ret = wiiUserConnect(0, wiimotes[0], wii_connection_change);
     assert(ret == SUCCESS);
