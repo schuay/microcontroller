@@ -306,22 +306,23 @@ static void task_adc(void) {
  */
 static void run_tasks(void) {
     cli();
+    /* Get current state. */
     enum state st = glb.st;
+    uint8_t flags = glb.flags;
+    uint8_t ticks = glb.ticks;
+
+    /* Clear flags for next loop iteration. */
+    glb.flags = 0x00;
     sei();
 
     switch (st) {
     case GameRunning:
-        cli();
-        if (glb.flags & RunLogic) {
-            glb.flags &= ~RunLogic;
-            sei();
+        if (flags & RunLogic) {
             task_logic();
         }
         break;
     case PointScored:
-        cli();
-        if (glb.flags & MP3DataRequested) {
-            sei();
+        if (flags & MP3DataRequested) {
             task_mp3();
         }
         break;
@@ -331,20 +332,13 @@ static void run_tasks(void) {
         assert(0);
     }
 
-    cli();
-    if (glb.ticks % 50 == 0) {
-        sei();
+    if (ticks % 50 == 0) {
         adc_start_conversion();
     }
 
-    cli();
-    if (glb.flags & ADCWaiting) {
-        glb.flags &= ~ADCWaiting;
-        sei();
+    if (flags & ADCWaiting) {
         task_adc();
     }
-
-    sei();
 }
 
 int main(void) {
