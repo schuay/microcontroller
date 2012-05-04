@@ -74,8 +74,11 @@ void lcd_putchar(char c, uint8_t row, uint8_t col) {
 }
 
 void lcd_clear(void) {
-    send_ctl(ClearDisplay);
-    _delay_us(1530);
+    for (uint8_t y = 0; y < ROWS; y++) {
+        for (uint8_t x = 0; x < COLS; x++) {
+            lcd_putchar(' ', y, x);
+        }
+    }
 }
 
 void lcd_init(void) {
