@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 
 #include "timer.h"
 #include "common.h"
@@ -13,6 +14,8 @@
 
 static volatile uint8_t *TCCRnB[] =
     { &TCCR1B, &TCCR3B, &TCCR4B, &TCCR5B };
+static volatile uint8_t *TIFRn[] =
+    { &TIFR1, &TIFR3, &TIFR4, &TIFR5 };
 static volatile uint8_t *TIMSKn[] =
     { &TIMSK1, &TIMSK3, &TIMSK4, &TIMSK5 };
 static volatile uint16_t *OCRnA[] =
@@ -30,9 +33,12 @@ bool timer_set(const struct timer_conf *conf) {
     timerN_once[n] = conf->once;
     ocieNa_handler[n] = conf->output_cmp_handler;
 
-    /* Enable interrupts. */
+    /* Enable interrupts, clearing any intr flags first. */
     if (conf->output_cmp_handler != NULL) {
-        set_bit(*TIMSKn[n], OCIE1A);
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+            set_bit(*TIFRn[n], OCF1A);
+            set_bit(*TIMSKn[n], OCIE1A);
+        }
     }
 
     /* Prescaler, CTC mode */
