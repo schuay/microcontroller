@@ -233,7 +233,6 @@ static void wii_connection_change(uint8_t wii, connection_status_t status) {
 static void init(void) {
     sleep_enable();
     uart_streams_init();
-    lcd_init();
     glcdInit();
     pong_init();
     spi_init();
@@ -253,6 +252,10 @@ static void init(void) {
     timer_set(&conf);
 
     memset((void *)&glb, 0, sizeof(glb));
+
+    sei();
+
+    lcd_init();
 }
 
 /**
@@ -343,7 +346,6 @@ static void run_tasks(void) {
 
 int main(void) {
     init();
-    sei();
 
     debug(PSTR("AVR Pong starting up...\n"));
     lcd_putstr_P(PSTR("AVR Pong"), 0, 0);

@@ -12,6 +12,7 @@
  * 4 bit data length, 2 display lines, 5x11 font.
  * The display is enabled, cleared, and the cursor
  * is set to the top left corner.
+ * Interrupts must be enabled.
  */
 void lcd_init(void);
 

@@ -1,10 +1,12 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
+#include <avr/sleep.h>
 
 #include "common.h"
 #include <util/delay.h>
 
 #include "lcd.h"
+#include "timer.h"
 
 #include "uart_streams.h"
 #include <assert.h>
@@ -81,6 +83,11 @@ void lcd_clear(void) {
     }
 }
 
+static volatile uint8_t lcd_init_wait = 1;
+static void lcd_init_cont(void) {
+    lcd_init_wait = 0;
+}
+
 void lcd_init(void) {
     const uint8_t msk = _BV(PC1) | _BV(PC0);
 
@@ -88,8 +95,23 @@ void lcd_init(void) {
     PORTC &= msk;
     DDRC |= ~msk;
 
-    /* Datasheet: 40ms, Tutor: 50ms. */
-    _delay_ms(50);
+    /* Datasheet: 40ms, Tutor: 50ms.
+     * This feels very much like busy waiting - on the other hand,
+     * this is only executed once during initialization.
+     * It would be much nicer to just do this using _delay_ms(),
+     * but there is a strict restriction on pure busy waiting.
+     * We can't change this to pure timer driven async, because
+     * then the first strings could be written before init is done.
+     * That could also be handled using buffered lcd writes,
+     * but the module was not conceived that way, and thus we need
+     * to live with this forced 50 ms wait.
+     */
+    struct timer_conf conf = { Timer4, true, 50, lcd_init_cont };
+    timer_set(&conf);
+
+    while (lcd_init_wait) {
+        sleep_cpu();
+    }
 
     /* 8 bit data length.
      * Needs to be sent 3 times to account for all possible states
