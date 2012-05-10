@@ -52,5 +52,5 @@ help:
 clean:
 #------------------------------------------------------------------------------
 	rm -f $(PROJECT).aux $(PROJECT).log $(PROJECT).dvi $(PROJECT).toc \
-		$(PROJECT).pdf $(PROJECT).ps
+		$(PROJECT).pdf $(PROJECT).ps $(PROJECT).out
 
