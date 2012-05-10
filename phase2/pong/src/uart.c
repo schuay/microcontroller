@@ -27,14 +27,7 @@ void uart_init(const struct uart_conf *conf) {
     enum UartN n = conf->uart;
 
     udri_handler[n] = conf->data_reg_empty_handler;
-    if (conf->ucsrnb & DataRegEmptyIntrEnable) {
-        assert(udri_handler[n] != NULL);
-    }
-
     rxci_handler[n] = conf->rx_complete_handler;
-    if (conf->ucsrnb & RXCompleteIntrEnable) {
-        assert(rxci_handler[n] != NULL);
-    }
 
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
         *UCSRnA[n] = (conf->double_speed ? _BV(U2X0) : 0);
