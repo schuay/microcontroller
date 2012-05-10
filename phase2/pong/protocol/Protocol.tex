@@ -573,17 +573,42 @@ In that time, the callback function needs to process at least
     DG_{length} - \mathit{Buffersize} + 1
 \end{displaymath}
 
-bytes to avoid triggering the flow control. Therefore, the upper bound for the
-callback function is
+bytes to avoid triggering the flow control. The offset by one is required
+because the last buffer slot must not be filled.  Therefore, an upper bound for
+the callback function is
 
 \begin{displaymath}
-    t_{CB} = \frac{T_{time}}{DG_{length} - \mathit{Buffersize} + 1}
-           = \frac{10 * DG_{length}}{\mathit{BAUD} * (DG_{length} - \mathit{Buffersize} + 1)}
+    t \le t_{CB} = \frac{T_{time}}{DG_{length} - \mathit{Buffersize} + 1}
+                 = \frac{10 * DG_{length}}{\mathit{BAUD} * (DG_{length} - \mathit{Buffersize} + 1)}
 \end{displaymath}
-
 
 For $\mathit{BAUD}=10^{6}bit/sec$, $\mathit{Buffersize}=49Byte$, and
 $DG_{length}=64Byte$, $t_{CB} = 4 * 10^{-5}$ seconds, or 40 $\mu$s.
+
+However, we can still do a bit better. The last callback does not need to run
+to completion within the provided time, it just needs to \emph{start}, since
+the byte is removed from the buffer instantaneously when the callback starts.
+
+This means that we can reduce the number of bytes which need to be processed to
+
+\begin{displaymath}
+    DG_{length} - \mathit{Buffersize}
+\end{displaymath}
+
+while requiring that the $t < t_{CB}$ instead of $t \le t_{CB}$. This turns our function into
+
+\begin{displaymath}
+    t < t_{CB} = \frac{T_{time}}{DG_{length} - \mathit{Buffersize}}
+               = \frac{10 * DG_{length}}{\mathit{BAUD} * (DG_{length} - \mathit{Buffersize})}
+\end{displaymath}
+
+with the result for the numbers stated above: $t_{CB} = 42.\overline{6} \mu$s.
+
+Simulation with the following program confirms these results.
+
+\vspace{3mm}
+
+\lstinputlisting{simul.c}
 
 %***************************************************************************
 % Theory task 1.2
@@ -603,7 +628,7 @@ take at most
 
 seconds.
 
-This, to fulfill both conditions, the upper bound for a callback is
+Thus, to fulfill both conditions, the upper bound for a callback is
 
 \begin{displaymath}
     t_{CB}' = min(t_{CB}, \frac{P_{DG}}{DG_{length}})
