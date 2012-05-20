@@ -1,6 +1,6 @@
 # call this with "source ./tinyOSExports" in your TinyOS root dir
 
-export TOSROOT=`pwd`
+export TOSROOT=`pwd`/tinyos
 export TOSDIR=$TOSROOT/tos
 export MAKERULES=$TOSROOT/support/make/Makerules
 
