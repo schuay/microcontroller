@@ -1,0 +1,28 @@
+#-*-Makefile-*- vim:syntax=make
+# ahagmann, 2011-10-21
+# angepasst von dapa.extra
+# flash - targets fuer bigAVR6 mittels avrprog2
+
+PROGRAM = avrprog2
+
+ifeq ($(PROGRAMMER),avrprog2)
+    ifdef BOOTLOADER_IMG
+      ifeq ($(shell [ -f /bin/cygwin1.dll ] && echo cygwin),cygwin)
+        BOOTLOADER_IMG := $(shell cygpath -m $(BOOTLOADER_IMG))
+      endif
+    endif
+
+    PROGRAMMER_FLAGS = --mcu=$(MCU) --flash w:$(MAIN_IHEX) -v
+    PROGRAMMER_INSTALL_SREC_FLAGS =
+    PROGRAMMER_INSTLAL_BOOTLOADER_FLAGS=
+endif
+
+program: FORCE
+	@echo "    installing $(PLATFORM) binary using avrprog2"
+	$(PROGRAMMER) $(PROGRAMMER_FLAGS) $(PROGRAMMER_INSTALL_SREC_FLAGS)
+
+program_bl: FORCE
+	@echo "    installing $(PLATFORM) bootloader using avrprog2"
+	avr-objcopy --output-target=ihex $(INSTALL_SREC) $(MAIN_IHEX).hex
+	$(PROGRAMMER) $(PROGRAMMER_FLAGS) $(PROGRAMMER_INSTALL_BOOTLOADER_FLAGS)
+	rm -f $(MAIN_IHEX).hex

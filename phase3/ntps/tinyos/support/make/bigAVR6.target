@@ -1,0 +1,25 @@
+#-*-Makefile-*- vim:syntax=make
+#$Id: mica2.target,v 1.5 2007-11-06 19:32:56 sallai Exp $
+
+PLATFORM = bigAVR6
+SENSORBOARD ?= micasb
+#PROGRAMMER ?= avrdude
+PROGRAMMER ?= avrprog2
+DEFAULT_PROGRAM_AVR ?= avrprog2
+MCU ?= atmega128
+
+ifeq ($(PROGRAMMER),avrdude)
+#  PROGRAMMER_PART ?= -pm128  -U efuse:w:0xff:m
+endif
+
+ifeq ($(PROGRAMMER),uisp)
+  PROGRAMMER_PART ?= -dpart=ATmega128  --wr_fuse_e=ff
+endif
+
+AVR_FUSE_H ?= 0xd9
+
+$(call TOSMake_include_platform,avr)
+
+bigAVR6: $(BUILD_DEPS)
+	@:
+

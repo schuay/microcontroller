@@ -1,0 +1,8 @@
+# call this with "source ./tinyOSExports" in your TinyOS root dir
+
+export TOSROOT=`pwd`
+export TOSDIR=$TOSROOT/tos
+export MAKERULES=$TOSROOT/support/make/Makerules
+
+echo "Set TinyOS root to"
+echo $TOSROOT

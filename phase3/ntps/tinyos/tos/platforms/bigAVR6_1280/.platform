@@ -1,0 +1,105 @@
+#
+# FILE:bigAVR6_1280/.platform
+#
+# Includes that should take precedence come first.  Platforms come before
+# chips because they may override files.  These must be specified as
+# @includes instead of -I's to @opts, otherwise the %T won't be processed
+# by ncc.
+#
+# $Id: .platform,v 1.9 2008-05-31 20:18:32 regehr Exp $
+#
+push( @includes, qw(
+
+  %T/platforms/bigAVR6_1280
+  %T/platforms/bigAVR6
+  %T/platforms/micaz
+
+#Needed for ActiveMessageC.nc
+#Needed for NestedResourceC.nc
+#Needed for platform_message.h
+  %T/platforms/mica2
+
+#Needed for HilTimerMilliC.nc
+#Needed for PlatformC.nc
+  %T/platforms/mica
+
+  %T/chips/g2100
+  %T/chips_ecs/enc28j60
+  %T/chips_ecs/VS1011e
+  %T/chips_ecs/mrf24w
+
+  %T/lib_ecs/keypad
+  %T/lib_ecs/arp
+  %T/lib_ecs/async_queue
+  %T/lib_ecs/glcd
+  %T/lib_ecs/icmp
+  %T/lib_ecs/ip
+  %T/lib_ecs/lcd
+  %T/lib_ecs/llc
+  %T/lib_ecs/packet_queue
+  %T/lib_ecs/ping
+  %T/lib_ecs/rtc
+  %T/lib_ecs/stdo
+  %T/lib_ecs/touchscreen
+  %T/lib_ecs/udp
+  %T/lib_ecs/sdcard
+
+  %T/chips_ecs/atm1280
+  %T/chips_ecs/atm1280/timerSync
+  %T/chips_ecs/atm1280/pins
+  %T/chips_ecs/atm1280/SoftSPI
+  %T/chips/atm1281
+  %T/chips/atm1281/adc
+  %T/chips/atm1281/timer
+  %T/chips_ecs/atm128
+  %T/chips_ecs/atm128/timerSync
+  %T/chips/atm128
+  %T/chips/atm128/adc
+  %T/chips/atm128/pins
+  %T/chips/atm128/spi
+  %T/chips/atm128/i2c
+  %T/chips/atm128/timer
+
+#  %T/lib/timer
+#  %T/lib/serial
+#  %T/lib/power
+
+) );
+
+@opts = qw(
+
+  -gcc=avr-gcc
+  -mmcu=atmega1280
+  -fnesc-target=avr
+  -fnesc-no-debug
+
+);
+
+push @opts, "-fnesc-scheduler=TinySchedulerC,TinySchedulerC.TaskBasic,TaskBasic,TaskBasic,runTask,postTask" if !$with_scheduler_flag;
+push @opts, "-mingw-gcc" if $cygwin;
+
+$ENV{'CIL_MACHINE'} =
+    "version_major=3 " .
+    "version_minor=4 " .
+    "version=avr-3.4.3 " .
+    "short=2,1, " .
+    "int=2,1 " .
+    "long=4,1 " .
+    "long_long=8,1 " .
+    "pointer=2,1 " .
+    "enum=2,1 " .
+    "float=4,1 " .
+    "double=4,1 " .
+    "long_double=4,1 " .
+    "void=1,1 " .
+    "fun=1,1 " .
+    "wchar_size_size=2,2 " .
+    "alignof_string=1 " .
+    "max_alignment=1 " .
+    "char_wchar_signed=true,true " .
+    "const_string_literals=true " .
+    "big_endian=false " .
+    "underscore_name=false " .
+    "__builtin_va_list=true " .
+    "__thread_is_keyword=true";
+
