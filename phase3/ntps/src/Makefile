@@ -1,0 +1,2 @@
+COMPONENT=NtpsAppC
+include $(MAKERULES)
