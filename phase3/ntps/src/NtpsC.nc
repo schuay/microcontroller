@@ -25,6 +25,8 @@ implementation
         /* TODO */
         call UserInterface.setTimeGPS(gps_time);
         call UserInterface.setTimeRTC(rtc_time);
+
+        call GpsTimerParser.startService();
     }
 
     event void UserInterface.setToGPSPressed(void)

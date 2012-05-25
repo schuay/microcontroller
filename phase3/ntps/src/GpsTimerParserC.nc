@@ -31,11 +31,13 @@ implementation
                                          uint16_t len __attribute__ ((unused)),
                                          error_t error __attribute ((unused)))
     {
+        /* Nothing to send. */
     }
 
     async event void UartStream.receiveDone(uint8_t* buf __attribute__ ((unused)),
                                             uint16_t len __attribute__ ((unused)),
                                             error_t error __attribute__ ((unused)))
     {
+        /* Not used. */
     }
 }
