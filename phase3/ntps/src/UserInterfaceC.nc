@@ -10,7 +10,7 @@ module UserInterfaceC
 #define GLCD_MAX_X (127)
 #define GLCD_MAX_Y (63)
 #define LETTER_WIDTH (6)
-#define LETTER_HEIGHT (7)
+#define LETTER_HEIGHT (8)
 #define POLL_INTERVAL_MS (50)
 
 #define BTN_GPS_X0 (0)
@@ -52,9 +52,18 @@ implementation
         call Timer.startPeriodic(POLL_INTERVAL_MS);
     }
 
-    command void UserInterface.setTimeGPS(const char *str)
+    command void UserInterface.setTimeGPS(timedate_t time __attribute__ ((unused)))
     {
-        call Glcd.drawText(str, 20, 50);
+        /* TODO */
+        call Glcd.drawText("GPS: Tue 22.05.2012", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 1);
+        call Glcd.drawText("           23:55:32", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 2);
+    }
+
+    command void UserInterface.setTimeRTC(rtc_time_t time __attribute__ ((unused)))
+    {
+        /* TODO */
+        call Glcd.drawText("RTC: Tue 22.05.2012", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 3);
+        call Glcd.drawText("           23:55:32", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 4);
     }
 
     event void TouchScreen.coordinatesReady(void)

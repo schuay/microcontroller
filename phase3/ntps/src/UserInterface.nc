@@ -1,3 +1,12 @@
+/* TODO: move this to GpsTimerParser and Rtc. */
+typedef struct {
+    int dummy;
+} timedate_t;
+
+typedef struct {
+    int dummy;
+} rtc_time_t;
+
 interface UserInterface
 {
     /**
@@ -8,7 +17,12 @@ interface UserInterface
     /**
      * Updates the displayed GPS time.
      */
-    command void setTimeGPS(const char *str);
+    command void setTimeGPS(timedate_t time);
+
+    /**
+     * Updates the displayed RTC time.
+     */
+    command void setTimeRTC(rtc_time_t time);
 
     /**
      * The 'Set to GPS' button has been pressed.
