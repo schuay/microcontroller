@@ -13,6 +13,7 @@ implementation
         printf_P(PSTR("Node ID %d\r\n"), TOS_NODE_ID);
 
         call Timer.startPeriodic(500);
+        call UserInterface.init();
     }
 
     event void Timer.fired()
