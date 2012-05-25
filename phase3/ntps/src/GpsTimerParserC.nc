@@ -24,7 +24,18 @@ implementation
 
     async event void UartStream.receivedByte(uint8_t byte)
     {
+        static uint8_t state = 0;
+        static uint8_t field = 0;
+
         debug("Received: %d\r\n", byte);
+
+        switch (state) {
+        case 0:
+            break;
+            switch (byte) {
+            case '$':
+            }
+        }
     }
 
     async event void UartStream.sendDone(uint8_t *buf __attribute__ ((unused)),
