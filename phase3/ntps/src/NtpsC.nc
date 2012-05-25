@@ -1,23 +1,26 @@
 module NtpsC
 {
-    uses interface Timer<TMilli> as Timer;
     uses interface Boot;
     uses interface UserInterface;
 }
 
 implementation
 {
-    event void Boot.booted()
+    event void Boot.booted(void)
     {
         printf_P(PSTR("%s\r\n"), __PRETTY_FUNCTION__);
         printf_P(PSTR("Node ID %d\r\n"), TOS_NODE_ID);
 
-        call Timer.startPeriodic(500);
         call UserInterface.init();
     }
 
-    event void Timer.fired()
+    event void UserInterface.setToGPSPressed(void)
     {
-        call UserInterface.setTimeGPS("ABCDE");
+        printf_P(PSTR("Set to GPS pressed.\r\n"));
+    }
+
+    event void UserInterface.setToOffsetPressed(void)
+    {
+        printf_P(PSTR("Set to Offset pressed.\r\n"));
     }
 }
