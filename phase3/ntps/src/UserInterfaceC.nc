@@ -9,11 +9,12 @@ implementation
 {
     command void UserInterface.setTimeGPS(const char *str)
     {
+        call Glcd.fill(0x00);
         call Glcd.drawText(str, 20, 20);
     }
 
     event void TouchScreen.coordinatesReady(void)
     {
-		debug("Demo: x=%u \t y=%u\n\r", coordinates.x, coordinates.y);
+        debug("coordinatesReady");
     }
 }
