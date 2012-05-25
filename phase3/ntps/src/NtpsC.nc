@@ -17,8 +17,8 @@ implementation
         timedate_t gps_time;
         rtc_time_t rtc_time;
 
-        printf_P(PSTR("%s\r\n"), __PRETTY_FUNCTION__);
-        printf_P(PSTR("Node ID %d\r\n"), TOS_NODE_ID);
+        debug("%s\r\n", __PRETTY_FUNCTION__);
+        debug("Node ID %d\r\n", TOS_NODE_ID);
 
         call UserInterface.init();
 
@@ -34,17 +34,17 @@ implementation
 
     event void UserInterface.setToGPSPressed(void)
     {
-        printf_P(PSTR("Set to GPS pressed.\r\n"));
+        debug("Set to GPS pressed.\r\n");
     }
 
     event void UserInterface.setToOffsetPressed(void)
     {
-        printf_P(PSTR("Set to Offset pressed.\r\n"));
+        debug("Set to Offset pressed.\r\n");
     }
 
     async event void UartStream.receivedByte(uint8_t byte)
     {
-        printf_P(PSTR("Received: %d\r\n"), byte);
+        debug("Received: %d\r\n", byte);
         call Leds.set(byte);
     }
 

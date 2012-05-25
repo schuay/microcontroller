@@ -1,4 +1,3 @@
-#include "printf.h"
 #include "debug.h"
 
 configuration NtpsAppC
