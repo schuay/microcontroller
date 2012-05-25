@@ -1,4 +1,6 @@
-interface GpsTime
+#include "GpsTimerParser.h"
+
+interface GpsTimerParser
 {
     /**
      ∗ Starts the parsing service of the GPS output stream.

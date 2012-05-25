@@ -1,8 +1,6 @@
-/* TODO: move this to GpsTimerParser and Rtc. */
-typedef struct {
-    int dummy;
-} timedate_t;
+#include "GpsTimerParser.h"
 
+/* TODO: move this to and Rtc. */
 typedef struct {
     int dummy;
 } rtc_time_t;

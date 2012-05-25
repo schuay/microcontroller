@@ -16,15 +16,18 @@ implementation
     components UserInterfaceC;
 
     components Atm128Uart0C as UartDevC;
+    components GpsTimerParserC;
 
     components StdoDebugC;
 
     NtpsC.Boot -> MainC.Boot;
     NtpsC.UserInterface -> UserInterfaceC;
-    NtpsC.UartStream -> UartDevC;
-    NtpsC.UartControl -> UartDevC.UartControl;
-    NtpsC.Uart -> UartDevC;
+    NtpsC.GpsTimerParser -> GpsTimerParserC;
     NtpsC.Leds -> LedsC;
+
+    GpsTimerParserC.UartStream -> UartDevC;
+    GpsTimerParserC.UartControl -> UartDevC.UartControl;
+    GpsTimerParserC.Uart -> UartDevC;
 
     UserInterfaceC.Timer -> Timer0;
     UserInterfaceC.TouchScreen -> TouchScreenC.TouchScreen;
