@@ -12,7 +12,7 @@ interface BufferedLcd {
 	command void autoRefresh(uint32_t period);
 	command void clear();
 	command void write(char *string);
-	command void write_P(prog_char *string);
+	command void write_P(const char *string);
 	command void goTo(uint8_t line, uint8_t col);
 	command void forceRefresh();
 }

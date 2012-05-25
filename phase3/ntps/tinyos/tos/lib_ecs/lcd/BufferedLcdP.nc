@@ -78,7 +78,7 @@ implementation {
 		}
 	}
 
-	command void BufferedLcd.write_P(prog_char *string) {
+	command void BufferedLcd.write_P(const char *string) {
 		char c;
 
 		c = pgm_read_byte(string);

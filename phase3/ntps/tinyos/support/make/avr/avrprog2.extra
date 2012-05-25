@@ -12,14 +12,16 @@ ifeq ($(PROGRAMMER),avrprog2)
       endif
     endif
 
-    PROGRAMMER_FLAGS = --mcu=$(MCU) --flash w:$(MAIN_IHEX) -v
+    PROGRAMMER_FLAGS = --mcu=$(MCU) --flash w:$(MAIN_IHEX).hex -v
     PROGRAMMER_INSTALL_SREC_FLAGS =
     PROGRAMMER_INSTLAL_BOOTLOADER_FLAGS=
 endif
 
 program: FORCE
 	@echo "    installing $(PLATFORM) binary using avrprog2"
+	avr-objcopy --output-target=ihex $(INSTALL_SREC) $(MAIN_IHEX).hex
 	$(PROGRAMMER) $(PROGRAMMER_FLAGS) $(PROGRAMMER_INSTALL_SREC_FLAGS)
+	rm -f $(MAIN_IHEX).hex
 
 program_bl: FORCE
 	@echo "    installing $(PLATFORM) bootloader using avrprog2"
