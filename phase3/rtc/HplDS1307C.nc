@@ -21,8 +21,17 @@ module HplDS1307C
 
 implementation
 {
+    enum Operation {
+        READ,
+        WRITE,
+        NONE,
+    };
+
     static bool inProgress = FALSE;
-    static uint8_t buffer[REG_COUNT];
+    static enum Operation queuedOperation = NONE;
+    static uint8_t dataBuffer[REG_COUNT];
+    static uint8_t dataSize;
+    static uint8_t addressBuffer;
 
     command error_t HplDS1307.open(void)
     {
@@ -31,7 +40,12 @@ implementation
 
     command error_t HplDS1307.close(void)
     {
-        if (inProgress) {
+        bool progress;
+        atomic {
+            progress = inProgress;
+        }
+
+        if (progress) {
             return FAIL;
         }
         return call Resource.release();
@@ -40,20 +54,35 @@ implementation
     command error_t HplDS1307.registerRead(uint8_t address)
     {
         bool owner = call Resource.isOwner();
-        if (!owner) {
+        bool progress;
+        atomic {
+            progress = inProgress;
+        }
+
+        if (!owner || progress) {
             return FAIL;
         }
-        /* TODO: since this is async, do we need to copy the data someplace before
-         * calling write()?
-         * TODO: implementation.
-         */
-        return call I2CPacket.read(I2C_START | I2C_STOP, I2C_ADDR, 1, buffer);
+
+        atomic {
+            inProgress = TRUE;
+            addressBuffer = address;
+            dataSize = 1;
+            queuedOperation = READ;
+        }
+
+        return call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR,
+                            sizeof(addressBuffer), &addressBuffer);
     }
 
     command error_t HplDS1307.registerWrite(uint8_t address, uint8_t data)
     {
         bool owner = call Resource.isOwner();
-        if (!owner) {
+        bool progress;
+        atomic {
+            progress = inProgress;
+        }
+
+        if (!owner || progress) {
             return FAIL;
         }
     }
@@ -61,7 +90,12 @@ implementation
     command error_t HplDS1307.bulkRead(ds1307_time_mem_t *data)
     {
         bool owner = call Resource.isOwner();
-        if (!owner) {
+        bool progress;
+        atomic {
+            progress = inProgress;
+        }
+
+        if (!owner || progress) {
             return FAIL;
         }
     }
@@ -69,7 +103,12 @@ implementation
     command error_t HplDS1307.bulkWrite(ds1307_time_mem_t *data)
     {
         bool owner = call Resource.isOwner();
-        if (!owner) {
+        bool progress;
+        atomic {
+            progress = inProgress;
+        }
+
+        if (!owner || progress) {
             return FAIL;
         }
     }
@@ -80,13 +119,37 @@ implementation
         case 1: signal HplDS1307.registerReadReady(*data);
         default: signal HplDS1307.bulkReadReady();
         }
+
+        atomic {
+            inProgress = FALSE;
+        }
     }
 
     async event void I2CPacket.writeDone(error_t error, uint16_t addr, uint8_t length, uint8_t* data)
     {
-        switch (length) {
-        case 1: signal HplDS1307.registerWriteReady();
-        default: signal HplDS1307.bulkWriteReady();
+        enum Operation op;
+
+        atomic {
+            op = queuedOperation;
+        }
+
+        switch (op) {
+        case READ:
+            atomic {
+                queuedOperation = NONE;
+            }
+            call I2CPacket.read(I2C_START | I2C_STOP, I2C_ADDR, dataSize, dataBuffer);
+        case NONE:
+            switch (length) {
+            case 1: signal HplDS1307.registerWriteReady();
+            default: signal HplDS1307.bulkWriteReady();
+            }
+
+            atomic {
+                inProgress = FALSE;
+            }
+        default:
+            debug("Unexpected operation\r");
         }
     }
 
