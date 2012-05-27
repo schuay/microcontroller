@@ -25,7 +25,7 @@ implementation
     {
     }
 
-    async event void HplDS1307.bulkWriteRead(void)
+    async event void HplDS1307.bulkWriteReady(void)
     {
     }
 }

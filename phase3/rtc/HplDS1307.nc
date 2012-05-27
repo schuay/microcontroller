@@ -11,5 +11,5 @@ interface HplDS1307
     async event void registerReadReady(uint8_t value);
     async event void registerWriteReady(void);
     async event void bulkReadReady(void);
-    async event void bulkWriteRead(void);
+    async event void bulkWriteReady(void);
 }
