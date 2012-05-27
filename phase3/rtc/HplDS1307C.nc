@@ -8,6 +8,8 @@ module HplDS1307C
 
 #define I2C_ADDR (0b1101000)
 
+#define REG_COUNT (8)
+
 #define REG_SECONDS (0x00)
 #define REG_MINUTES (0x01)
 #define REG_HOURS (0x02)
@@ -20,6 +22,7 @@ module HplDS1307C
 implementation
 {
     static bool inProgress = FALSE;
+    static uint8_t buffer[REG_COUNT];
 
     command error_t HplDS1307.open(void)
     {
@@ -40,6 +43,11 @@ implementation
         if (!owner) {
             return FAIL;
         }
+        /* TODO: since this is async, do we need to copy the data someplace before
+         * calling write()?
+         * TODO: implementation.
+         */
+        return call I2CPacket.read(I2C_START | I2C_STOP, I2C_ADDR, 1, buffer);
     }
 
     command error_t HplDS1307.registerWrite(uint8_t address, uint8_t data)
@@ -68,10 +76,18 @@ implementation
 
     async event void I2CPacket.readDone(error_t error, uint16_t addr, uint8_t length, uint8_t* data)
     {
+        switch (length) {
+        case 1: signal HplDS1307.registerReadReady(*data);
+        default: signal HplDS1307.bulkReadReady();
+        }
     }
 
     async event void I2CPacket.writeDone(error_t error, uint16_t addr, uint8_t length, uint8_t* data)
     {
+        switch (length) {
+        case 1: signal HplDS1307.registerWriteReady();
+        default: signal HplDS1307.bulkWriteReady();
+        }
     }
 
     event void Resource.granted()
