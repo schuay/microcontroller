@@ -3,6 +3,7 @@ module RtcC
     uses interface Boot;
     uses interface Leds;
     uses interface HplDS1307;
+    uses interface Timer<TMilli> as Timer;
 }
 
 implementation
@@ -12,8 +13,7 @@ implementation
         debug("%s\r", __PRETTY_FUNCTION__);
         debug("Node ID %d\r", TOS_NODE_ID);
 
-        call HplDS1307.open();
-        call HplDS1307.registerRead(0x00);
+        call Timer.startPeriodic(1000);
     }
 
     task void closeHpl(void)
@@ -37,5 +37,11 @@ implementation
 
     async event void HplDS1307.bulkWriteReady(void)
     {
+    }
+
+    event void Timer.fired()
+    {
+        call HplDS1307.open();
+        call HplDS1307.registerRead(0x00);
     }
 }

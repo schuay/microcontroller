@@ -10,6 +10,7 @@ implementation
     components RtcC;
 
     components LedsC;
+    components new TimerMilliC() as Timer0;
 
     components HplDS1307C;
     components new Atm128I2CMasterC();
@@ -18,6 +19,7 @@ implementation
 
     RtcC.Boot -> MainC.Boot;
     RtcC.Leds -> LedsC;
+    RtcC.Timer -> Timer0;
     RtcC.HplDS1307 -> HplDS1307C;
 
     HplDS1307C.Resource -> Atm128I2CMasterC;
