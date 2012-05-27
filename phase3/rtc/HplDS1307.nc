@@ -1,3 +1,5 @@
+#include "HplDS1307.h"
+
 interface HplDS1307
 {
     command error_t open(void);
