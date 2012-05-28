@@ -1,3 +1,5 @@
+#include "Rtc.h"
+
 interface Rtc
 {
     /**
