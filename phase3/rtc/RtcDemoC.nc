@@ -1,4 +1,4 @@
-module RtcC
+module RtcDemoC
 {
     uses interface Boot;
     uses interface Leds;

@@ -1,2 +1,2 @@
-COMPONENT=RtcAppC
+COMPONENT=RtcDemoAppC
 include $(MAKERULES)

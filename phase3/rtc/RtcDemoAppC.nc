@@ -1,13 +1,13 @@
 #include "debug.h"
 
-configuration RtcAppC
+configuration RtcDemoAppC
 {
 }
 
 implementation
 {
     components MainC;
-    components RtcC;
+    components RtcDemoC;
 
     components LedsC;
     components new TimerMilliC() as Timer0;
@@ -17,10 +17,10 @@ implementation
 
     components StdoDebugC;
 
-    RtcC.Boot -> MainC.Boot;
-    RtcC.Leds -> LedsC;
-    RtcC.Timer -> Timer0;
-    RtcC.HplDS1307 -> HplDS1307C;
+    RtcDemoC.Boot -> MainC.Boot;
+    RtcDemoC.Leds -> LedsC;
+    RtcDemoC.Timer -> Timer0;
+    RtcDemoC.HplDS1307 -> HplDS1307C;
 
     HplDS1307C.Resource -> Atm128I2CMasterC;
     HplDS1307C.I2CPacket -> Atm128I2CMasterC;
