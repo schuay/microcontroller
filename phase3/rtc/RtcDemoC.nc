@@ -8,7 +8,7 @@ module RtcDemoC
 
 implementation
 {
-    static rtc_time_t time;
+    static rtc_time_t time = { 0, 51, 15, 1, 1, 2, 10 };
 
     event void Boot.booted(void)
     {

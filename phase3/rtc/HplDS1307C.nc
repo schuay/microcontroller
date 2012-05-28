@@ -100,7 +100,7 @@ implementation
             queuedOperation = WRITE;
         }
 
-        return call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR,
+        return call I2CPacket.write(I2C_START, I2C_ADDR,
                             sizeof(addressBuffer), &addressBuffer);
     }
 
@@ -150,7 +150,7 @@ implementation
             queuedOperation = WRITE;
         }
 
-        return call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR,
+        return call I2CPacket.write(I2C_START, I2C_ADDR,
                             sizeof(addressBuffer), &addressBuffer);
     }
 
@@ -188,7 +188,7 @@ implementation
             atomic {
                 queuedOperation = NONE;
             }
-            call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR, dataSize, dataPtr);
+            call I2CPacket.write(I2C_STOP, I2C_ADDR, dataSize, dataPtr);
             break;
         case NONE:
             switch (length) {
