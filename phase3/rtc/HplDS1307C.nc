@@ -29,7 +29,8 @@ implementation
 
     static bool inProgress = FALSE;
     static enum Operation queuedOperation = NONE;
-    static uint8_t dataBuffer[REG_COUNT];
+    static uint8_t *dataPtr;
+    static uint8_t dataBuffer;
     static uint8_t dataSize;
     static uint8_t addressBuffer;
 
@@ -67,6 +68,7 @@ implementation
             inProgress = TRUE;
             addressBuffer = address;
             dataSize = 1;
+            dataPtr = &dataBuffer;
             queuedOperation = READ;
         }
 
@@ -90,7 +92,8 @@ implementation
             inProgress = TRUE;
             addressBuffer = address;
             dataSize = 1;
-            dataBuffer[0] = data;
+            dataBuffer = data;
+            dataPtr = &dataBuffer;
             queuedOperation = WRITE;
         }
 
@@ -109,6 +112,17 @@ implementation
         if (!owner || progress) {
             return FAIL;
         }
+
+        atomic {
+            inProgress = TRUE;
+            addressBuffer = REG_SECONDS;
+            dataSize = sizeof(data);
+            dataPtr = (uint8_t *)data;
+            queuedOperation = READ;
+        }
+
+        return call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR,
+                            sizeof(addressBuffer), &addressBuffer);
     }
 
     command error_t HplDS1307.bulkWrite(ds1307_time_mem_t *data)
@@ -122,13 +136,28 @@ implementation
         if (!owner || progress) {
             return FAIL;
         }
+
+        atomic {
+            inProgress = TRUE;
+            addressBuffer = REG_SECONDS;
+            dataSize = 1;
+            dataPtr = (uint8_t *)data;
+            queuedOperation = WRITE;
+        }
+
+        return call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR,
+                            sizeof(addressBuffer), &addressBuffer);
     }
 
     async event void I2CPacket.readDone(error_t error, uint16_t addr, uint8_t length, uint8_t* data)
     {
         switch (length) {
-        case 1: signal HplDS1307.registerReadReady(*data); break;
-        default: signal HplDS1307.bulkReadReady(); break;
+        case 1:
+            signal HplDS1307.registerReadReady(*data);
+            break;
+        default:
+            signal HplDS1307.bulkReadReady();
+            break;
         }
 
         atomic {
@@ -149,18 +178,22 @@ implementation
             atomic {
                 queuedOperation = NONE;
             }
-            call I2CPacket.read(I2C_START | I2C_STOP, I2C_ADDR, dataSize, dataBuffer);
+            call I2CPacket.read(I2C_START | I2C_STOP, I2C_ADDR, dataSize, dataPtr);
             break;
         case WRITE:
             atomic {
                 queuedOperation = NONE;
             }
-            call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR, dataSize, dataBuffer);
+            call I2CPacket.write(I2C_START | I2C_STOP, I2C_ADDR, dataSize, dataPtr);
             break;
         case NONE:
             switch (length) {
-            case 1: signal HplDS1307.registerWriteReady();
-            default: signal HplDS1307.bulkWriteReady();
+            case 1:
+                signal HplDS1307.registerWriteReady();
+                break;
+            default:
+                signal HplDS1307.bulkWriteReady();
+                break;
             }
 
             atomic {
