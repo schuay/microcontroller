@@ -36,12 +36,16 @@ implementation
 
     command error_t HplDS1307.open(void)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
         return call Resource.immediateRequest();
     }
 
     command error_t HplDS1307.close(void)
     {
         bool progress;
+
+        debug("%s\r", __PRETTY_FUNCTION__);
+
         atomic {
             progress = inProgress;
         }
@@ -56,6 +60,9 @@ implementation
     {
         bool owner = call Resource.isOwner();
         bool progress;
+
+        debug("%s\r", __PRETTY_FUNCTION__);
+
         atomic {
             progress = inProgress;
         }
@@ -80,6 +87,9 @@ implementation
     {
         bool owner = call Resource.isOwner();
         bool progress;
+
+        debug("%s\r", __PRETTY_FUNCTION__);
+
         atomic {
             progress = inProgress;
         }
@@ -105,6 +115,9 @@ implementation
     {
         bool owner = call Resource.isOwner();
         bool progress;
+
+        debug("%s\r", __PRETTY_FUNCTION__);
+
         atomic {
             progress = inProgress;
         }
@@ -129,6 +142,9 @@ implementation
     {
         bool owner = call Resource.isOwner();
         bool progress;
+
+        debug("%s\r", __PRETTY_FUNCTION__);
+
         atomic {
             progress = inProgress;
         }
@@ -151,6 +167,10 @@ implementation
 
     async event void I2CPacket.readDone(error_t error, uint16_t addr, uint8_t length, uint8_t* data)
     {
+
+        debug("%s\r", __PRETTY_FUNCTION__);
+        debug("Error %d, length %d\r", error, length);
+
         switch (length) {
         case 1:
             signal HplDS1307.registerReadReady(*data);
@@ -169,6 +189,8 @@ implementation
     {
         enum Operation op;
 
+        debug("%s\r", __PRETTY_FUNCTION__);
+
         atomic {
             op = queuedOperation;
         }
@@ -178,6 +200,7 @@ implementation
             atomic {
                 queuedOperation = NONE;
             }
+            debug("Starting read (size %d)\r", dataSize);
             call I2CPacket.read(I2C_START | I2C_STOP, I2C_ADDR, dataSize, dataPtr);
             break;
         case WRITE:

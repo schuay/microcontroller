@@ -57,6 +57,8 @@ implementation
 
     command error_t Rtc.start(rtc_time_t *data)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
+
         if (call Hpl.open() != SUCCESS) {
             return FAIL;
         }
@@ -66,34 +68,51 @@ implementation
 
     command error_t Rtc.stop(void)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
         return FAIL;
     }
 
     command error_t Rtc.readTime(rtc_time_t *data)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
         return FAIL;
     }
 
     task void closeHpl(void)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
         call Hpl.close();
     }
 
     async event void Hpl.registerReadReady(uint8_t value)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
         debug("Received value from RTC: %x\r", value);
         post closeHpl();
     }
 
     async event void Hpl.registerWriteReady(void)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
+    }
+
+    task void bulkReadReadyTask(void)
+    {
+        debug("%s\r", __PRETTY_FUNCTION__);
+        debug("Secs %d Minutes %d Hours %d\r",
+            fromBCD(registerBuffer.seconds, 0b111),
+            fromBCD(registerBuffer.minutes, 0b111),
+            fromBCD(registerBuffer.hours, 0b11));
     }
 
     async event void Hpl.bulkReadReady(void)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
+        post bulkReadReadyTask();
     }
 
     async event void Hpl.bulkWriteReady(void)
     {
+        debug("%s\r", __PRETTY_FUNCTION__);
     }
 }
