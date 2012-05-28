@@ -6,8 +6,13 @@ module DS1307C
     uses interface HplDS1307;
 }
 
+#define STATE_INITIAL (0)
+
 implementation
 {
+    static ds1307_time_mem_t registerBuffer;
+    static uint8_t state = STATE_INITIAL;
+
     static void toRtcT(const ds1307_time_mem_t *src, rtc_time_t *dst)
     {
         assert(src);
@@ -42,19 +47,11 @@ implementation
 
     command error_t Rtc.start(rtc_time_t *data)
     {
-        error_t err;
-
         if (call HplDS1307.open() != SUCCESS) {
             return FAIL;
         }
 
-        /* TODO: clear CH bit, set time if data != NULL. */
-
-out:
-        if (call HplDS1307.close() != SUCCESS) {
-            err = FAIL;
-        }
-        return err;
+        return call HplDS1307.bulkRead(&registerBuffer);
     }
 
     command error_t Rtc.stop(void)
