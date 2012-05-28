@@ -7,10 +7,13 @@ module DS1307C
 }
 
 #define STATE_INITIAL (0)
+#define STATE_START_READ (1)
+#define STATE_START_WRITE (2)
 
 implementation
 {
     static ds1307_time_mem_t registerBuffer;
+    static rtc_time_t *timePtr;
     static uint8_t state = STATE_INITIAL;
 
     static inline uint8_t fromBCD(uint8_t from, uint8_t mask)
@@ -23,12 +26,13 @@ implementation
         return ((from / 10) << 4) + (from % 10);
     }
 
+    /**
+     * Sets the time in dst to the values from src.
+     */
     static void toRtcT(const ds1307_time_mem_t *src, rtc_time_t *dst)
     {
         assert(src);
         assert(dst);
-
-        memset(dst, 0, sizeof(*dst));
 
         dst->seconds = toBCD(src->seconds);
         dst->minutes = toBCD(src->minutes);
@@ -39,12 +43,14 @@ implementation
         dst->year = toBCD(src->year);
     }
 
+    /**
+     * Overwrites time locations in dst with the values from src.
+     * Other locations remain unchanged.
+     */
     static void toDS1307T(const rtc_time_t *src, ds1307_time_mem_t *dst)
     {
         assert(src);
         assert(dst);
-
-        memset(dst, 0, sizeof(*dst));
 
         dst->seconds = fromBCD(src->seconds, 0b111);
         dst->minutes = fromBCD(src->minutes, 0b111);
@@ -63,7 +69,16 @@ implementation
             return FAIL;
         }
 
-        return call Hpl.bulkRead(&registerBuffer);
+        timePtr = data;
+        state = STATE_START_READ;
+
+        if (call Hpl.bulkRead(&registerBuffer) != SUCCESS) {
+            state = STATE_INITIAL;
+            call Hpl.close();
+            return FAIL;
+        };
+
+        return SUCCESS;
     }
 
     command error_t Rtc.stop(void)
@@ -99,20 +114,59 @@ implementation
     task void bulkReadReadyTask(void)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
-        debug("Secs %d Minutes %d Hours %d\r",
-            fromBCD(registerBuffer.seconds, 0b111),
-            fromBCD(registerBuffer.minutes, 0b111),
-            fromBCD(registerBuffer.hours, 0b11));
+
+        switch (state) {
+        case STATE_START_READ:
+            if (timePtr) {
+                /* Set the time as requested. */
+                toDS1307T(timePtr, &registerBuffer);
+            }
+
+            /* Clear clock halt, set 24h mode. */
+            registerBuffer.clockHalt = 0;
+            registerBuffer.hour_mode = 0;
+
+            state = STATE_START_WRITE;
+
+            if (call Hpl.bulkWrite(&registerBuffer) != SUCCESS) {
+                state = STATE_INITIAL;
+                call Hpl.close();
+            }
+            break;
+        default:
+            debug("Unexpected state %d\r", state);
+            break;
+        }
     }
 
     async event void Hpl.bulkReadReady(void)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
-        post bulkReadReadyTask();
+        if (post bulkReadReadyTask() != SUCCESS) {
+            debug("post failed\r");
+        }
+    }
+
+    task void bulkWriteReadyTask(void)
+    {
+        debug("%s\r", __PRETTY_FUNCTION__);
+
+        switch (state) {
+        case STATE_START_WRITE:
+            state = STATE_INITIAL;
+            call Hpl.close();
+            break;
+        default:
+            debug("Unexpected state %d\r", state);
+            break;
+        }
     }
 
     async event void Hpl.bulkWriteReady(void)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
+        if (post bulkWriteReadyTask() != SUCCESS) {
+            debug("post failed\r");
+        }
     }
 }
