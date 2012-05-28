@@ -91,8 +91,6 @@ implementation
 
     command error_t Rtc.readTime(rtc_time_t *data)
     {
-        debug("%s\r", __PRETTY_FUNCTION__);
-
         assert(data);
 
         if (call Hpl.open() != SUCCESS) {
@@ -111,17 +109,9 @@ implementation
         return SUCCESS;
     }
 
-    task void closeHpl(void)
-    {
-        debug("%s\r", __PRETTY_FUNCTION__);
-        call Hpl.close();
-    }
-
     async event void Hpl.registerReadReady(uint8_t value)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
-        debug("Received value from RTC: %x\r", value);
-        post closeHpl();
     }
 
     async event void Hpl.registerWriteReady(void)
@@ -131,8 +121,6 @@ implementation
 
     task void bulkReadReadyTask(void)
     {
-        debug("%s\r", __PRETTY_FUNCTION__);
-
         switch (state) {
         case STATE_START_READ:
             if (timePtr) {
@@ -167,7 +155,6 @@ implementation
 
     async event void Hpl.bulkReadReady(void)
     {
-        debug("%s\r", __PRETTY_FUNCTION__);
         if (post bulkReadReadyTask() != SUCCESS) {
             debug("post failed\r");
         }
@@ -175,8 +162,6 @@ implementation
 
     task void bulkWriteReadyTask(void)
     {
-        debug("%s\r", __PRETTY_FUNCTION__);
-
         switch (state) {
         case STATE_START_WRITE:
             state = STATE_INITIAL;
@@ -190,7 +175,6 @@ implementation
 
     async event void Hpl.bulkWriteReady(void)
     {
-        debug("%s\r", __PRETTY_FUNCTION__);
         if (post bulkWriteReadyTask() != SUCCESS) {
             debug("post failed\r");
         }
