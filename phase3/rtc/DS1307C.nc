@@ -1,3 +1,5 @@
+#include <assert.h>
+
 module DS1307C
 {
     provides interface Rtc;
@@ -6,6 +8,38 @@ module DS1307C
 
 implementation
 {
+    static void toRtcT(const ds1307_time_mem_t *src, rtc_time_t *dst)
+    {
+        assert(src);
+        assert(dst);
+
+        memset(dst, 0, sizeof(*dst));
+
+        dst->seconds = src->seconds;
+        dst->minutes = src->minutes;
+        dst->hours = src->hours;
+        dst->day = src->day;
+        dst->date = src->date;
+        dst->month = src->month;
+        dst->year = src->year;
+    }
+
+    static void toDS1307T(const rtc_time_t *src, ds1307_time_mem_t *dst)
+    {
+        assert(src);
+        assert(dst);
+
+        memset(dst, 0, sizeof(*dst));
+
+        dst->seconds = src->seconds;
+        dst->minutes = src->minutes;
+        dst->hours = src->hours;
+        dst->day = src->day;
+        dst->date = src->date;
+        dst->month = src->month;
+        dst->year = src->year;
+    }
+
     command error_t Rtc.start(rtc_time_t *data)
     {
         error_t err;
