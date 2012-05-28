@@ -1,9 +1,5 @@
 #include "GpsTimerParser.h"
-
-/* TODO: move this to and Rtc. */
-typedef struct {
-    int dummy;
-} rtc_time_t;
+#include "Rtc.h"
 
 interface UserInterface
 {
