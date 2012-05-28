@@ -19,7 +19,7 @@ implementation
 
     static inline uint8_t fromBCD(uint8_t from, uint8_t mask)
     {
-        return (from >> 4) * 10 + (from & mask);
+        return ((from >> 4) & mask) * 10 + (from & 0b1111);
     }
 
     static inline uint8_t toBCD(uint8_t from)
@@ -35,13 +35,13 @@ implementation
         assert(src);
         assert(dst);
 
-        dst->seconds = toBCD(src->seconds);
-        dst->minutes = toBCD(src->minutes);
-        dst->hours = toBCD(src->hours);
-        dst->day = toBCD(src->day);
-        dst->date = toBCD(src->date);
-        dst->month = toBCD(src->month);
-        dst->year = toBCD(src->year);
+        dst->seconds = fromBCD(src->seconds, 0b111);
+        dst->minutes = fromBCD(src->minutes, 0b111);
+        dst->hours = fromBCD(src->hours, 0b11);
+        dst->day = fromBCD(src->day, 0b0);
+        dst->date = fromBCD(src->date, 0b11);
+        dst->month = fromBCD(src->month, 0b1);
+        dst->year = fromBCD(src->year, 0b1111);
     }
 
     /**
@@ -53,13 +53,13 @@ implementation
         assert(src);
         assert(dst);
 
-        dst->seconds = fromBCD(src->seconds, 0b111);
-        dst->minutes = fromBCD(src->minutes, 0b111);
-        dst->hours = fromBCD(src->hours, 0b11);
-        dst->day = fromBCD(src->day, 0b0);
-        dst->date = fromBCD(src->date, 0b11);
-        dst->month = fromBCD(src->month, 0b1);
-        dst->year = fromBCD(src->year, 0b1111);
+        dst->seconds = toBCD(src->seconds);
+        dst->minutes = toBCD(src->minutes);
+        dst->hours = toBCD(src->hours);
+        dst->day = toBCD(src->day);
+        dst->date = toBCD(src->date);
+        dst->month = toBCD(src->month);
+        dst->year = toBCD(src->year);
     }
 
     command error_t Rtc.start(rtc_time_t *data)
