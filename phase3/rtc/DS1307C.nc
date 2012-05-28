@@ -3,7 +3,7 @@
 module DS1307C
 {
     provides interface Rtc;
-    uses interface HplDS1307;
+    uses interface HplDS1307 as Hpl;
 }
 
 #define STATE_INITIAL (0)
@@ -47,11 +47,11 @@ implementation
 
     command error_t Rtc.start(rtc_time_t *data)
     {
-        if (call HplDS1307.open() != SUCCESS) {
+        if (call Hpl.open() != SUCCESS) {
             return FAIL;
         }
 
-        return call HplDS1307.bulkRead(&registerBuffer);
+        return call Hpl.bulkRead(&registerBuffer);
     }
 
     command error_t Rtc.stop(void)
@@ -66,24 +66,24 @@ implementation
 
     task void closeHpl(void)
     {
-        call HplDS1307.close();
+        call Hpl.close();
     }
 
-    async event void HplDS1307.registerReadReady(uint8_t value)
+    async event void Hpl.registerReadReady(uint8_t value)
     {
         debug("Received value from RTC: %x\r", value);
         post closeHpl();
     }
 
-    async event void HplDS1307.registerWriteReady(void)
+    async event void Hpl.registerWriteReady(void)
     {
     }
 
-    async event void HplDS1307.bulkReadReady(void)
+    async event void Hpl.bulkReadReady(void)
     {
     }
 
-    async event void HplDS1307.bulkWriteReady(void)
+    async event void Hpl.bulkWriteReady(void)
     {
     }
 }

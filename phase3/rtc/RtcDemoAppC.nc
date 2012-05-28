@@ -24,7 +24,7 @@ implementation
     RtcDemoC.Timer -> Timer0;
     RtcDemoC.Rtc -> DS1307C;
 
-    DS1307C.HplDS1307 -> HplDS1307C;
+    DS1307C.Hpl -> HplDS1307C;
 
     HplDS1307C.Resource -> Atm128I2CMasterC;
     HplDS1307C.I2CPacket -> Atm128I2CMasterC;
