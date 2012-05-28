@@ -52,18 +52,32 @@ implementation
         call Timer.startPeriodic(POLL_INTERVAL_MS);
     }
 
-    command void UserInterface.setTimeGPS(timedate_t time __attribute__ ((unused)))
+
+#define MAX_STR_LEN (20) /* For example, "GPS: Tue 22.05.2012". */
+
+    /* Holds the strings to print to the GLCD. */
+    static char stringBuffer[MAX_STR_LEN];
+
+    command void UserInterface.setTimeGPS(timedate_t time)
     {
-        /* TODO */
-        call Glcd.drawText("GPS: Tue 22.05.2012", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 1);
-        call Glcd.drawText("           23:55:32", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 2);
+        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("GPS: Tue %02d.%02d.20%02d"),
+                   time.date, time.month, time.year);
+        call Glcd.drawText(stringBuffer, 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 1);
+
+        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("           %02d:%02d:%02d"),
+                   time.hours, time.minutes, time.seconds);
+        call Glcd.drawText(stringBuffer, 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 2);
     }
 
-    command void UserInterface.setTimeRTC(rtc_time_t time __attribute__ ((unused)))
+    command void UserInterface.setTimeRTC(rtc_time_t time)
     {
-        /* TODO */
-        call Glcd.drawText("RTC: Tue 22.05.2012", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 3);
-        call Glcd.drawText("           23:55:32", 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 4);
+        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("RTC: Tue %02d.%02d.20%02d"),
+                   time.date, time.month, time.year);
+        call Glcd.drawText(stringBuffer, 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 3);
+
+        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("           %02d:%02d:%02d"),
+                   time.hours, time.minutes, time.seconds);
+        call Glcd.drawText(stringBuffer, 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 4);
     }
 
     event void TouchScreen.coordinatesReady(void)
