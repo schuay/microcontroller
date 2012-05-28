@@ -58,10 +58,25 @@ implementation
     /* Holds the strings to print to the GLCD. */
     static char stringBuffer[MAX_STR_LEN];
 
+    static const char *dayName(uint8_t day)
+    {
+        switch (day)
+        {
+            case 1: return "Mon";
+            case 2: return "Tue";
+            case 3: return "Wed";
+            case 4: return "Thu";
+            case 5: return "Fri";
+            case 6: return "Sat";
+            case 7: return "Sun";
+            default: assert(0);
+        }
+    }
+
     command void UserInterface.setTimeGPS(timedate_t time)
     {
-        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("GPS: Tue %02d.%02d.20%02d"),
-                   time.date, time.month, time.year);
+        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("GPS: %s %02d.%02d.20%02d"),
+                   dayName(time.day), time.date, time.month, time.year);
         call Glcd.drawText(stringBuffer, 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 1);
 
         snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("           %02d:%02d:%02d"),
@@ -71,8 +86,8 @@ implementation
 
     command void UserInterface.setTimeRTC(rtc_time_t time)
     {
-        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("RTC: Tue %02d.%02d.20%02d"),
-                   time.date, time.month, time.year);
+        snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("RTC: %s %02d.%02d.20%02d"),
+                   dayName(time.day), time.date, time.month, time.year);
         call Glcd.drawText(stringBuffer, 2, BTN_GPS_Y1 + 1 + LETTER_HEIGHT * 3);
 
         snprintf_P(stringBuffer, MAX_STR_LEN, PSTR("           %02d:%02d:%02d"),
