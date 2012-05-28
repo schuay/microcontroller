@@ -1,9 +1,8 @@
 #ifndef GPSTIMERPARSER_H
 #define GPSTIMERPARSER_H
 
-typedef struct {
-    uint16_t time; /**< 123519 means 12:35:19 */
-    uint16_t date; /**< 230394 means 23.3.1994 */
-} timedate_t;
+#include "Rtc.h"
+
+typedef rtc_time_t timedate_t;
 
 #endif

@@ -13,6 +13,54 @@ module GpsTimerParserC
 
 implementation
 {
+    static inline bool isLeapYear(uint16_t year)
+    {
+        /* A year is a leap year if it is evenly divisible by 4,
+         * and either not evenly divisible by 100, or divisible by 400. */
+        return (((year % 4) == 0)
+                && (((year % 100) != 0) || ((year % 400) == 0)));
+    }
+
+    /**
+     * Returns the day of the week (1 = Monday, 7 = Sunday).
+     * The year argument only specifies the last 2 digits of the year,
+     * it is assumed that the century == 2000-2099.
+     * The algorithm is taken from
+     * http://java.dzone.com/articles/algorithm-week-how-determine
+     */
+    static uint8_t dayOfWeek(uint8_t date, uint8_t month, uint8_t year)
+    {
+        const uint8_t dowCentury = 6;
+        const uint8_t dowMonth[] = { 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 };
+        uint8_t monthNo;
+        uint8_t day;
+
+        assert(date > 0 && date < 32);
+        assert(month > 0 && month < 13);
+        assert(year < 100);
+
+        /* Add dow_century, the last 2 digits of the year,
+         * the last 2 digits of the year divided by 4, and the month number.
+         *
+         * For January and Febuary in leap years, the correct month number is
+         * (dow_month + 6) % 7.
+         *
+         * The result % 7 is the day of the week, with 0 = Sunday and 6 = Saturday.
+         */
+
+        monthNo = dowMonth[month - 1];
+        if (isLeapYear(2000 + year)) {
+            monthNo = (monthNo + 6) % 7;
+        }
+
+        day = (dowCentury + year + year / 4 + monthNo) % 7;
+        if (day == 0) {
+            day = 7;
+        }
+
+        return day;
+    }
+
     command void GpsTimerParser.startService(void)
     {
         call Uart.start();
@@ -74,6 +122,39 @@ implementation
         return i;
     }
 
+    /**
+     * Stores parsed time. 133542 represents 13:35:42.
+     */
+    static uint16_t time;
+
+    /**
+     * Stores parsed date. 230612 represents 23.6.2012.
+     */
+    static uint16_t date;
+
+    task void newTimeDateTask(void)
+    {
+        uint16_t t, d; /* Local copies of time and date. */
+        timedate_t timedate;
+
+        atomic {
+            t = time;
+            d = date;
+        }
+
+        timedate.seconds = t % 100;
+        timedate.minutes = (t / 100) % 100;
+        timedate.hours = t / 10000;
+
+        timedate.year = d % 100;
+        timedate.month = (d / 100) % 100;
+        timedate.date = d / 10000;
+
+        timedate.day = dayOfWeek(timedate.date, timedate.month, timedate.year);
+
+        signal GpsTimerParser.newTimeDate(timedate);
+    }
+
 #define STATE_INITIAL (0)
 #define STATE_HEADER (1)
 #define STATE_FIELDS (2)
@@ -90,7 +171,6 @@ implementation
     {
         static uint8_t state = 0;
         static uint8_t field = 0;
-        static timedate_t timedate;
         bool ok = TRUE;
 
         debug("Received: %d\r\n", byte);
@@ -129,9 +209,9 @@ implementation
                  * Conversion errors reset the state machine.
                  */
                 if (field == FIELD_TIME) {
-                    timedate.time = parseint(buffer, &ok);
+                    time = parseint(buffer, &ok);
                 } else if (field == FIELD_DATE) {
-                    timedate.time = parseint(buffer, &ok);
+                    time = parseint(buffer, &ok);
                 }
 
                 if (!ok) {
@@ -158,7 +238,7 @@ implementation
                 break;
             case '\n':
                 if (field >= FIELD_DATE) {
-                    signal GpsTimerParser.newTimeDate(timedate);
+                    post newTimeDateTask();
                 }
                 state = STATE_INITIAL;
                 break;
