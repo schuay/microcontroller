@@ -116,7 +116,7 @@ implementation
         atomic {
             inProgress = TRUE;
             addressBuffer = REG_SECONDS;
-            dataSize = sizeof(data);
+            dataSize = sizeof(*data);
             dataPtr = (uint8_t *)data;
             queuedOperation = READ;
         }
@@ -140,7 +140,7 @@ implementation
         atomic {
             inProgress = TRUE;
             addressBuffer = REG_SECONDS;
-            dataSize = 1;
+            dataSize = sizeof(*data);
             dataPtr = (uint8_t *)data;
             queuedOperation = WRITE;
         }
