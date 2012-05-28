@@ -9,6 +9,7 @@ module DS1307C
 #define STATE_INITIAL (0)
 #define STATE_START_READ (1)
 #define STATE_START_WRITE (2)
+#define STATE_GET_TIME (3)
 
 implementation
 {
@@ -84,13 +85,30 @@ implementation
     command error_t Rtc.stop(void)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
+        /* TODO */
         return FAIL;
     }
 
     command error_t Rtc.readTime(rtc_time_t *data)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
-        return FAIL;
+
+        assert(data);
+
+        if (call Hpl.open() != SUCCESS) {
+            return FAIL;
+        }
+
+        timePtr = data;
+        state = STATE_GET_TIME;
+
+        if (call Hpl.bulkRead(&registerBuffer) != SUCCESS) {
+            state = STATE_INITIAL;
+            call Hpl.close();
+            return FAIL;
+        };
+
+        return SUCCESS;
     }
 
     task void closeHpl(void)
@@ -132,6 +150,14 @@ implementation
                 state = STATE_INITIAL;
                 call Hpl.close();
             }
+            break;
+        case STATE_GET_TIME:
+            toRtcT(&registerBuffer, timePtr);
+
+            state = STATE_INITIAL;
+            call Hpl.close();
+
+            signal Rtc.timeReady();
             break;
         default:
             debug("Unexpected state %d\r", state);

@@ -22,6 +22,9 @@ implementation
     event void Rtc.timeReady(void)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
+        debug("%02d:%02d:%02d %02d.%02d.20%02d\r",
+            time.hours, time.minutes, time.seconds,
+            time.date, time.month, time.year);
     }
 
     event void Timer.fired()
