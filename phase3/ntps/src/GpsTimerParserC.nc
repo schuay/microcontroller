@@ -39,6 +39,7 @@ implementation
         assert(month > 0 && month < 13);
         assert(year < 100);
 
+
         /* Add dow_century, the last 2 digits of the year,
          * the last 2 digits of the year divided by 4, and the month number.
          *
@@ -100,10 +101,10 @@ implementation
         return (strncmp(buffer, s, MAX_FIELD_SIZE) == 0);
     }
 
-    static uint16_t parseint(const char *s, bool *ok)
+    static uint32_t parseint(const char *s, bool *ok)
     {
         char *endptr;
-        uint16_t i;
+        uint32_t i;
 
         errno = 0;
         i = strtol(s, &endptr, 10);
@@ -125,16 +126,16 @@ implementation
     /**
      * Stores parsed time. 133542 represents 13:35:42.
      */
-    static uint16_t time;
+    static uint32_t time;
 
     /**
      * Stores parsed date. 230612 represents 23.6.2012.
      */
-    static uint16_t date;
+    static uint32_t date;
 
     task void newTimeDateTask(void)
     {
-        uint16_t t, d; /* Local copies of time and date. */
+        uint32_t t, d; /* Local copies of time and date. */
         timedate_t timedate;
 
         atomic {
@@ -211,7 +212,7 @@ implementation
                 if (field == FIELD_TIME) {
                     time = parseint(buffer, &ok);
                 } else if (field == FIELD_DATE) {
-                    time = parseint(buffer, &ok);
+                    date = parseint(buffer, &ok);
                 }
 
                 if (!ok) {
