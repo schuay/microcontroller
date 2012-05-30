@@ -12,6 +12,7 @@ implementation
     components LedsC;
 
     components new TimerMilliC() as Timer0;
+    components new TimerMilliC() as Timer1;
     components TouchScreenC;
     components UserInterfaceC;
 
@@ -29,6 +30,7 @@ implementation
     NtpsC.GpsTimerParser -> GpsTimerParserC;
     NtpsC.Leds -> LedsC;
     NtpsC.Rtc -> DS1307C;
+    NtpsC.Timer -> Timer1;
 
     DS1307C.Hpl -> HplDS1307C;
 

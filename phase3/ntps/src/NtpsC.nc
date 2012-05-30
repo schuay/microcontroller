@@ -8,6 +8,7 @@ module NtpsC
     uses interface GpsTimerParser;
     uses interface Rtc;
     uses interface Leds;
+    uses interface Timer<TMilli> as Timer;
 }
 
 implementation
@@ -23,8 +24,7 @@ implementation
         call Rtc.start(&time);
         call GpsTimerParser.startService();
 
-        /* TODO: use a timer for this. */
-        call Rtc.readTime(&time);
+        call Timer.startPeriodic(1000);
     }
 
     event void UserInterface.setToGPSPressed(void)
@@ -49,5 +49,10 @@ implementation
             time.hours, time.minutes, time.seconds,
             time.date, time.month, time.year);
         call UserInterface.setTimeRTC(time);
+    }
+
+    event void Timer.fired()
+    {
+        call Rtc.readTime(&time);
     }
 }
