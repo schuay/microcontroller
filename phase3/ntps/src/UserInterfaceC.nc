@@ -57,20 +57,11 @@ implementation
 
     /* Holds the strings to print to the GLCD. */
     static char stringBuffer[MAX_STR_LEN];
+    static const char *dayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 
     static const char *dayName(uint8_t day)
     {
-        switch (day)
-        {
-            case 1: return "Mon";
-            case 2: return "Tue";
-            case 3: return "Wed";
-            case 4: return "Thu";
-            case 5: return "Fri";
-            case 6: return "Sat";
-            case 7: return "Sun";
-            default: assert(0);
-        }
+        return dayNames[day % 7];
     }
 
     command void UserInterface.setTimeGPS(timedate_t time)

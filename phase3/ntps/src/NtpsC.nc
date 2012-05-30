@@ -40,6 +40,7 @@ implementation
     event void GpsTimerParser.newTimeDate(timedate_t newTimeDate)
     {
         debug("%s\r\n", __PRETTY_FUNCTION__);
+
         call UserInterface.setTimeGPS(newTimeDate);
     }
 
