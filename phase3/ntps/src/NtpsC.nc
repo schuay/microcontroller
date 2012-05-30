@@ -14,6 +14,8 @@ module NtpsC
 implementation
 {
     static rtc_time_t time = { 0, 51, 15, 1, 1, 2, 10 };
+    static bool setToGPS = FALSE;
+    static bool setToOffset = FALSE;
 
     event void Boot.booted(void)
     {
@@ -30,11 +32,13 @@ implementation
     event void UserInterface.setToGPSPressed(void)
     {
         debug("Set to GPS pressed.\r\n");
+        setToGPS = TRUE;
     }
 
     event void UserInterface.setToOffsetPressed(void)
     {
         debug("Set to Offset pressed.\r\n");
+        setToOffset = TRUE;
     }
 
     event void GpsTimerParser.newTimeDate(timedate_t newTimeDate)
@@ -42,6 +46,17 @@ implementation
         debug("%s\r\n", __PRETTY_FUNCTION__);
 
         call UserInterface.setTimeGPS(newTimeDate);
+
+        if (setToGPS) {
+            time = newTimeDate;
+            call Rtc.start(&time);
+            setToGPS = FALSE;
+        } else if (setToOffset) {
+            time = newTimeDate;
+            /* TODO */
+            call Rtc.start(&time);
+            setToOffset = FALSE;
+        }
     }
 
     event void Rtc.timeReady(void)
