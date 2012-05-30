@@ -9,6 +9,10 @@ module NtpsC
     uses interface Rtc;
     uses interface Leds;
     uses interface Timer<TMilli> as Timer;
+    uses interface UdpSend as UdpSend;
+    uses interface UdpReceive as UdpReceive;
+    uses interface SplitControl as Control;
+    uses interface IpControl;
 }
 
 implementation
@@ -21,6 +25,10 @@ implementation
 
     event void Boot.booted(void)
     {
+        in_addr_t cip = { .bytes {IP}};
+        in_addr_t cnm = { .bytes {NETMASK}};
+        in_addr_t cgw = { .bytes {GATEWAY}};
+
         debug("%s\r\n", __PRETTY_FUNCTION__);
         debug("Node ID %d\r\n", TOS_NODE_ID);
 
@@ -29,6 +37,13 @@ implementation
         call GpsTimerParser.startService();
 
         call Timer.startPeriodic(1000);
+
+        /* Network setup. */
+        call IpControl.setIp(&cip);
+        call IpControl.setNetmask(&cnm);
+        call IpControl.setGateway(&cgw);
+
+        call Control.start();
     }
 
     event void UserInterface.setToGPSPressed(void)
@@ -135,5 +150,25 @@ implementation
     event void Timer.fired()
     {
         call Rtc.readTime(&time);
+    }
+
+    event void Control.stopDone(error_t error)
+    {
+        /* Ignored, won't happen. */
+    }
+
+    event void Control.startDone(error_t error)
+    {
+        debug("Ethernet started");
+    }
+
+    event void UdpSend.sendDone(error_t error)
+    {
+        debug("sendDone: %d\r", error);
+    }
+
+    event void UdpReceive.received(in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len)
+    {
+        debug("%s\r", __PRETTY_FUNCTION__);
     }
 }

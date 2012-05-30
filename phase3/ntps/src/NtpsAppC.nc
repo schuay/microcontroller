@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "UdpConfig.h"
 
 configuration NtpsAppC
 {
@@ -23,6 +24,12 @@ implementation
     components HplDS1307C;
     components DS1307C;
 
+    components new UdpC(UDP_PORT);
+    components Enc28j60C as EthernetC;
+    components LlcTransceiverC;
+    components IpTransceiverC;
+    components PingC;
+
     components StdoDebugC;
 
     NtpsC.Boot -> MainC.Boot;
@@ -31,6 +38,12 @@ implementation
     NtpsC.Leds -> LedsC;
     NtpsC.Rtc -> DS1307C;
     NtpsC.Timer -> Timer1;
+
+    NtpsC.UdpSend -> UdpC;
+    NtpsC.UdpReceive -> UdpC;
+    NtpsC.Control -> EthernetC;
+    LlcTransceiverC.Mac -> EthernetC;
+    NtpsC.IpControl -> IpTransceiverC;
 
     DS1307C.Hpl -> HplDS1307C;
 
@@ -44,4 +57,5 @@ implementation
     UserInterfaceC.Timer -> Timer0;
     UserInterfaceC.TouchScreen -> TouchScreenC.TouchScreen;
     UserInterfaceC.Glcd -> TouchScreenC.Glcd;
+
 }
