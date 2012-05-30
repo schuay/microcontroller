@@ -3,7 +3,7 @@
 interface GpsTimerParser
 {
     /**
-     ∗ Starts the parsing service of the GPS output stream.
+     * Starts the parsing service of the GPS output stream.
      */
     command void startService(void);
 
