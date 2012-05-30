@@ -21,8 +21,8 @@ implementation {
 	Enc28j60P.Resource -> SPI.Resource[0];
 	Enc28j60P.ssETH -> IO.PortB0;
 	Enc28j60P.rstETH -> IO.PortB4;
-	Enc28j60P.intETH -> HplAtm128InterruptC.Int0;
-	Enc28j60P.intPin -> IO.PortD0;
+	Enc28j60P.intETH -> HplAtm128InterruptC.Int2;
+	Enc28j60P.intPin -> IO.PortD2;
 	Enc28j60P.SplitControl = SplitControl;
 	Enc28j60P.Enc28j60Control = Enc28j60Control;
 }

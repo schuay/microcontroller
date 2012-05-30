@@ -10,6 +10,7 @@ module Enc28j60P {
 	provides interface Mac;
 	uses interface GeneralIO as ssETH;
 	uses interface GeneralIO as rstETH;
+	uses interface GeneralIO as intPin;
 	uses interface HplAtm128Interrupt as intETH;
 	uses interface SpiByte;
 	uses interface Resource;
@@ -337,7 +338,7 @@ implementation {
 		call Resource.release();
 
 		atomic {
-			if (call intETH.getValue() == FALSE) {
+			if (call intPin.get() == FALSE) {
 				post checkInterruptflag();
 			}
 		}
