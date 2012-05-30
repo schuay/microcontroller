@@ -41,7 +41,8 @@ implementation
 
 
         /* Add dow_century, the last 2 digits of the year,
-         * the last 2 digits of the year divided by 4, and the month number.
+         * the last 2 digits of the year divided by 4, the month number, and the
+         * date.
          *
          * For January and Febuary in leap years, the correct month number is
          * (dow_month + 6) % 7.
@@ -50,11 +51,11 @@ implementation
          */
 
         monthNo = dowMonth[month - 1];
-        if (isLeapYear(2000 + year)) {
+        if (isLeapYear(2000 + year) && month < 3) {
             monthNo = (monthNo + 6) % 7;
         }
 
-        day = (dowCentury + year + year / 4 + monthNo) % 7;
+        day = (dowCentury + year + year / 4 + monthNo + date) % 7;
         if (day == 0) {
             day = 7;
         }
