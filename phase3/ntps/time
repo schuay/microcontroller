@@ -1,3 +1,8 @@
 6.0h    Orientation, initial implementation
 0.5h    DS1307 datasheet
 5.0h    RTC implementation
+5.0h    Bug fixes, further implementation @ TILab
+6.0h    Network implementation, bug hunting @ TILab
+        Open issues: Defining a task (which includes a command call) breaks the application.
+                     This only seems to happen if the network stack is included.
+                     The 1s main timer stops firing after a while.
