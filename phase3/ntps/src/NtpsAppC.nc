@@ -28,7 +28,6 @@ implementation
     components Enc28j60C as EthernetC;
     components LlcTransceiverC;
     components IpTransceiverC;
-    components PingC;
 
     components StdoDebugC;
 
