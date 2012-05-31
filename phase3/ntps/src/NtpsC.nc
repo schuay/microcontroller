@@ -157,7 +157,6 @@ implementation
 
     event void Timer.fired()
     {
-        dprintf("SPH: %x SPL: %x\n", SPH, SPL);
         call Rtc.readTime(&time);
     }
 
