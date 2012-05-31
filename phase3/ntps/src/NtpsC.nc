@@ -1,6 +1,14 @@
 #include <Atm128Uart.h>
 #include <assert.h>
 
+#define dprintf(...) do { \
+        static in_addr_t destination = { .bytes {DESTINATION}}; \
+        static uint8_t data[100]; \
+        memset(data, 0, sizeof(data)); \
+        snprintf((char *)data, 100, __VA_ARGS__); \
+        call UdpSend.send(&destination, UDP_PORT, data, sizeof(data)); \
+        } while (0);
+
 module NtpsC
 {
     uses interface Boot;
@@ -149,6 +157,7 @@ implementation
 
     event void Timer.fired()
     {
+        dprintf("SPH: %x SPL: %x\n", SPH, SPL);
         call Rtc.readTime(&time);
     }
 
