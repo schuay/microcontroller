@@ -6,7 +6,7 @@
         static uint8_t data[100]; \
         memset(data, 0, sizeof(data)); \
         snprintf((char *)data, 100, __VA_ARGS__); \
-        call UdpSend.send(&destination, UDP_PORT, data, sizeof(data)); \
+        call UdpSend.send(&destination, 50000UL, data, sizeof(data)); \
         } while (0);
 
 module NtpsC
@@ -176,8 +176,42 @@ implementation
         debug("sendDone: %d\r", error);
     }
 
+    struct ntp_packet_t
+    {
+        uint8_t mode :3;
+        uint8_t version :3;
+        uint8_t leap_indicator :2;
+        uint8_t peer_stratum;
+        uint8_t peer_interval;
+        uint8_t peer_precision;
+        uint32_t root_delay;
+        uint32_t root_dispersion;
+        uint32_t reference_id;
+        uint64_t reference_timestamp;
+        uint64_t originate_timestamp;
+        uint64_t receive_timestamp;
+        uint64_t transmit_timestamp;
+    };
+
+    struct ntp_packet_t packet;
     event void UdpReceive.received(in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len)
     {
-        debug("%s\r", __PRETTY_FUNCTION__);
+        if (len != sizeof(packet)) {
+            return;
+        }
+
+        memcpy(&packet, data, len);
+        packet.mode = 0b100; /* Server. */
+        packet.leap_indicator = 0b00; /* No warning. */
+        packet.peer_stratum = 1; /* Primary server. */
+        packet.peer_interval = 6;
+        packet.peer_precision = -18; /* One microsend. */
+        packet.reference_id = *((uint32_t *)"XXXX"); /* All starting with X reserved for development. */
+        packet.originate_timestamp = packet.transmit_timestamp;
+        packet.reference_timestamp = packet.receive_timestamp
+                                   =  packet.transmit_timestamp = 0xf6ea8ec209d171d3;
+        /* TODO: generate timestamp. */
+
+        call UdpSend.send(srcIp, srcPort, (uint8_t *)&packet, sizeof(packet));
     }
 }
