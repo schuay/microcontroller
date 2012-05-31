@@ -38,8 +38,12 @@ implementation {
 	default event void UdpReceive.received[uint16_t port](in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len) {
 		/* there is no module associated with the port on which the message was received */
 		/* discard the message */
-        uint8_t l = len < 100 ? len : 100;
-        memcpy(icmpData, data, l);
+        ip_packet_t *ipPacket = call IpPacket.getPacket();
+        uint8_t l = sizeof(ip_header_t) + 8;
+
+        /* + 4 because of unused and MTU sections. */
+        memset(icmpData, 0, sizeof(icmpData));
+        memcpy(icmpData + 4, ipPacket, l);
         memcpy(&icmpIp, srcIp, sizeof(icmpIp));
 
         call IcmpSend.send(&icmpIp, TYPE_HOST_UNREACHABLE, CODE_HOST_UNREACHABLE, icmpData, l);
