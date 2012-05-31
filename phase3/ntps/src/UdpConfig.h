@@ -1,7 +1,7 @@
 #ifndef UDP_CONFIG_H
 #define UDP_CONFIG_H
 
-#define UDP_PORT	50000UL
+#define UDP_PORT	123UL
 #define DESTINATION	10,60,0,1
 
 #define IP		10,60,0,2
