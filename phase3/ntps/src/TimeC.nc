@@ -65,21 +65,24 @@ implementation
     }
 
 #define TIMESTAMP_01012000 (3155673600UL)
+#define MINS_PER_HOUR (60UL)
+#define HOURS_PER_DAY (24UL)
+#define DAYS_PER_YEAR (365UL)
+#define MONTHS_PER_YEAR (12UL)
 #define SECS_PER_MINUTE (60UL)
-#define SECS_PER_HOUR (SECS_PER_MINUTE * 60UL)
-#define SECS_PER_DAY (SECS_PER_HOUR * 24UL)
-#define SECS_PER_YEAR (SECS_PER_DAY * 365UL)
+#define SECS_PER_HOUR (SECS_PER_MINUTE * MINS_PER_HOUR)
+#define SECS_PER_DAY (SECS_PER_HOUR * HOURS_PER_DAY)
+#define SECS_PER_YEAR (SECS_PER_DAY * DAYS_PER_YEAR)
+
+    /* Stores sum of days in year in previous months.
+     * Cumulative sum of: { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 }
+     */
+    static const uint16_t days_until_month[] =
+        { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
     command void Time.toNtpTimestamp(uint32_t *dst, const rtc_time_t *src)
     {
         uint32_t ts = TIMESTAMP_01012000;
-        uint8_t days_in_year[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
-        uint8_t i;
-
-        /* Sum up days_in_year. */
-        for (i = 2; i < sizeof(days_in_year) / sizeof(days_in_year[0]); i++) {
-            days_in_year[i] += days_in_year[i - 1];
-        }
 
         /* Note: 2000 is represented as 0. */
         ts += SECS_PER_YEAR * src->year;
@@ -94,7 +97,7 @@ implementation
             ts -= SECS_PER_DAY;
         }
 
-        ts += SECS_PER_DAY * days_in_year[src->month - 1];
+        ts += SECS_PER_DAY * days_until_month[src->month - 1];
         ts += SECS_PER_DAY * (src->date - 1);
         ts += SECS_PER_HOUR * src->hours;
         ts += SECS_PER_MINUTE * src->minutes;
@@ -105,5 +108,43 @@ implementation
 
     command void Time.fromNtpTimestamp(rtc_time_t *dst, const uint32_t *src)
     {
+        uint32_t ts = *src - TIMESTAMP_01012000;
+        uint16_t days_in_year;
+
+        dst->seconds = ts % SECS_PER_MINUTE;
+        ts /= SECS_PER_MINUTE;
+
+        dst->minutes = ts % MINS_PER_HOUR;
+        ts /= MINS_PER_HOUR;
+
+        dst->hours = ts % HOURS_PER_DAY;
+        ts /= HOURS_PER_DAY;
+
+        /* ts is now a count of days. */
+
+        for (dst->year = 0; ; dst->year++) {
+            days_in_year = DAYS_PER_YEAR;
+            if (isLeapYear(dst->year)) {
+                days_in_year++;
+            }
+            if (days_in_year > ts) {
+                break;
+            } else {
+                ts -= days_in_year;
+            }
+        }
+
+        /* dst->year is now set correctly, and ts is the count of days passed in current year. */
+
+        for (dst->month = 1; dst->month < MONTHS_PER_YEAR; dst->month++) {
+            if (days_until_month[dst->month] > ts) {
+                break;
+            }
+        }
+        ts -= days_until_month[dst->month - 1];
+
+        dst->date = ts;
+
+        dst->day = call Time.dayOfWeek(dst->date, dst->month, dst->year);
     }
 }
