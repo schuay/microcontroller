@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <limits.h>
 
+#ifndef TEST
 module GpsTimerParserC
 {
     uses interface StdControl as Uart;
@@ -26,6 +27,7 @@ implementation
     {
         call Uart.stop();
     }
+#endif
 
 #define MAX_FIELD_SIZE (6) /* The longest fields we care about are date/time. */
 
@@ -85,15 +87,24 @@ implementation
      */
     static uint32_t date;
 
+#ifndef TEST
     task void newTimeDateTask(void)
+#else
+    timedate_t testTimedate;
+    void newTimeDateTask(void)
+#endif
     {
         uint32_t t, d; /* Local copies of time and date. */
         timedate_t timedate;
 
+#ifndef TEST
         atomic {
+#endif
             t = time;
             d = date;
+#ifndef TEST
         }
+#endif
 
         timedate.seconds = t % 100;
         timedate.minutes = (t / 100) % 100;
@@ -103,9 +114,15 @@ implementation
         timedate.month = (d / 100) % 100;
         timedate.date = d / 10000;
 
+#ifndef TEST
         timedate.day = call Time.dayOfWeek(timedate.date, timedate.month, timedate.year);
 
         signal GpsTimerParser.newTimeDate(timedate);
+#else
+        timedate.day = dayOfWeek(timedate.date, timedate.month, timedate.year);
+
+        testTimedate = timedate;
+#endif
     }
 
 #define STATE_INITIAL (0)
@@ -120,7 +137,11 @@ implementation
      * Ignores all except sentences that are valid for us (GPRMC),
      * and fields we need (time and date).
      */
+#ifndef TEST
     async event void UartStream.receivedByte(uint8_t byte)
+#else
+    void receivedByte(uint8_t byte)
+#endif
     {
         static uint8_t state = 0;
         static uint8_t field = 0;
@@ -191,7 +212,11 @@ implementation
                 break;
             case '\n':
                 if (field >= FIELD_DATE) {
+#ifndef TEST
                     post newTimeDateTask();
+#else
+                    newTimeDateTask();
+#endif
                 }
                 state = STATE_INITIAL;
                 break;
@@ -203,6 +228,7 @@ implementation
         }
     }
 
+#ifndef TEST
     async event void UartStream.sendDone(uint8_t *buf __attribute__ ((unused)),
                                          uint16_t len __attribute__ ((unused)),
                                          error_t error __attribute ((unused)))
@@ -217,3 +243,4 @@ implementation
         /* Not used. */
     }
 }
+#endif
