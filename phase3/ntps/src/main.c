@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
 
 #include "minunit.h"
 
@@ -40,12 +41,81 @@ static char *test_dayOfWeek_20501225(void)
     return 0;
 }
 
+static char *test_toNtpTimestamp_20000101_000000(void)
+{
+    uint32_t dst;
+    rtc_time_t src = { 0, 0, 0, 6, 1, 1, 0 };
+    toNtpTimestamp(&dst, &src);
+    mu_assert("test_toNtpTimestamp_20000101_000000",
+            dst == 3155673600UL);
+    return 0;
+}
+
+static char *test_toNtpTimestamp_20360207_000000(void)
+{
+    uint32_t dst;
+    rtc_time_t src = { 0, 0, 0, 4, 7, 2, 36 };
+    toNtpTimestamp(&dst, &src);
+    mu_assert("test_toNtpTimestamp_20360207_000000",
+            dst == 4294944000UL);
+    return 0;
+}
+
+static char *test_toNtpTimestamp_20120601_122211(void)
+{
+    uint32_t dst;
+    rtc_time_t src = { 11, 22, 12, 5, 1, 6, 12 };
+    toNtpTimestamp(&dst, &src);
+    mu_assert("test_toNtpTimestamp_20120601_122211",
+            dst == 3547542131UL);
+    return 0;
+}
+
+static char *test_fromNtpTimestamp_20000101_000000(void)
+{
+    uint32_t src = 3155673600UL;
+    rtc_time_t dst;
+    rtc_time_t expected = { 0, 0, 0, 6, 1, 1, 0 };
+    fromNtpTimestamp(&dst, &src);
+    mu_assert("test_fromNtpTimestamp_20000101_000000",
+            memcmp(&dst, &expected, sizeof(dst)) == 0);
+    return 0;
+}
+
+static char *test_fromNtpTimestamp_20360207_000000(void)
+{
+    uint32_t src = 4294944000UL;
+    rtc_time_t dst;
+    rtc_time_t expected = { 0, 0, 0, 4, 7, 2, 36 };
+    fromNtpTimestamp(&dst, &src);
+    mu_assert("test_fromNtpTimestamp_20360207_000000",
+            memcmp(&dst, &expected, sizeof(dst)) == 0);
+    return 0;
+}
+
+static char *test_fromNtpTimestamp_20120601_122211(void)
+{
+    uint32_t src = 3547542131UL;
+    rtc_time_t dst;
+    rtc_time_t expected = { 11, 22, 12, 5, 1, 6, 12 };
+    fromNtpTimestamp(&dst, &src);
+    mu_assert("test_fromNtpTimestamp_20120601_122211",
+            memcmp(&dst, &expected, sizeof(dst)) == 0);
+    return 0;
+}
+
 static char *all_tests(void)
 {
     mu_run_test(test_dayOfWeek_20000101);
     mu_run_test(test_dayOfWeek_20000322);
     mu_run_test(test_dayOfWeek_20120322);
     mu_run_test(test_dayOfWeek_20501225);
+    mu_run_test(test_toNtpTimestamp_20000101_000000);
+    mu_run_test(test_toNtpTimestamp_20360207_000000);
+    mu_run_test(test_toNtpTimestamp_20120601_122211);
+    mu_run_test(test_fromNtpTimestamp_20000101_000000);
+    mu_run_test(test_fromNtpTimestamp_20360207_000000);
+    mu_run_test(test_fromNtpTimestamp_20120601_122211);
     return 0;
 }
 
