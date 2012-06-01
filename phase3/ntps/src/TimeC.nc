@@ -125,6 +125,8 @@ implementation
     {
         uint32_t ts = *src - TIMESTAMP_01012000;
         uint16_t days_in_year;
+        uint16_t days_until_month_cur = 0;
+        uint8_t leap_offset;
 
         dst->seconds = ts % SECS_PER_MINUTE;
         ts /= SECS_PER_MINUTE;
@@ -139,9 +141,9 @@ implementation
 
         for (dst->year = 0; ; dst->year++) {
             days_in_year = DAYS_PER_YEAR;
-            if (isLeapYear(dst->year)) {
-                days_in_year++;
-            }
+            leap_offset = isLeapYear(dst->year) ? 1 : 0;
+            days_in_year += leap_offset;
+
             if (days_in_year > ts) {
                 break;
             } else {
@@ -152,13 +154,18 @@ implementation
         /* dst->year is now set correctly, and ts is the count of days passed in current year. */
 
         for (dst->month = 1; dst->month < MONTHS_PER_YEAR; dst->month++) {
-            if (days_until_month[dst->month] > ts) {
+            uint16_t days_until_month_next = days_until_month[dst->month];
+            if (dst->month > 2) {
+                days_until_month_next += leap_offset;
+            }
+            if (days_until_month_next > ts) {
                 break;
             }
+            days_until_month_cur = days_until_month_next;
         }
-        ts -= days_until_month[dst->month - 1];
+        ts -= days_until_month_cur;
 
-        dst->date = ts;
+        dst->date = ts + 1;
 
 #ifndef TEST
         dst->day = call Time.dayOfWeek(dst->date, dst->month, dst->year);
