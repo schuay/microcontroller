@@ -14,6 +14,8 @@
 
 #include "Rtc.h"
 #include "TimeC.nc"
+#include "HplDS1307.h"
+#include "DS1307C.nc"
 
 int tests_run = 0;
 
@@ -104,6 +106,50 @@ static char *test_fromNtpTimestamp_20120601_122211(void)
     return 0;
 }
 
+static char *test_fromBCD(void)
+{
+    mu_assert("test_fromBCD", fromBCD(0x99, 0xff) == 99);
+    return 0;
+}
+
+static char *test_fromBCDMasked(void)
+{
+    mu_assert("test_fromBCD", fromBCD(0x99, 0x01) == 19);
+    return 0;
+}
+
+static char *test_toBCD(void)
+{
+    mu_assert("test_fromBCD", toBCD(99) == 0x99);
+    return 0;
+}
+
+static char *test_toRtcT(void)
+{
+    ds1307_time_mem_t src = { .seconds = 0x11, .clockHalt = 0x1, .minutes = 0x22,
+                              .hours = 0x12, .hour_mode = 0x0, .day = 0x5, .date = 0x1,
+                              .month = 0x6, .year = 0x12, .rs = 0x3, .sqwe = 0x1, .out = 0x1 };
+    rtc_time_t dst;
+    rtc_time_t expected = { 11, 22, 12, 5, 1, 6, 12 };
+    toRtcT(&src, &dst);
+    mu_assert("test_toRtcT",
+            memcmp(&dst, &expected, sizeof(dst)) == 0);
+    return 0;
+}
+
+static char *test_toDS1307T(void)
+{
+    rtc_time_t src = { 11, 22, 12, 5, 1, 6, 12 };
+    ds1307_time_mem_t dst = { .clockHalt = 0x1, .hour_mode = 0x0, .rs = 0x3, .sqwe = 0x1, .out = 0x1 };
+    ds1307_time_mem_t expected = { .seconds = 0x11, .clockHalt = 0x1, .minutes = 0x22,
+                                   .hours = 0x12, .hour_mode = 0x0, .day = 0x5, .date = 0x1,
+                                   .month = 0x6, .year = 0x12, .rs = 0x3, .sqwe = 0x1, .out = 0x1 };
+    toDS1307T(&src, &dst);
+    mu_assert("test_toDS1307T",
+            memcmp(&dst, &expected, sizeof(dst)) == 0);
+    return 0;
+}
+
 static char *all_tests(void)
 {
     mu_run_test(test_dayOfWeek_20000101);
@@ -116,6 +162,11 @@ static char *all_tests(void)
     mu_run_test(test_fromNtpTimestamp_20000101_000000);
     mu_run_test(test_fromNtpTimestamp_20360207_000000);
     mu_run_test(test_fromNtpTimestamp_20120601_122211);
+    mu_run_test(test_fromBCD);
+    mu_run_test(test_fromBCDMasked);
+    mu_run_test(test_toBCD);
+    mu_run_test(test_toRtcT);
+    mu_run_test(test_toDS1307T);
     return 0;
 }
 

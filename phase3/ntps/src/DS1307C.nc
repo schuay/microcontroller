@@ -1,3 +1,4 @@
+#ifndef TEST
 #include <assert.h>
 
 module DS1307C
@@ -19,6 +20,7 @@ implementation
     static rtc_time_t *timePtr;
     static uint8_t state = STATE_INITIAL;
 
+#endif
     /**
      * Converts a binary coded decimal to normal representation.
      * The number can have at most two digits. The lower nibble
@@ -75,6 +77,7 @@ implementation
         dst->year = toBCD(src->year);
     }
 
+#ifndef TEST
     command error_t Rtc.start(rtc_time_t *data)
     {
         debug("%s\r", __PRETTY_FUNCTION__);
@@ -217,3 +220,4 @@ implementation
         }
     }
 }
+#endif
