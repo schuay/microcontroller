@@ -7,62 +7,13 @@ module GpsTimerParserC
     uses interface StdControl as Uart;
     uses interface UartStream;
     uses interface UartControl;
+    uses interface Time;
 
     provides interface GpsTimerParser;
 }
 
 implementation
 {
-    static inline bool isLeapYear(uint16_t year)
-    {
-        /* A year is a leap year if it is evenly divisible by 4,
-         * and either not evenly divisible by 100, or divisible by 400. */
-        return (((year % 4) == 0)
-                && (((year % 100) != 0) || ((year % 400) == 0)));
-    }
-
-    /**
-     * Returns the day of the week (1 = Monday, 7 = Sunday).
-     * The year argument only specifies the last 2 digits of the year,
-     * it is assumed that the century == 2000-2099.
-     * The algorithm is taken from
-     * http://java.dzone.com/articles/algorithm-week-how-determine
-     */
-    static uint8_t dayOfWeek(uint8_t date, uint8_t month, uint8_t year)
-    {
-        const uint8_t dowCentury = 6;
-        const uint8_t dowMonth[] = { 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 };
-        uint8_t monthNo;
-        uint8_t day;
-
-        assert(date > 0 && date < 32);
-        assert(month > 0 && month < 13);
-        assert(year < 100);
-
-
-        /* Add dow_century, the last 2 digits of the year,
-         * the last 2 digits of the year divided by 4, the month number, and the
-         * date.
-         *
-         * For January and Febuary in leap years, the correct month number is
-         * (dow_month + 6) % 7.
-         *
-         * The result % 7 is the day of the week, with 0 = Sunday and 6 = Saturday.
-         */
-
-        monthNo = dowMonth[month - 1];
-        if (isLeapYear(2000 + year) && month < 3) {
-            monthNo = (monthNo + 6) % 7;
-        }
-
-        day = (dowCentury + year + year / 4 + monthNo + date) % 7;
-        if (day == 0) {
-            day = 7;
-        }
-
-        return day;
-    }
-
     command void GpsTimerParser.startService(void)
     {
         call Uart.start();
@@ -152,7 +103,7 @@ implementation
         timedate.month = (d / 100) % 100;
         timedate.date = d / 10000;
 
-        timedate.day = dayOfWeek(timedate.date, timedate.month, timedate.year);
+        timedate.day = call Time.dayOfWeek(timedate.date, timedate.month, timedate.year);
 
         signal GpsTimerParser.newTimeDate(timedate);
     }

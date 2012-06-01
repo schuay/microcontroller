@@ -30,6 +30,8 @@ implementation
     components IpTransceiverC;
     components PingC;
 
+    components TimeC;
+
     components StdoDebugC;
 
     NtpsC.Boot -> MainC.Boot;
@@ -53,6 +55,7 @@ implementation
     GpsTimerParserC.UartStream -> UartDevC;
     GpsTimerParserC.UartControl -> UartDevC.UartControl;
     GpsTimerParserC.Uart -> UartDevC;
+    GpsTimerParserC.Time -> TimeC;
 
     UserInterfaceC.Timer -> Timer0;
     UserInterfaceC.TouchScreen -> TouchScreenC.TouchScreen;
