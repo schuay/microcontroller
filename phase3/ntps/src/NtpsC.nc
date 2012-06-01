@@ -156,23 +156,30 @@ implementation
     event void UdpReceive.received(in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len)
     {
         uint32_t timestamp = 0;
+        uint32_t networkTimestamp;
 
         if (len != sizeof(packet)) {
             return;
         }
 
         call Time.toNtpTimestamp(&timestamp, &time);
+        networkTimestamp = htonl(timestamp);
 
-        memcpy(&packet, data, len);
-        packet.mode = 0b100; /* Server. */
-        packet.leap_indicator = 0b00; /* No warning. */
+        memcpy(&packet, data, sizeof(packet));
+
+        packet.mode = 4; /* Server. */
+        /* packet.version is sent back unchanged. */
+        packet.leap_indicator = 0; /* No warning. */
         packet.peer_stratum = 1; /* Primary server. */
-        packet.peer_interval = 6;
-        packet.peer_precision = -18; /* One microsend. */
+        /* packet.peer_interval is sent back unchanged. */
+        packet.peer_precision = -18; /* One microsecond. */
+        /* packet.root_delay is sent back unchanged. */
+        /* packet.root_dispersion is sent back unchanged. */
         packet.reference_id = *((uint32_t *)"XXXX"); /* All starting with X reserved for development. */
+        packet.reference_timestamp = networkTimestamp;
         packet.originate_timestamp = packet.transmit_timestamp;
-        packet.reference_timestamp = packet.receive_timestamp
-                                   = packet.transmit_timestamp = htonl(timestamp); /* TODO: ensure we hit the seconds field. */
+        packet.receive_timestamp = networkTimestamp;
+        packet.transmit_timestamp = networkTimestamp;
 
         call UdpSend.send(srcIp, srcPort, (uint8_t *)&packet, sizeof(packet));
     }
