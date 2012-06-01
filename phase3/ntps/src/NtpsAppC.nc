@@ -12,10 +12,14 @@ implementation
 
     components LedsC;
 
+#ifndef NOEXTRAS
     components new TimerMilliC() as Timer0;
+#endif
     components new TimerMilliC() as Timer1;
+#ifndef NOEXTRAS
     components TouchScreenC;
     components UserInterfaceC;
+#endif
 
     components Atm128Uart0C as UartDevC;
     components GpsTimerParserC;
@@ -24,29 +28,35 @@ implementation
     components HplDS1307C;
     components DS1307C;
 
+#ifndef NOEXTRAS
     components new UdpC(UDP_PORT);
     components Enc28j60C as EthernetC;
     components LlcTransceiverC;
     components IpTransceiverC;
     components PingC;
+#endif
 
     components TimeC;
 
     components StdoDebugC;
 
     NtpsC.Boot -> MainC.Boot;
+#ifndef NOEXTRAS
     NtpsC.UserInterface -> UserInterfaceC;
+#endif
     NtpsC.GpsTimerParser -> GpsTimerParserC;
     NtpsC.Leds -> LedsC;
     NtpsC.Rtc -> DS1307C;
     NtpsC.Timer -> Timer1;
     NtpsC.Time -> TimeC;
 
+#ifndef NOEXTRAS
     NtpsC.UdpSend -> UdpC;
     NtpsC.UdpReceive -> UdpC;
     NtpsC.Control -> EthernetC;
     LlcTransceiverC.Mac -> EthernetC;
     NtpsC.IpControl -> IpTransceiverC;
+#endif
 
     DS1307C.Hpl -> HplDS1307C;
 
@@ -58,8 +68,9 @@ implementation
     GpsTimerParserC.Uart -> UartDevC;
     GpsTimerParserC.Time -> TimeC;
 
+#ifndef NOEXTRAS
     UserInterfaceC.Timer -> Timer0;
     UserInterfaceC.TouchScreen -> TouchScreenC.TouchScreen;
     UserInterfaceC.Glcd -> TouchScreenC.Glcd;
-
+#endif
 }

@@ -12,17 +12,21 @@
 module NtpsC
 {
     uses interface Boot;
+#ifndef NOEXTRAS
     uses interface UserInterface;
+#endif
     uses interface GpsTimerParser;
     uses interface Rtc;
     uses interface Leds;
     uses interface Timer<TMilli> as Timer;
     uses interface Time;
 
+#ifndef NOEXTRAS
     uses interface UdpSend as UdpSend;
     uses interface UdpReceive as UdpReceive;
     uses interface SplitControl as Control;
     uses interface IpControl;
+#endif
 }
 
 implementation
@@ -35,6 +39,7 @@ implementation
 
     event void Boot.booted(void)
     {
+#ifndef NOEXTRAS
         in_addr_t cip = { .bytes {IP}};
         in_addr_t cnm = { .bytes {NETMASK}};
         in_addr_t cgw = { .bytes {GATEWAY}};
@@ -43,19 +48,23 @@ implementation
         debug("Node ID %d\r\n", TOS_NODE_ID);
 
         call UserInterface.init();
+#endif
         call Rtc.start(&time);
         call GpsTimerParser.startService();
 
         call Timer.startPeriodic(1000);
 
+#ifndef NOEXTRAS
         /* Network setup. */
         call IpControl.setIp(&cip);
         call IpControl.setNetmask(&cnm);
         call IpControl.setGateway(&cgw);
 
         call Control.start();
+#endif
     }
 
+#ifndef NOEXTRAS
     event void UserInterface.setToGPSPressed(void)
     {
         debug("Set to GPS pressed.\r\n");
@@ -67,12 +76,17 @@ implementation
         debug("Set to Offset pressed.\r\n");
         setToOffset = TRUE;
     }
+#endif
 
     event void GpsTimerParser.newTimeDate(timedate_t newTimeDate)
     {
         debug("%s\r\n", __PRETTY_FUNCTION__);
 
+#ifndef NOEXTRAS
         call UserInterface.setTimeGPS(newTimeDate);
+#else
+        call Leds.led0Toggle();
+#endif
 
         if (setToGPS) {
             time = newTimeDate;
@@ -103,7 +117,11 @@ implementation
         debug("%02d:%02d:%02d %02d.%02d.20%02d\r",
             time.hours, time.minutes, time.seconds,
             time.date, time.month, time.year);
+#ifndef NOEXTRAS
         call UserInterface.setTimeRTC(time);
+#else
+        call Leds.led1Toggle();
+#endif
     }
 
     event void Timer.fired()
@@ -111,6 +129,7 @@ implementation
         call Rtc.readTime(&time);
     }
 
+#ifndef NOEXTRAS
     event void Control.stopDone(error_t error)
     {
         /* Ignored, won't happen. */
@@ -183,4 +202,5 @@ implementation
 
         call UdpSend.send(srcIp, srcPort, (uint8_t *)&packet, sizeof(packet));
     }
+#endif
 }
