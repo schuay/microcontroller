@@ -58,18 +58,17 @@ implementation
     static uint32_t parseint(const char *s, bool *ok)
     {
         char *endptr;
-        uint32_t i;
+        unsigned long i;
 
         errno = 0;
-        i = strtol(s, &endptr, 10);
+        i = strtoul(s, &endptr, 10);
 
-        if ((errno == ERANGE && (i == LONG_MAX || i == LONG_MIN))
-                || (errno != 0 && i == 0)) {
+        if ((errno == ERANGE && i == ULONG_MAX) || (errno != 0 && i == 0)) {
             *ok = FALSE;
             return 0;
         }
 
-        if (endptr == s) {
+        if (*endptr != '\0') {
             *ok = FALSE;
             return 0;
         }
@@ -167,6 +166,8 @@ implementation
             } else if (byte == ',' && buffer_equals("GPRMC")) {
                 state = STATE_FIELDS;
                 buffer_clear();
+            } else if (byte == '$') {
+                buffer_clear();
             } else {
                 state = STATE_INITIAL;
             }
@@ -211,7 +212,7 @@ implementation
                 buffer_clear();
                 break;
             case '\n':
-                if (field >= FIELD_DATE) {
+                if (field > FIELD_DATE) {
 #ifndef TEST
                     post newTimeDateTask();
 #else
