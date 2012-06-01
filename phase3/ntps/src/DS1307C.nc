@@ -19,11 +19,22 @@ implementation
     static rtc_time_t *timePtr;
     static uint8_t state = STATE_INITIAL;
 
+    /**
+     * Converts a binary coded decimal to normal representation.
+     * The number can have at most two digits. The lower nibble
+     * represents 10^0, the high nibble 10^1.
+     * Since the higher nibble may also represent further unrelated
+     * information, it is masked using mask.
+     */
     static inline uint8_t fromBCD(uint8_t from, uint8_t mask)
     {
         return ((from >> 4) & mask) * 10 + (from & 0b1111);
     }
 
+    /**
+     * Converts a number to binary coded decimal representation.
+     * from must be between 0 and 99 (inclusive).
+     */
     static inline uint8_t toBCD(uint8_t from)
     {
         return ((from / 10) << 4) + (from % 10);
