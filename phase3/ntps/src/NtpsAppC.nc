@@ -40,6 +40,7 @@ implementation
     NtpsC.Leds -> LedsC;
     NtpsC.Rtc -> DS1307C;
     NtpsC.Timer -> Timer1;
+    NtpsC.Time -> TimeC;
 
     NtpsC.UdpSend -> UdpC;
     NtpsC.UdpReceive -> UdpC;

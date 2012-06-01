@@ -64,8 +64,43 @@ implementation
         return day;
     }
 
+#define TIMESTAMP_01012000 (3155673600UL)
+#define SECS_PER_MINUTE (60UL)
+#define SECS_PER_HOUR (SECS_PER_MINUTE * 60UL)
+#define SECS_PER_DAY (SECS_PER_HOUR * 24UL)
+#define SECS_PER_YEAR (SECS_PER_DAY * 365UL)
+
     command void Time.toNtpTimestamp(uint32_t *dst, const rtc_time_t *src)
     {
+        uint32_t ts = TIMESTAMP_01012000;
+        uint8_t days_in_year[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
+        uint8_t i;
+
+        /* Sum up days_in_year. */
+        for (i = 2; i < sizeof(days_in_year) / sizeof(days_in_year[0]); i++) {
+            days_in_year[i] += days_in_year[i - 1];
+        }
+
+        /* Note: 2000 is represented as 0. */
+        ts += SECS_PER_YEAR * src->year;
+
+        /* Add a day for each leap year which occurred between 2000 and src->year.
+         * ((...) + 1) because 2000 itself is a leap year. */
+        ts += SECS_PER_DAY * ((src->year / 4) + 1);
+
+        /* The previous calculation also adds a day if the current year is a leap year.
+         * If however src->month < 3, this is incorrect and we need to subtract it. */
+        if (isLeapYear(src->year) && src->month < 3) {
+            ts -= SECS_PER_DAY;
+        }
+
+        ts += SECS_PER_DAY * days_in_year[src->month - 1];
+        ts += SECS_PER_DAY * (src->date - 1);
+        ts += SECS_PER_HOUR * src->hours;
+        ts += SECS_PER_MINUTE * src->minutes;
+        ts += src->seconds;
+
+        *dst = ts;
     }
 
     command void Time.fromNtpTimestamp(rtc_time_t *dst, const uint32_t *src)

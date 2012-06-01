@@ -17,6 +17,8 @@ module NtpsC
     uses interface Rtc;
     uses interface Leds;
     uses interface Timer<TMilli> as Timer;
+    uses interface Time;
+
     uses interface UdpSend as UdpSend;
     uses interface UdpReceive as UdpReceive;
     uses interface SplitControl as Control;
@@ -147,49 +149,6 @@ implementation
         timedate->year -= delta_year;
     }
 
-#define TIMESTAMP_01012000 (3155673600ULL)
-#define SECS_PER_HOUR (3600ULL)
-#define SECS_PER_DAY (86400ULL)
-#define SECS_PER_YEAR (31536000ULL)
-#define STARTING_YEAR (00)
-    static uint64_t toNTPTimestamp(const rtc_time_t *t)
-    {
-        uint8_t i;
-        uint64_t netTS = 0; /* Network byte order. */
-        uint64_t ts = TIMESTAMP_01012000;
-        uint8_t *n = &netTS;
-        uint8_t *m = &ts;
-        uint8_t days_in_year[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 };
-
-        /* Sum up the days in a year. */
-        for (i = 1; i < sizeof(days_in_year) / sizeof(days_in_year[0]); i++) {
-            days_in_year[i] += days_in_year[i - 1];
-        }
-
-        ts += SECS_PER_YEAR * (t->year - STARTING_YEAR);
-
-        /* Leap years. */
-        ts += SECS_PER_DAY * ((t->year - STARTING_YEAR - 1) / 4);
-
-        ts += SECS_PER_DAY * days_in_year[t->month - 1];
-
-        /* Leap years. */
-        if (t->year % 4 == 0 && t->month > 2) {
-            ts += SECS_PER_DAY;
-        }
-
-        ts += SECS_PER_DAY * t->date;
-        ts += SECS_PER_HOUR * t->hours;
-        ts += t->seconds;
-
-        /* hton the timestamp. */
-        for (i = 0; i < sizeof(ts); i++) {
-            n[sizeof(ts) - 1 - i] = m[i];
-        }
-
-        return netTS;
-    }
-
     event void Rtc.timeReady(void)
     {
         debug("%02d:%02d:%02d %02d.%02d.20%02d\r",
@@ -235,12 +194,25 @@ implementation
         uint64_t transmit_timestamp;
     };
 
+    /**
+     * Converts hostlong from host to network byte order.
+     */
+    static uint32_t htonl(uint32_t hostlong)
+    {
+        /* TODO */
+        return hostlong;
+    }
+
     struct ntp_packet_t packet;
     event void UdpReceive.received(in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len)
     {
+        uint32_t timestamp = 0;
+
         if (len != sizeof(packet)) {
             return;
         }
+
+        call Time.toNtpTimestamp(&timestamp, &time);
 
         memcpy(&packet, data, len);
         packet.mode = 0b100; /* Server. */
@@ -251,7 +223,7 @@ implementation
         packet.reference_id = *((uint32_t *)"XXXX"); /* All starting with X reserved for development. */
         packet.originate_timestamp = packet.transmit_timestamp;
         packet.reference_timestamp = packet.receive_timestamp
-                                   = packet.transmit_timestamp = toNTPTimestamp(&time) >> 32; /* Last 4 bits are fractional part. */
+                                   = packet.transmit_timestamp = htonl(timestamp); /* TODO: ensure we hit the seconds field. */
 
         call UdpSend.send(srcIp, srcPort, (uint8_t *)&packet, sizeof(packet));
     }
