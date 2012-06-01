@@ -1,3 +1,5 @@
+#ifndef TEST
+
 module TimeC
 {
     provides interface Time;
@@ -5,6 +7,7 @@ module TimeC
 
 implementation
 {
+#endif
     static inline bool isLeapYear(uint16_t year)
     {
         /* A year is a leap year if it is evenly divisible by 4,
@@ -29,7 +32,11 @@ implementation
      * The algorithm is taken from
      * http://java.dzone.com/articles/algorithm-week-how-determine
      */
+#ifndef TEST
     command uint8_t Time.dayOfWeek(uint8_t date, uint8_t month, uint8_t year)
+#else
+    uint8_t dayOfWeek(uint8_t date, uint8_t month, uint8_t year)
+#endif
     {
         const uint8_t dowCentury = 6;
         const uint8_t dowMonth[] = { 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 };
@@ -80,7 +87,11 @@ implementation
     static const uint16_t days_until_month[] =
         { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
+#ifndef TEST
     command void Time.toNtpTimestamp(uint32_t *dst, const rtc_time_t *src)
+#else
+    void toNtpTimestamp(uint32_t *dst, const rtc_time_t *src)
+#endif
     {
         uint32_t ts = TIMESTAMP_01012000;
 
@@ -106,7 +117,11 @@ implementation
         *dst = ts;
     }
 
+#ifndef TEST
     command void Time.fromNtpTimestamp(rtc_time_t *dst, const uint32_t *src)
+#else
+    void fromNtpTimestamp(rtc_time_t *dst, const uint32_t *src)
+#endif
     {
         uint32_t ts = *src - TIMESTAMP_01012000;
         uint16_t days_in_year;
@@ -145,6 +160,12 @@ implementation
 
         dst->date = ts;
 
+#ifndef TEST
         dst->day = call Time.dayOfWeek(dst->date, dst->month, dst->year);
+#else
+        dst->day = dayOfWeek(dst->date, dst->month, dst->year);
+#endif
     }
+#ifndef TEST
 }
+#endif
