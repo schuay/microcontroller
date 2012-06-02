@@ -21,6 +21,7 @@ implementation
 
         call UartControl.setSpeed(4800);
         call UartControl.setParity(TOS_UART_PARITY_NONE);
+        call UartStream.enableReceiveInterrupt();
     }
 
     command void GpsTimerParser.stopService(void)

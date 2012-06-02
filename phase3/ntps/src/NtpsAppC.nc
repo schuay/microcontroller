@@ -7,6 +7,8 @@ configuration NtpsAppC
 
 implementation
 {
+    components StdoDebugC; /* ECS implementation forces us to defines
+                            * this before PlatformSerialC. */
     components MainC;
     components NtpsC;
 
@@ -21,7 +23,7 @@ implementation
     components UserInterfaceC;
 #endif
 
-    components Atm128Uart0C as UartDevC;
+    components PlatformSerialC as UartDevC;
     components GpsTimerParserC;
 
     components new Atm128I2CMasterC();
@@ -37,8 +39,6 @@ implementation
 #endif
 
     components TimeC;
-
-    components StdoDebugC;
 
     NtpsC.Boot -> MainC.Boot;
 #ifndef NOEXTRAS
