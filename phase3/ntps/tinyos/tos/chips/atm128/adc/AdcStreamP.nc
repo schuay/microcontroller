@@ -205,7 +205,7 @@ implementation {
 	  }
 	else
 	  {
-            uint16_t tmp_count;
+            uint16_t tmp_count __attribute__ ((unused));
 	    bufferQueue[client] = entry->next;
 	    if (!bufferQueue[client])
 	      bufferQueueEnd[client] = &bufferQueue[client];

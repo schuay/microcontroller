@@ -218,7 +218,7 @@ implementation {
   error_t sendNextPart() {
     uint16_t end;
     uint16_t tmpPos;
-    uint16_t myLen;
+    uint16_t myLen __attribute__ ((unused));
     uint8_t* COUNT_NOK(myLen) tx;
     uint8_t* COUNT_NOK(myLen) rx;
     
@@ -338,7 +338,7 @@ implementation {
      sendNextPart();
    }
    else {
-     uint8_t discard;
+     uint8_t discard __attribute__ ((unused));
      uint16_t  myLen;
      uint8_t* COUNT_NOK(myLen) rx;
      uint8_t* COUNT_NOK(myLen) tx;

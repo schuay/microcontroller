@@ -32,35 +32,26 @@
 /**
  * @author Alec Woo <awoo@archrock.com>
  * @author Jonathan Hui <jhui@archrock.com>
- * @version $Revision: 1.4 $ $Date: 2006-12-12 18:23:02 $
+ * @version $Revision: 1.4 $ $Date: 2006-12-12 18:23:42 $
  */
 
-#include <Atm128Uart.h>
-
-configuration Atm128Uart0C {
-  provides interface UartControl;
+configuration PlatformSerialC {
+  
   provides interface StdControl;
-  provides interface UartByte;
   provides interface UartStream;
-  uses interface Counter<TMicro, uint32_t>;
-
+  provides interface UartByte;
+  provides interface UartControl;
+  
 }
+implementation {
 
-implementation{
-
-  components new Atm128UartP() as UartP;
-  StdControl = UartP;
-  UartByte = UartP;
-  UartStream = UartP;
-  UartP.Counter = Counter;
-
-  components HplAtm128UartC as HplUartC;
-  UartP.HplUartTxControl -> HplUartC.Uart0TxControl;
-  UartP.HplUartRxControl -> HplUartC.Uart0RxControl;
-  UartP.HplUart -> HplUartC.HplUart0;
-  UartControl = HplUartC.Uart0Control;
-
-  UartP.UartControl -> HplUartC.Uart0Control;
-
-
+  components Atm128Uart0C as Uart0;
+  StdControl = Uart0;
+  UartStream = Uart0;
+  UartByte = Uart0;
+  UartControl = Uart0;
+  
+  components CounterMicro32C;
+  Uart0.Counter -> CounterMicro32C;
+  
 }

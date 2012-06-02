@@ -91,7 +91,7 @@ enum {
 };
 
 #else
-#error "Unknown clock rate. MHZ must be defined to one of 1, 2, 4, or 8."
+#error "Unknown clock rate. MHZ must be defined to one of 8 or 16."
 #endif
 
 enum {

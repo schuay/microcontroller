@@ -75,6 +75,6 @@ implementation
   }
 
   async command uint16_t Atm128Calibrate.baudrateRegister(uint32_t baudrate) {
-    return (PLATFORM_MHZ*1000000UL / (baudrate * 8UL));
+    return ((PLATFORM_MHZ*1000000UL + (baudrate * 4UL)) / (baudrate * 8UL) - 1 );
   }
 }

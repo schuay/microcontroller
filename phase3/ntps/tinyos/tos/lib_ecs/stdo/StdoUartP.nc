@@ -16,6 +16,7 @@ module StdoUartP @safe() {
 	uses interface UartByte as Uart;
 #endif
 	uses interface StdControl as Control;
+	uses interface UartControl;
 }
 
 implementation {
@@ -30,6 +31,7 @@ implementation {
 
 	command error_t Init.init() {
 		call Control.start();
+		call UartControl.setDuplexMode(TOS_UART_TONLY);
 		stdout = &atm128_stdout;
 		return SUCCESS;
 	}

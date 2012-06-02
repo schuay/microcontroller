@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-// uncomment this for a blocking implementation of printf
+// uncomment this for a non-blocking implementation of printf
 #define BLOCKING_PRINTF
 
 enum {

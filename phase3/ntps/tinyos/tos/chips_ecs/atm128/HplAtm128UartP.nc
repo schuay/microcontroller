@@ -94,8 +94,8 @@ module HplAtm128UartP {
   uses interface McuPowerState;
 }
 implementation {
-  uart_speed_t ubrr0;
-  uart_speed_t ubrr1;
+  uart_speed_t speed0;
+  uart_speed_t speed1;
   uart_duplex_t duplex0;
   uart_duplex_t duplex1;
   uart_parity_t parity0;
@@ -111,7 +111,7 @@ implementation {
     stts.bits = (struct Atm128_UCSRA_t) {u2x:1};
     mode.bits = (struct Atm128_UCSRC_t) {ucsz:ATM128_UART_DATA_SIZE_8_BITS};
 
-	call Uart0Control.setSpeed(PLATFORM_BAUDRATE);
+    call Uart0Control.setSpeed(PLATFORM_BAUDRATE);
     UCSR0A = stts.flat;
     UCSR0C = mode.flat;
     UCSR0B = ctrl.flat;
@@ -184,16 +184,17 @@ implementation {
   }
 
   async command error_t Uart0Control.setSpeed(uart_speed_t speed) {
+    uint16_t ubrr = call Atm128Calibrate.baudrateRegister(speed);
     atomic {
-      ubrr0 = call Atm128Calibrate.baudrateRegister(speed);
-      UBRR0L = ubrr0;
-      UBRR0H = ubrr0 >> 8;
-	}
+      speed0 = speed;
+      UBRR0L = ubrr;
+      UBRR0H = ubrr >> 8;
+    }
     return SUCCESS;
   }
 
   async command uart_speed_t Uart0Control.speed() {
-    return ubrr0;
+    atomic return speed0;
   }
 
   async command error_t Uart0Control.setDuplexMode(uart_duplex_t duplex) {
@@ -356,16 +357,17 @@ implementation {
   }
 
   async command error_t Uart1Control.setSpeed(uart_speed_t speed) {
+    uint16_t ubrr = call Atm128Calibrate.baudrateRegister(speed);
     atomic {
-      ubrr1 = call Atm128Calibrate.baudrateRegister(speed);
-      UBRR1L = ubrr1;
-      UBRR1H = ubrr1 >> 8;
+      speed1 = speed;
+      UBRR1L = ubrr;
+      UBRR1H = ubrr >> 8;
     }
     return SUCCESS;
   }
 
   async command uart_speed_t Uart1Control.speed() {
-    return ubrr1;
+    atomic return speed1;
   }
 
   async command error_t Uart1Control.setDuplexMode(uart_duplex_t duplex) {

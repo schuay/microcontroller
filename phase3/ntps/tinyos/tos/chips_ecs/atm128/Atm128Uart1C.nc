@@ -59,4 +59,7 @@ implementation{
   UartP.HplUartRxControl -> HplUartC.Uart1RxControl;
   UartP.HplUart -> HplUartC.HplUart1;
   UartControl = HplUartC.Uart1Control;
+
+  UartP.UartControl -> HplUartC.Uart1Control;
+
 }

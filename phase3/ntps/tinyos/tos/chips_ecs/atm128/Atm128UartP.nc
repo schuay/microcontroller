@@ -53,6 +53,7 @@ generic module Atm128UartP() @safe() {
   uses interface StdControl as HplUartRxControl;
   uses interface HplAtm128Uart as HplUart;
   uses interface Counter<TMicro, uint32_t>;
+
   uses interface UartControl;
 
 }
@@ -77,7 +78,9 @@ implementation{
     call HplUartRxControl.start();
 
     // Bug fix: pal 11/26/07: RX interrupts should be enabled on start
-    call HplUart.enableRxIntr();
+    // Bug fix of the Bug fix: koe 05/31/12: previous bug fix breaks UartByte.receive
+    //                         If you want to use UartStream enable receive interrupt by hand
+    //call HplUart.enableRxIntr();
     return SUCCESS;
   }
 
@@ -186,17 +189,48 @@ implementation{
   }
 
   async command error_t UartByte.receive( uint8_t * byte, uint8_t timeout){
-    uint16_t m_byte_time;
-    uint16_t timeout_micro = m_byte_time * timeout + 1;
-    uint16_t start;
+
+    uint32_t timeout_micro;
+    uint32_t start;
+
+    uint16_t magic;
+
+
+    switch(call UartControl.speed()){
+      case TOS_UART_9600:
+        /* 1000000/9600=104.16 us/Bit -> 1042us per byte   */
+        /* (for simplicity we assume 8N1 -> 10Bit)         */
+        magic=1042;
+      break;
+      case TOS_UART_19200:
+        /* 1000000/19200=52.08 us/Bit -> 521us per byte    */
+        magic=521;
+      break;
+      case TOS_UART_38400:
+        /* 1000000/38400=26.04 us/Bit -> 260us per byte    */
+        magic=260;
+      break;
+      case TOS_UART_57600:
+        /* 1000000/57600=17.36 us/Bit -> 174us per byte    */
+        magic=260;
+      break;
+      case TOS_UART_115200:
+        /* 1000000/115200=8.68 us/Bit -> 87us per byte     */
+        magic=260;
+      break;
+      default:
+        /* unsupported Baudrate, assume 500us per byte     */
+        magic=500;
+    }
 
     if(m_rx_intr)
       return FAIL;
 
-    m_byte_time = 10000000UL / (call UartControl.speed());
     start = call Counter.get();
+    timeout_micro = timeout * magic;
+
     while ( call HplUart.isRxEmpty() ) {
-      if ( ( (uint16_t)call Counter.get() - start ) >= timeout_micro )
+      if ( ( call Counter.get() - start ) >= timeout_micro )
 	return FAIL;
     }
     *byte = call HplUart.rx();

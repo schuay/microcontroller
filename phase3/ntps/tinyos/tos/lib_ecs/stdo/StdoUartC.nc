@@ -4,6 +4,7 @@
  */
 
 #include "stdo.h"
+#include "Atm128Uart.h"
 
 configuration StdoUartC {
 
@@ -20,8 +21,9 @@ implementation {
 	StdoUartP.Init <- MainC;
 	StdoUartP.Uart -> Uart;
 	StdoUartP.Control -> Uart;
+	StdoUartP.UartControl -> Uart;
 #ifndef BLOCKING_PRINTF
-	StdoP.Queue -> AsyncQueueC;
+	StdoUartP.Queue -> AsyncQueueC;
 #endif
 }
 
