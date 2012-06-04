@@ -167,8 +167,17 @@ implementation
      */
     static uint32_t htonl(uint32_t hostlong)
     {
-        /* TODO */
-        return hostlong;
+        uint8_t i;
+        uint32_t dst;
+        uint8_t *dstptr = (uint8_t *)&dst;
+        const uint8_t *srcptr = (const uint8_t *)&hostlong;
+        const uint8_t len = sizeof(hostlong);
+
+        for (i = 0; i < len; i++) {
+            dstptr[i] = srcptr[len - 1 - i];
+        }
+
+        return dst;
     }
 
     struct ntp_packet_t packet;
