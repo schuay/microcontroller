@@ -7,3 +7,5 @@
                      This only seems to happen if the network stack is included.
                      The 1s main timer stops firing after a while.
 7.0h    Unit tests, move time conversions into TimeC
+8.0h    More debugging of #*&$^#$ TinyOS
+2.5h    Debugging with ahagmann, test program
