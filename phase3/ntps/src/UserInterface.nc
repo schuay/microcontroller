@@ -19,6 +19,11 @@ interface UserInterface
     command void setTimeRTC(rtc_time_t time);
 
     /**
+     * Initiate a touchscreen poll.
+     */
+    command void pollTouchscreen(void);
+
+    /**
      * The 'Set to GPS' button has been pressed.
      */
     event void setToGPSPressed(void);

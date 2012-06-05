@@ -53,7 +53,7 @@ implementation
         call Rtc.start(&time);
         call GpsTimerParser.startService();
 
-        call Timer.startPeriodic(1000);
+        call Timer.startPeriodic(100);
 
 #ifndef NOEXTRAS
         /* Network setup. */
@@ -142,12 +142,27 @@ implementation
 #endif
     }
 
+    task void timerFiredTask(void)
+    {
+        /* If we run timer logic in here, the app does not start. */
+    }
+
     /**
      * Read RTC time on each timer tick.
      */
     event void Timer.fired()
     {
-        call Rtc.readTime(&time);
+        /* Normally, the touchscreen polling should be encapsulated in
+         * UserInterface. However, running a second timer completely breaks
+         * the application. */
+        static uint8_t i = 0;
+        if (i % 10 == 0) {
+            call Rtc.readTime(&time);
+        }
+#ifndef NOEXTRAS
+        call UserInterface.pollTouchscreen();
+#endif
+        i++;
     }
 
 #ifndef NOEXTRAS

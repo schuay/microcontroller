@@ -49,8 +49,9 @@ implementation
         call Glcd.drawText(labelOffset,
                            BTN_OFS_X0 + (BTN_OFS_X0 - LETTER_WIDTH * strlen(labelOffset)) / 2, 25);
 
-        /* Begin polling touchscreen. */
-        call Timer.startPeriodic(POLL_INTERVAL_MS);
+        /* Begin polling touchscreen.
+         * Starting the second timer seems to break everything. */
+        // call Timer.startPeriodic(POLL_INTERVAL_MS);
     }
 
 
@@ -97,9 +98,13 @@ implementation
         }
     }
 
-    /** Poll touchscreen on each timer tick. */
-    event void Timer.fired()
+    command void UserInterface.pollTouchscreen(void)
     {
         call TouchScreen.getCoordinates(&coordinates);
+    }
+
+    event void Timer.fired()
+    {
+        /* Unused. If two timers are used, they stop after a while. */
     }
 }
