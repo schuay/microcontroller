@@ -25,7 +25,7 @@ module UserInterfaceC
 
 implementation
 {
-    ts_coordinates_t coordinates;
+    static ts_coordinates_t coordinates;
 
     command void UserInterface.init(void)
     {
