@@ -180,7 +180,7 @@ implementation
         return dst;
     }
 
-    struct ntp_packet_t packet;
+    static struct ntp_packet_t packet;
     event void UdpReceive.received(in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len)
     {
         uint32_t timestamp = 0;
