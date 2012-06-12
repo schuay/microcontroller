@@ -35,6 +35,9 @@ implementation
     static char buffer[MAX_FIELD_SIZE + 1]; /* Trailing '\0'. */
     static uint8_t buffer_pos = 0;
 
+    /**
+     * Appends c to the buffer unless the buffer is full.
+     */
     static void buffer_push(char c)
     {
         if (buffer_pos == MAX_FIELD_SIZE) {
@@ -45,17 +48,29 @@ implementation
         buffer_pos++;
     }
 
+    /**
+     * Clears the buffer.
+     */
     static void buffer_clear(void)
     {
         memset(buffer, 0, MAX_FIELD_SIZE + 1);
         buffer_pos = 0;
     }
 
+    /**
+     * Returns true if the buffer contents equal s.
+     * Only the filled part of the buffer is checked, and never more than
+     * the buffer size. */
     static bool buffer_equals(const char *s)
     {
+        /* TODO: Only check up to min(buffer_pos, MAX_FIELD_SIZE). */
         return (strncmp(buffer, s, MAX_FIELD_SIZE) == 0);
     }
 
+    /**
+     * Converts s to an unsigned integer and returns the result.
+     * If a conversion error occurs, ok is set to FALSE.
+     */
     static uint32_t parseint(const char *s, bool *ok)
     {
         char *endptr;
@@ -87,6 +102,9 @@ implementation
      */
     static uint32_t date;
 
+    /**
+     * Converts the result of a GPS parsing run to timedate_t format.
+     */
 #ifndef TEST
     task void newTimeDateTask(void)
 #else

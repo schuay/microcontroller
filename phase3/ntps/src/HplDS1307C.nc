@@ -27,12 +27,12 @@ implementation
         NONE,
     };
 
-    static bool inProgress = FALSE;
-    static enum Operation queuedOperation = NONE;
-    static uint8_t *dataPtr;
-    static uint8_t dataBuffer;
-    static uint8_t dataSize;
-    static uint8_t addressBuffer;
+    static bool inProgress = FALSE; /**< Is an operation in progress? */
+    static enum Operation queuedOperation = NONE; /**< The next queued operation. */
+    static uint8_t *dataPtr; /**< Pointer to the buffer to be written to / read from. */
+    static uint8_t dataBuffer; /**< Buffer for a single register read. */
+    static uint8_t dataSize; /**< The size of the read/write. */
+    static uint8_t addressBuffer; /** Stores the register address. */
 
     command error_t HplDS1307.open(void)
     {
@@ -158,6 +158,10 @@ implementation
     {
         switch (length) {
         case 1:
+            /* This (and all following) signals are emitted intentionally
+             * directly from the events. Waiting for a posted task to execute
+             * could cause us to lose packets. Connected signal handlers must be
+             * short. */
             signal HplDS1307.registerReadReady(*data);
             break;
         default:

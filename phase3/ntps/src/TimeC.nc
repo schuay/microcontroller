@@ -8,6 +8,10 @@ module TimeC
 implementation
 {
 #endif
+    /**
+     * Returns true if the passed year (the year 2000 is represented by 2000).
+     * is a leap year.
+     */
     static inline bool isLeapYear(uint16_t year)
     {
         /* A year is a leap year if it is evenly divisible by 4,
@@ -31,6 +35,9 @@ implementation
     /**
      * The algorithm is taken from
      * http://java.dzone.com/articles/algorithm-week-how-determine
+     *
+     * Returns the day of the week (1 == Monday, 7 == Sunday) for the given
+     * date, month and year, where year = 0 represents the year 2000.
      */
 #ifndef TEST
     command uint8_t Time.dayOfWeek(uint8_t date, uint8_t month, uint8_t year)
@@ -81,12 +88,18 @@ implementation
 #define SECS_PER_DAY (SECS_PER_HOUR * HOURS_PER_DAY)
 #define SECS_PER_YEAR (SECS_PER_DAY * DAYS_PER_YEAR)
 
-    /* Stores sum of days in year in previous months.
+    /**
+     * Stores sum of days in year in previous months.
+     * Not located in PROGMEM for performance reasons. In this case, efficiency
+     * seems more important than saving a few bytes of RAM.
      * Cumulative sum of: { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30 }
      */
     static const uint16_t days_until_month[] =
         { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
+    /**
+     * Converts an rtc_time_t to the corresponding NTP timestamp.
+     */
 #ifndef TEST
     command void Time.toNtpTimestamp(uint32_t *dst, const rtc_time_t *src)
 #else
@@ -117,6 +130,9 @@ implementation
         *dst = ts;
     }
 
+    /**
+     * Converts an NTP timestamp to the corresponding rtc_time_t.
+     */
 #ifndef TEST
     command void Time.fromNtpTimestamp(rtc_time_t *dst, const uint32_t *src)
 #else

@@ -12,6 +12,10 @@ implementation
     static uint8_t pingData[PING_MAX_DATA];
     static in_addr_t pingIp;
 
+    /**
+     * Replies to received ping packets.
+     * The reply packet includes up to 100 bytes of the original packet.
+     */
 	event void IcmpReceive.received(in_addr_t *srcIp, uint8_t code, uint8_t *data, uint16_t len)
     {
         memcpy(pingData, data, len < PING_MAX_DATA ? len : PING_MAX_DATA);
@@ -22,5 +26,6 @@ implementation
 	
 	event void IcmpSend.sendDone(error_t error)
     {
+        /* Ignored. */
 	}
 }

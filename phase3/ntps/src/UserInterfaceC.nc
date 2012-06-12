@@ -25,6 +25,7 @@ module UserInterfaceC
 
 implementation
 {
+    /** Stores last read touchscreen coordinates. */
     static ts_coordinates_t coordinates;
 
     command void UserInterface.init(void)
@@ -57,8 +58,9 @@ implementation
 
     /* Holds the strings to print to the GLCD. */
     static char stringBuffer[MAX_STR_LEN];
-    static const char *dayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 
+    /** Not stored in PROGMEM because GLCD functions cannot handle PROGMEM types. */
+    static const char *dayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
     static const char *dayName(uint8_t day)
     {
         return dayNames[day % 7];
@@ -95,6 +97,7 @@ implementation
         }
     }
 
+    /** Poll touchscreen on each timer tick. */
     event void Timer.fired()
     {
         call TouchScreen.getCoordinates(&coordinates);

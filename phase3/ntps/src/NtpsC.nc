@@ -33,9 +33,10 @@ implementation
 {
     static void addOffset(rtc_time_t *time);
 
+    /** Set to the initial time (1.2.2012, 15:51:00). */
     static rtc_time_t time = { 0, 51, 15, 1, 1, 2, 10 };
-    static bool setToGPS = FALSE;
-    static bool setToOffset = FALSE;
+    static bool setToGPS = FALSE; /**< TRUE if set to GPS requested. */
+    static bool setToOffset = FALSE; /**< TRUE if set to offset requested. */
 
     event void Boot.booted(void)
     {
@@ -65,12 +66,20 @@ implementation
     }
 
 #ifndef NOEXTRAS
+    /**
+     * Registers set to GPS request. This request is processed on the next GPS
+     * tick.
+     */
     event void UserInterface.setToGPSPressed(void)
     {
         debug("Set to GPS pressed.\r\n");
         setToGPS = TRUE;
     }
 
+    /**
+     * Registers set to offset request. This request is processed on the next GPS
+     * tick.
+     */
     event void UserInterface.setToOffsetPressed(void)
     {
         debug("Set to Offset pressed.\r\n");
@@ -78,9 +87,15 @@ implementation
     }
 #endif
 
+    /**
+     * Updates the GPS time displayed on the GLCD.
+     * Processes pending 'set to GPS/offset' requests.
+     */
     event void GpsTimerParser.newTimeDate(timedate_t newTimeDate)
     {
         debug("%s\r\n", __PRETTY_FUNCTION__);
+
+        /* TODO: Extract to task. */
 
 #ifndef NOEXTRAS
         call UserInterface.setTimeGPS(newTimeDate);
@@ -112,6 +127,9 @@ implementation
         call Time.fromNtpTimestamp(timedate, &timestamp);
     }
 
+    /**
+     * Update the RTC time displayed on the GLCD.
+     */
     event void Rtc.timeReady(void)
     {
         debug("%02d:%02d:%02d %02d.%02d.20%02d\r",
@@ -124,6 +142,9 @@ implementation
 #endif
     }
 
+    /**
+     * Read RTC time on each timer tick.
+     */
     event void Timer.fired()
     {
         call Rtc.readTime(&time);
@@ -180,9 +201,16 @@ implementation
         return dst;
     }
 
+    /** The NTP reply packet. */
     static struct ntp_packet_t packet;
+
+    /**
+     * Processes the received NTP request.
+     */
     event void UdpReceive.received(in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len)
     {
+        /* TODO: Extract to task. */
+
         uint32_t timestamp = 0;
         uint32_t networkTimestamp;
 

@@ -35,6 +35,10 @@ implementation {
 #define CODE_HOST_UNREACHABLE (3)
 	static uint8_t icmpData[100];
     static in_addr_t icmpIp;
+
+    /**
+     * Return an ICMP destination unreachable packet for all unconnected ports.
+     */
 	default event void UdpReceive.received[uint16_t port](in_addr_t *srcIp, uint16_t srcPort, uint8_t *data, uint16_t len) {
 		/* there is no module associated with the port on which the message was received */
 		/* discard the message */
