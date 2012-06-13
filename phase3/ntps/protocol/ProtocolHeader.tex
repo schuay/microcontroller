@@ -1,0 +1,190 @@
+%***************************************************************************
+% MCLab Protocol Template
+%
+% Protocol Header: includes title page and other stuff that students should
+% not change
+%
+% Embedded Computing Systems Group
+% Institute of Computer Engineering
+% TU Vienna
+%
+%---------------------------------------------------------------------------
+% Vers.	Author	Date	Changes
+% 1.0	bw	16.6.06	first version
+%---------------------------------------------------------------------------
+% Author names:
+%       bw      Bettina Weiss
+%***************************************************************************
+
+
+%***************************************************************************
+% the following part is taken from the ESP lab protocol template
+%***************************************************************************
+
+%in order to get the source code in a really good shape
+\lstset{%backgroundcolor=\color[gray]{.9},
+         extendedchars=true,
+         basicstyle=\scriptsize,
+%        frame={tb},
+%         morekeywords={outp,inp,bit_is_clear,bit_is_set,sei,cli,sbi,cbi,INTERRUPT,SIGNAL,uint8,uint16_t,uint32_t,uint64_t,int8_t,int16_t,int32_t,int64_t,memptr},
+         language=C,
+%         lineskip=2pt,
+%         numbers=left,
+%         stepnumber=5,
+         }
+
+
+\setlength{\textheight}{9.3in}
+\setlength{\textwidth}{6.8in}
+\setlength{\columnsep}{0.3125in}
+\setlength{\oddsidemargin}{-0.304in}
+\setlength{\evensidemargin}{-0.304in}
+\setlength{\topmargin}{0.2in}
+\setlength{\headheight}{-0.1in}
+\setlength{\headsep}{-0.1in}
+\setlength{\footskip}{.5in}
+\setlength{\parindent}{1pc}
+
+
+
+\renewcommand{\floatpagefraction}{0.9}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{1.0}
+\renewcommand{\bottomfraction}{1.0}
+
+\setcounter{totalnumber}{3}
+\setcounter{bottomnumber}{3}
+\setcounter{topnumber}{3}
+
+\setlength{\unitlength}{1mm}
+\setlength{\parindent}{6mm}
+\setlength{\parskip}{12pt plus2pt minus2pt}
+
+\sloppy
+
+%***************************************************************************
+% end ESP lab protocol template
+%***************************************************************************
+
+
+%***************************************************************************
+% Declaration of Honesty
+%***************************************************************************
+
+\newcommand{\Declaration}{{\bf Declaration of Academic Honesty} \\
+~ \\
+I hereby declare that this protocol (text and code) is my own
+original work, that I have completed this work using only the sources
+cited in the text, and that neither this protocol nor parts of it have ever
+before been submitted to this or any other course.}
+
+
+\newcommand{\Publishme}{{\bf Admission to Publish} \\
+\begin{description}
+ \item[ $\Box$ ]  I explicitely \textbf{allow} the publication of my solution (protocol and sourcecode) on the course webpage.
+ \item[ $\Box$ ]  I \textbf{do not allow} the publication of my solution (default if nothing is checked).
+\end{description}
+}
+
+
+%***************************************************************************
+% useful macros
+%***************************************************************************
+
+\input ExerciseMacros.tex
+
+\newcounter{cntquest}
+\newcommand{\BeginQuestions}{\setcounter{cntquest}{0}}
+\newcommand{\QuText}[1]{
+  \addtocounter{cntquest}{1}
+  \noindent {\bf \arabic{cntquest}. #1}
+}
+%***************************************************************************
+
+
+%***************************************************************************
+% generate titlepage and table of contents (do not edit anything here!)
+%***************************************************************************
+
+\newcommand{\MakeTitleAndTOC}{
+  %-------------------------------------------------------------------------
+  % print title page
+  %-------------------------------------------------------------------------
+  \thispagestyle{empty}
+  \begin{flushright}
+  \begin{tabular}{lll}
+  Application: &  Points: & \underline{~~~~~~~~~} / 5\\
+  ~ \\
+
+ Uart + Parser: &  Points: & \underline{~~~~~~~~~} / 5 \\
+  ~ \\
+ UI: &  Points: & \underline{~~~~~~~~~} / 3 \\
+  ~ \\
+  Port unreachable: &  Points: & \underline{~~~~~~~~~} / 2 \\
+  ~ \\
+  Ping: &  Points: & \underline{~~~~~~~~~} / 1 \\
+  ~ \\
+  Theory Tasks: &  Points: & \underline{~~~~~~~~~} / 7 \\ \hline
+  ~ \\
+  Overall:      &  Points: & \underline{~~~~~~~~~} / 23
+  \end{tabular}
+  \end{flushright}
+%%  ~ \\
+%%  ~ \\
+  \begin{center}
+  \noindent
+  {\Huge \bf Microcontroller VL}
+
+  \vspace{1cm}
+  {\LARGE Application Protocol}
+  \end{center}
+
+  % Author
+  \begin{center}
+  \noindent
+  {\large \Vorname\ \Nachname, MatrNr.\ \MatrNr} \\
+  {\small \Email} \\
+  ~ \\
+  {\large Tutor: \Tutor}
+  ~ \\
+  ~ \\
+  {\large \today}
+  \end{center}
+
+  \fbox{\begin{minipage}{\textwidth}
+  \Declaration
+  ~ \\
+  \begin{flushright}
+  \begin{tabular}{cc}
+  \underline{~~~~~~~~~~~~~~~~~~~~~~~~~~} &
+  \underline{~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~} \\
+  (Date) & (Signature of Student) \\
+  \end{tabular}
+  \end{flushright}
+  \end{minipage}}
+
+
+  \fbox{\begin{minipage}{\textwidth}
+  \Publishme
+  \begin{flushright}
+  \begin{tabular}{c}
+  \underline{~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~} \\
+  (Signature of Student) \\
+  \end{tabular}
+  \end{flushright}
+  \end{minipage}}
+
+
+
+
+
+  \newpage
+
+  %-------------------------------------------------------------------------
+  % print table of contents
+  %-------------------------------------------------------------------------
+  \tableofcontents
+  \newpage
+
+} % \MakeTitleAndTOC
+%***************************************************************************

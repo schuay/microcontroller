@@ -1,0 +1,195 @@
+\documentclass[12pt,a4paper,titlepage,oneside]{article}
+\usepackage{graphicx}            % fuer Bilder
+\usepackage{epsfig}              % fuer EPS Bilder
+\usepackage{listings}            % fuer Programmlistings
+%\usepackage{german}              % fuer deutsche Umbrueche
+\usepackage[latin1]{inputenc}    % fuer Umlaute
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[pdfborder={0 0 0}]{hyperref}
+
+\definecolor{Brown}{cmyk}{0,0.81,1,0.60}
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\definecolor{gray}{gray}{0.5}
+
+\lstset{
+    language=C,                             % Code langugage
+    basicstyle=\ttfamily,                   % Code font, Examples: \footnotesize, \ttfamily
+    keywordstyle=\color{OliveGreen},        % Keywords font ('*' = uppercase)
+    commentstyle=\color{gray},              % Comments font
+    captionpos=b,                           % Caption-position = bottom
+    breaklines=true,                        % Automatic line breaking?
+    breakatwhitespace=false,                % Automatic breaks only at whitespace?
+    showspaces=false,                       % Dont make spaces visible
+    showtabs=false,                         % Dont make tabs visible
+    morekeywords={__attribute__},           % Specific keywords
+}
+
+%***************************************************************************
+% note: the template is in English, but you can use German for your
+% protocol as well; in that case, remove the comment from the
+% \usepackage{german} line above
+%***************************************************************************
+
+
+%***************************************************************************
+% enter your data into the following fields
+%***************************************************************************
+\newcommand{\Vorname}{Jakob}
+\newcommand{\Nachname}{Gruber}
+\newcommand{\MatrNr}{0203440}
+\newcommand{\Email}{e0203440@student.tuwien.ac.at}
+\newcommand{\Part}{I}
+\newcommand{\Tutor}{Patrik Fimml}
+%***************************************************************************
+
+
+%***************************************************************************
+% generating the document from Protocol.tex:
+%       "latex Protocol"        generates a .dvi file
+%       "latex Protocol"        repeat to get correct table of contents
+%       "xdvi Protocol &"       shows the .dvi file on viewer
+%       "dvips Protocol.dvi -o Protocol.ps"      generates a postscript file
+%
+%***************************************************************************
+
+%---------------------------------------------------------------------------
+% include all the stuff that is the same for all protocols and students
+\input ProtocolHeader.tex
+%---------------------------------------------------------------------------
+
+\begin{document}
+
+%---------------------------------------------------------------------------
+% create titlepage and table of contents
+\MakeTitleAndTOC
+%---------------------------------------------------------------------------
+
+
+%***************************************************************************
+% This is where your protocol starts
+%***************************************************************************
+
+
+%***************************************************************************
+\section{Overview}
+%***************************************************************************
+
+\subsection{Quickstart}
+
+
+%---------------------------------------------------------------------------
+\subsection{Connections,  External Pullups/Pulldowns}
+%---------------------------------------------------------------------------
+
+\bConnections{What}{}
+J15 & Connected to PF0 \\
+\eConnections
+
+All other peripherals are connected as described in the specification.
+
+%---------------------------------------------------------------------------
+\subsection{Design Decisions}
+%---------------------------------------------------------------------------
+
+\begin{itemize}
+
+ \item
+ 
+\end{itemize}
+
+
+%---------------------------------------------------------------------------
+\subsection{Specialities}
+%---------------------------------------------------------------------------
+
+\begin{itemize}
+
+ \item
+ 
+\end{itemize}
+
+
+
+%---------------------------------------------------------------------------
+\subsection{API Documentation}
+%---------------------------------------------------------------------------
+
+
+%***************************************************************************
+\section{Main Application}
+%***************************************************************************
+
+
+%***************************************************************************
+\section{Problems}
+%***************************************************************************
+
+
+%***************************************************************************
+\section{Work}
+%***************************************************************************
+
+\begin{tabular}{|l|c|}
+\hline
+reading manuals, datasheets	&  h	\\
+program design			&  h	\\
+programming			&  h	\\
+debugging			&  h	\\
+questions, protocol		&  h	\\
+\hline
+{\bf Total}			&  h	\\
+\hline
+\end{tabular}
+
+
+
+%***************************************************************************
+\section{Theory Tasks}
+%***************************************************************************
+
+
+
+%***************************************************************************
+\newpage
+\appendix
+\section{Listings}
+\small{
+%***************************************************************************
+
+Include EVERY source file of your Application (including headers)!!!
+And EVERY file you have modified!
+
+%---------------------------------------------------------------------------
+\subsection{Application}
+%---------------------------------------------------------------------------
+
+\lstinputlisting{../src/main.c}
+\lstinputlisting{../src/main.c}
+\lstinputlisting{../src/UdpConfig.h}
+\lstinputlisting{../src/NtpsAppC.nc}
+\lstinputlisting{../src/Rtc.nc}
+\lstinputlisting{../src/GpsTimerParser.nc}
+\lstinputlisting{../src/HplDS1307C.nc}
+\lstinputlisting{../src/Enc28j60C.nc}
+\lstinputlisting{../src/PingP.nc}
+\lstinputlisting{../src/NtpsC.nc}
+\lstinputlisting{../src/GpsTimerParserC.nc}
+\lstinputlisting{../src/UdpTransceiverC.nc}
+\lstinputlisting{../src/UserInterface.nc}
+\lstinputlisting{../src/PingC.nc}
+\lstinputlisting{../src/UdpTransceiverP.nc}
+\lstinputlisting{../src/GpsTimerParser.h}
+\lstinputlisting{../src/TimeC.nc}
+\lstinputlisting{../src/minunit.h}
+\lstinputlisting{../src/Time.nc}
+\lstinputlisting{../src/DS1307C.nc}
+\lstinputlisting{../src/Rtc.h}
+\lstinputlisting{../src/UserInterfaceC.nc}
+\lstinputlisting{../src/HplDS1307.nc}
+\lstinputlisting{../src/HplDS1307.h}
+
+%***************************************************************************
+}% small
+\end{document}
