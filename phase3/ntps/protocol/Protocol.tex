@@ -109,7 +109,48 @@ All other dipswitches in SW12-SW15 should be disabled.
 
 \begin{itemize}
 
- \item
+\item Unit testing
+    Many important functions can be (with a little care) written to make unit
+    testing possible. Tests are important for improving application stability
+    and allow for higher confidence when debugging and altering the code. These
+    tests are executed by running \emph{make check} in the project root.
+
+\item Use the same underlying data type for rtc\_time\_t and timedate\_t.
+    This simplifies code which handles interactions between the RTC and GPS
+    modules.
+
+\item Time-critical work is performed directly in events instead of tasks.
+    For example, I2C packet read handling is not extracted to a task since we
+    don't want to miss any read events. Another alternative would have been to
+    use a buffer area for overflow storage, but within the scope of this
+    assignment it seemed like overkill.
+
+\item Use only RTC bulk read/write methods
+    The HplDS1307 interface offers ways to perform targeted read/write
+    operations of specific register locations. However, most (if not all) of
+    the implemented functionality in DS1307C requires reading or writing
+    several different register sections. Therefore, it seemed to be a better
+    solution (avoiding function overhead, complicated code, additional
+    potential error sources) to use bulk read/writes exclusively.
+
+\item The RTC is set only on incoming time event
+    Instead of setting the RTC immediately, we wait for the next incoming GPS
+    time event to ensure accuracy.
+
+\item The RTC is polled once per second
+
+\item The touchscreen is polled once every 50 milliseconds
+    50 ms should be long enough to avoid wasting too many resources, and short
+    enough not to miss any touch events. The touchscreen needs to be polled
+    because it doesn't differentiate between idle and touched states.
+
+\item Do not store performance-critical constants in PROGMEM
+    This includes, for example, the \emph{days until month} table in TimeC.
+    Time calculations need to be fast, so we'd rather lose a few bytes of RAM
+    than performance.
+
+\item Do not store GLCD string constants in PROGMEM
+    The GLCD functions do not accept PROGMEM strings.
  
 \end{itemize}
 
@@ -120,15 +161,125 @@ All other dipswitches in SW12-SW15 should be disabled.
 
 \begin{itemize}
 
- \item
+\item Unit testing
+
+\item Partial compilation
+    The application can be compiled without extras (Touchscreen, GLCD,
+    Ethernet) by adding \emph{-DNOEXTRAS} to CFLAGS.
+
+\item Robust and failure-tolerant GPRMC sentence parser
+    Every complete GPRMC sentence should be parsed successfully, even if the
+    rest of the data stream is invalid.
  
 \end{itemize}
 
 
 %***************************************************************************
-\section{Main Application}
+\section{Modules}
 %***************************************************************************
 
+%***************************************************************************
+\subsection{Main Application}
+%***************************************************************************
+
+The main application has very little to do. All components are initialized, and
+the user interface, RTC, GPS and ethernet modules are glued together by
+reacting to touch events, incoming time information and NTP requests.
+
+The RTC is polled once per second. Upon receival of updated RTC or GPS times,
+they are displayed on the GLCD. When a button touch event is received, the RTC
+is updated whenever the next incoming time event occurs.
+
+If an NTP request is received, the reply packet is returned using the latest
+cached RTC time.
+
+%***************************************************************************
+\subsection{User Interface}
+%***************************************************************************
+
+UserInterfaceC handles interaction with the GLCD and touchscreen. It is
+responsible for drawing the UI and signalling button press events to the
+application. The touchscreen is polled every 50 ms - if the returned
+coordinates are within the button areas, a button press is emitted.
+
+%***************************************************************************
+\subsection{Time Conversion Utilities}
+%***************************************************************************
+
+TimeC encapsulates a couple of time utility functions, including day of week
+determination and conversion between NTP timestamps and rtc\_time\_t structs.
+Two-way conversion makes tasks like adding offsets to a specific timedate very
+easy.
+
+%***************************************************************************
+\subsection{ICMP and UDP Handlers}
+%***************************************************************************
+
+ICMP echo (Ping) and destination unreachable packets are handled in the PingP
+and UdpTransceiverP modules. The only notable things to watch out for are that
+reply packets must contain the correct type and code and that destination
+unreachable packets contain a portion the original request packet to help the
+sender identify which packet is referenced by the reply.
+
+%***************************************************************************
+\subsection{Unit Tests}
+%***************************************************************************
+
+Unit testing is performed using minunit
+(\url{http://www.jera.com/techinfo/jtns/jtn002.html}).
+
+Important functions are adapted for testing using conditional compilation.
+
+%***************************************************************************
+\subsection{GPS Parser}
+%***************************************************************************
+
+The GpsTimerParserC module parses an incoming UART GPS data stream for time
+data, and emits a signal when a time has been received. Time information is
+contained in GPRMC sentences and have the following format:
+
+\$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A
+
+Fields are separated by commas; the time is in field 0 (123519 represents
+12:35:19), and the date in field 8 (230394 represents March 23, 1994).
+
+A state machine is used to parse the incoming data stream. It is designed to
+tolerate transmission failures, incorrect and unexpected data. Every complete
+GPRMC sentence should be parsed successfully, even if the rest of the data
+stream is invalid.
+
+The parser is also fairly space-efficient, requiring only a 6 byte buffer plus
+one byte to store the current index.
+
+Upon completion of a successful parse, all interested parties are notified by
+emitting the newTimeDate signal.
+
+%***************************************************************************
+\subsection{Real Time Clock}
+%***************************************************************************
+
+The Real Time Clock (RTC) module uses a layered approach: the interface
+HplDS1307 (module DS1307C)is responsible for low level tasks such as reading
+and writing to individual RTC registers, while interface Rtc (module DS1307C)
+encapsulates common functions such as starting, stopping, setting, and querying
+the RTC.
+
+Communication with the RTC is performed using the I2C protocol. Access to the
+bus is protected by using the Resource interface. Most of the tasks performed
+by HplDS1307C are split-phase and consist of multiple steps, therefore a state
+machine is used to control execution flow.
+
+DS1307C uses HplDS1307C to implement common functions. Again, a state machine
+is used to handle control flow in split-phase commands. A few private utility
+functions to handle tasks such as converting between BCD and normal integer
+representation are also included.
+
+
+%***************************************************************************
+\section{API Documentation}
+%***************************************************************************
+
+API functions are documented in Doxygen style within the source code.
 
 %***************************************************************************
 \section{Problems}
