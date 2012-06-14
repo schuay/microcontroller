@@ -347,9 +347,18 @@ maximum $t + \pi$, with the difference between the two being $2 \cdot \pi$.
 Thus, the maximum difference between the fault-tolerant measurement of two
 controllers $d \leq 2 \cdot \pi$.
 
-\subsection{Rounding of Values}
-\subsection{Rounding of Larger Values}
+\subsection{Rounding of Values, Rounding of Larger Values}
 
+The solution to the assembler rounding assignments is presented as commented
+source code.
+
+The functions main\_div\_truncate, main\_div\_round\_up,
+main\_div\_round\_to\_nearest correspond to assignments 2a, 2b, and 2c.
+
+main\_big\_div\_truncate, main\_big\_div\_round\_up,
+main\_big\_div\_round\_to\_nearest correspond to assignments 3a, 3b, and 3c.
+
+\lstinputlisting[language={[x86masm]Assembler}]{round.s}
 
 %***************************************************************************
 \newpage
