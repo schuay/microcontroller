@@ -18,7 +18,7 @@ module UdpTransceiverP {
 
 implementation {
 	
-	udp_packet_t packet;
+	static udp_packet_t packet;
 	
 	command error_t PacketSender.send(udp_queue_item_t *item) {
 		// create udp packet
