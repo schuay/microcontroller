@@ -149,6 +149,44 @@ questions, protocol		&  h	\\
 \section{Theory Tasks}
 %***************************************************************************
 
+\subsection{GPS Fault Tolerance}
+
+To tolerate $f > 0$ faulty modules of a total of $n > 2 \cdot f + 1 >
+0$ GPS modules, the f-tolerant mean $avg_f(t_1, ... , t_n)$ is used, which is
+defined as follows:
+
+Of the ordered set $t_{(1)}, ... , t_{(n)}$, the $f$ largest and $f$ smallest
+$t_i$ are discarded, and the average of the remaining values $t_{(f + 1)}, ...,
+t_{(n - f)}$ is used as the result.
+
+GPS accuracy is restricted such that the difference between the actual and the
+measured GPS time is always below a threshold $\pi$.
+
+\subsubsection{Fault bounds of a single controller}
+
+Assuming we have f faulty modules, there are at most f modules for which
+$|t-gps_f(t)| \leq \pi$ does not hold. By applying $avg_f(.)$, the f largest and
+smallest values are discarded, and from the threshold guarantee of non-faulty
+models it follows that the remaining $n - 2 \cdot f$ values are within the
+interval $t - \pi \leq gps_i(t) \leq t + \pi$.
+
+Finally, from $x_{(1)} \leq avg(x_{(1)}, ..., x_{(n)}) \leq x_{(n)}$, it follows
+that $|t - avg_f(gps_1(t), ..., gps_n(t))| \leq \pi$ for all $t$.
+
+\subsubsection{Fault bounds of two controllers}
+
+The difference between the measurement of two controllers can be shown easily
+using the results we have just acquired. We have shown that one controller using
+$avg_f(.)$ with f faulty GPS modules will set its time to within $[t - \pi, t +
+\pi]$. The maximum possible difference between the measurements of two
+controllers is achieved if one measures the minimum $t - \pi$, and the other the
+maximum $t + \pi$, with the difference between the two being $2 \cdot \pi$.
+
+Thus, the maximum difference between the fault-tolerant measurement of two
+controllers $d \leq 2 \cdot \pi$.
+
+\subsection{Rounding of Values}
+\subsection{Rounding of Larger Values}
 
 
 %***************************************************************************
