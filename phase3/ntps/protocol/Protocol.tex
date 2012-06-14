@@ -84,10 +84,24 @@
 %---------------------------------------------------------------------------
 
 \bConnections{What}{}
-J15 & Connected to PF0 \\
+SW15, MMC Dipswitches & Disabled \\
+PB4 & Ethernet RST \\
+PB0 & Ethernet CS \\
+PD2 & Ethernet INT \\
+PB1 & Ethernet SCK \\
+PB3 & Ethernet MISO \\
+PB2 & Ethernet MOSI \\
+PB4 & Ethernet RST \\
+SW14, RTC Dipswitches (5, 7) & Enabled \\
+SW13, RS232-A Dipswitches (5, 6) & Enabled \\
+SW13, RS232-B TX Dipswitch (8) & Enabled \\
+SW13, Touchscreen Dipswitches (1-4) & Enabled \\
+SW15, Backlight Dipswitch (8) & Enabled \\
+J18 & Set to VCC \\
+J15 & Disconnected \\
 \eConnections
 
-All other peripherals are connected as described in the specification.
+All other dipswitches in SW12-SW15 should be disabled.
 
 %---------------------------------------------------------------------------
 \subsection{Design Decisions}
@@ -111,12 +125,6 @@ All other peripherals are connected as described in the specification.
 \end{itemize}
 
 
-
-%---------------------------------------------------------------------------
-\subsection{API Documentation}
-%---------------------------------------------------------------------------
-
-
 %***************************************************************************
 \section{Main Application}
 %***************************************************************************
@@ -126,6 +134,11 @@ All other peripherals are connected as described in the specification.
 \section{Problems}
 %***************************************************************************
 
+Apart from the usual early adopter issues (incomplete specification, bugs in
+used tools, toolchain setup issues), my main problems were the initial lack of
+debugging outputs (since one UART was used by the application, and the other
+could not be used due to pin conflicts), and an obscure compiler bug which took
+several days to track down (thanks to Andreas Hagmann for the help).
 
 %***************************************************************************
 \section{Work}
@@ -133,17 +146,15 @@ All other peripherals are connected as described in the specification.
 
 \begin{tabular}{|l|c|}
 \hline
-reading manuals, datasheets	&  h	\\
-program design			&  h	\\
-programming			&  h	\\
-debugging			&  h	\\
-questions, protocol		&  h	\\
+reading manuals, datasheets	& 1 h	\\
+program design			& 1 h	\\
+programming			& 13 h	\\
+debugging			& 25 h	\\
+questions, protocol		& 5 h	\\
 \hline
-{\bf Total}			&  h	\\
+{\bf Total}			& 45 h	\\
 \hline
 \end{tabular}
-
-
 
 %***************************************************************************
 \section{Theory Tasks}
