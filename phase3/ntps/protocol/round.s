@@ -242,10 +242,51 @@ big_div_truncate:
 
     ret
 
+; Adds reg_tmp to the number represented by registers 1..R (R is assumed to be 8)
+; The upper bound for used cycles is R.
+big_add:
+    add     0x01, tmp ; 1 cycle
+    .irpc   param,2345678
+    adc     0x0\param, zero ; 7 cycles
+    .endr
+
+    ret
+
+; Subtracts reg_tmp to the number represented by registers 1..R (R is assumed to be 8)
+; The upper bound for used cycles is R.
+big_sub:
+    sub     r1, tmp ; 1 cycle
+    .irpc   param,2345678
+    sbc     r\param, zero ; 7 cycles
+    .endr
+
+    ret
+
+; =============================================================================
+; 3.b)
+; Calculate a / 2^n (rounded up).
+; a is now stored across R different general purpose registers starting at r1.
+; The upper bound for the number of cycles is 11 * R + 2.
+
 main_big_div_round_up:
     call    reset_big_a
+
+    ldi     tmp, 1 ; 1 cycle
+    call    big_sub ; R cycles
+
+    call    big_div_truncate ; At most 9 * R cycles
+
+    ldi     tmp, 1 ; 1 cycle
+    call    big_add ; R cycles
+
     out     PORTE, a
     ret
+
+; =============================================================================
+; 3.c)
+; Calculate a / 2^n (round to nearest).
+; a is now stored across R different general purpose registers starting at r1.
+; The upper bound for the number of cycles is TODO.
 
 main_big_div_round_to_nearest:
     call    reset_big_a
