@@ -16,7 +16,7 @@ protocol:
 round: protocol/round.s
 	(\
 		cd protocol && \
-		avr-as -mmcu=atmega1280 round.s -o round.o && \
+		avr-as -g --gstabs -mmcu=atmega1280 round.s -o round.o && \
 		avr-ld -mavr51 round.o -o round.elf && \
 		avrprog2 --flash w:round.elf \
 	)
