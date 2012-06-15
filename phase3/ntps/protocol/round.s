@@ -2,10 +2,15 @@
 .include "m1280def.inc"
 .list
 
-.equ zero, 0x12
+.equ zero, 0x10
 .equ tmp, 0x11
-.equ a, 0x10
+.equ mask, 0x12
+.equ sign, 0x13
+.equ a, 0x01
+
 .equ n, 5
+.equ mod8, n % 8
+.equ div8, n / 8
 
 .section .text
 .globl main
@@ -35,6 +40,8 @@ main_init_sleep:
 
 main_init_misc:
     ldi     zero, 0x00
+    ldi     sign, 0x00
+    ldi     mask, 0b01111111
 
     call    main_div_truncate
     call    main_div_round_up
@@ -50,7 +57,16 @@ main_loop:
 
 ; Initialize a to 35
 reset_a:
-    ldi     a, 35
+    ldi     tmp, 35
+    mov     a, tmp
+    ret
+
+reset_big_a:
+    ldi     tmp, 35
+    mov     a, tmp
+    .irpc   param,8765432
+    mov     0x0\param, zero
+    .endr
     ret
 
 ; =============================================================================
@@ -129,26 +145,109 @@ main_div_round_to_nearest:
 ; 3.a)
 ; Calculate a / 2^n (truncated).
 ; a is now stored across R different general purpose registers starting at r1.
-; The upper bound for the number of cycles is TODO.
+; The upper bound for the number of cycles is 9 * R.
 
 main_big_div_truncate:
-    call    reset_a
-
-    ; Algorithm idea:
-    ; Calculate p = n % 8 and q = n / 8.
-    ; Shift entire registers by q (for example, move reg 8 to reg 5).
-    ; Shift remaining registers by p, making sure to move LSB from reg i+1 to
-    ; MSB in reg i.
-
-    .rept n
-    asr     a           ; n cycles
-    .endr
-
+    call    reset_big_a
+    call    big_div_truncate
     out     PORTD, a
     ret
 
+big_div_truncate:
+
+    ; The general algorithm idea:
+    ;
+    ; Calculate mod8 = n % 8 and div8 = n / 8.
+    ; First move all registers div places to the right (for example,
+    ; move reg_4 to reg_1 with div = 3).
+    ; Then perform internal shifts by mod on all registers.
+    ;
+    ; For the sake of simplicity, set R = 8. a is stored in r1 (LSB) to r8
+    ; (MSB). It is trivial to alter the algorithm to different R's, but
+    ; readability is improved by using the .irpc assembler directive.
+
+    ; Register move div8 times.
+    ; Only perform register move if there is something to do.
+
+    .if     div8 != 0
+
+    ; After moving registers over, the tail registers need to be cleared to
+    ; 0xFF (for negative numbers) or 0x00 (otherwise). Prepare a register with
+    ; the appropriate value so we can copy it over easily later.
+
+    sbrc    0x08    ; 1 cycles if n non-negative, 2 otherwise
+    com     sign    ; 1 cycle
+
+    ; for (param = div8 + 1; param <= R; param++)
+
+    .irpc   param,12345678
+    .if     \param > div8
+
+    mov     0x0\param - div8, 0x0\param ; Exactly (R - div8 - 1) cycles. At most R - 1 cycles.
+
+    ; Clear moved register to sign bits (see above).
+    mov     0x0\param, sign ; Exactly (R - div8 - 1) cycles. At most R - 1 cycles.
+
+    .endif  ; \param > div8
+    .endr   ; .irpc param, 1..R
+
+    .endif  ; div8 != 0
+
+    ; Register shift mod8 times.
+
+    .rept   mod8
+
+    ; for (param = R - div8; param > 0; param++)
+
+    .irpc   param,87654321
+    .if     \param <= 8 - div8
+    
+    .if     \param == 8 - div8
+
+    ; Shifting reg_{R - div8} ignores the carry flag and respects the sign bit.
+    asr     0x0\param ; Ignored for cycle count, see ror below.
+
+    .else
+
+    ror     0x0\param ; Exactly mod8 * (R - div8) cycles. At most 7 * R.
+
+    .endif  ; \param == R
+
+    .endif  ; \param <= R - div8
+    .endr   ; .irpc param, R..1
+
+    .endr   ; .rept mod8
+
+    ; Summing up, we have exactly:
+    ;
+    ; 2                 Prepare sign register (only if div8 != 0)
+    ; R - div8 - 1      Register move (only if div8 != 0)
+    ; R - div8 - 1      Register clear to sign (this could be optimized further)
+    ; mod8 * (R - div8) Register shift
+    ; --------------------------------
+    ; mod8 * (R - div8) 
+    ; +  2 * (R - div8 + - 1) + 2 (if div8 != 0).
+    ;
+    ; and at most:
+    ;
+    ; 2
+    ; R - 1
+    ; R - 1
+    ; 7 * R
+    ; --------------------------------
+    ; 9 * R cycles.
+    ;
+    ; div8 = n / 8
+    ; mod8 = n % 8
+
+    ret
+
 main_big_div_round_up:
+    call    reset_big_a
+    out     PORTE, a
     ret
 
 main_big_div_round_to_nearest:
+    call    reset_big_a
+    out     PORTF, a
     ret
