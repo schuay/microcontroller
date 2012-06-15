@@ -53,6 +53,7 @@ reset_a:
     ldi     a, 35
     ret
 
+; =============================================================================
 ; 2.a)
 ; Calculate a / 2^n (truncated).
 ; The upper bound for the number of cycles is n.
@@ -61,18 +62,34 @@ main_div_truncate:
     call    reset_a
 
     .rept n
+
+    ; To divide a by 2^n (truncating the results), perform a right shift n
+    ; times. The sign bit is preserved by using an the arithmetic shift.
+
     asr     a           ; n cycles
     .endr
 
     out     PORTA, a
     ret
 
+; =============================================================================
 ; 2.b)
 ; Calculate a / 2^n (rounded up).
 ; The upper bound for the number of cycles is n + 2.
 
 main_div_round_up:
     call    reset_a
+
+    ; To round up instead of down, the algorithm from 2.a needs to be altered.
+    ; When a is not evenly divisible by 2^n, the result is
+    ;
+    ; div_truncate(a, n) + 1
+    ;
+    ; This is achieved by incrementing the final result (inc a).
+    ;
+    ; The only remaining problem is that this produces incorrect results for
+    ; a = m * 2^n, in which case div_round_up(a, n) should equal m. This
+    ; issue can be solved by decrementing a before shifting (dec a).
 
     dec     a           ; 1 cycle
     .rept n
@@ -83,12 +100,21 @@ main_div_round_up:
     out     PORTB, a
     ret
 
+; =============================================================================
 ; 2.c)
 ; Calculate a / 2^n (round to nearest).
 ; The upper bound for the number of cycles is n + 1.
 
 main_div_round_to_nearest:
     call    reset_a
+
+    ; Again, the algorithm is very similar to div_truncate(a, n).
+    ; The round to nearest effect is achieved by truncating if
+    ; a / 2^n < 1/2 and rounding up otherwise.
+    ; We can determine this by looking at the carry flag after the last
+    ; shift. It is clear if and only if a / 2^n < 1/2.
+    ; Adjust the final result by performing an add with carry (result, zero),
+    ; which adds one to the result if the carry flag is set.
 
     .rept n
     asr     a           ; n cycles
@@ -99,6 +125,7 @@ main_div_round_to_nearest:
     out     PORTC, a
     ret
 
+; =============================================================================
 ; 3.a)
 ; Calculate a / 2^n (truncated).
 ; a is now stored across R different general purpose registers starting at r1.
