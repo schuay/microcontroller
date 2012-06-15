@@ -6,6 +6,7 @@
 .equ tmp, 0x11
 .equ mask, 0x12
 .equ sign, 0x13
+.equ upperhalf, 0x14
 .equ a, 0x01
 
 .equ n, 5
@@ -62,6 +63,8 @@ reset_a:
     ret
 
 reset_big_a:
+    ldi     upperhalf, 0x01
+
     ldi     tmp, 35
     mov     a, tmp
     .irpc   param,8765432
@@ -145,7 +148,7 @@ main_div_round_to_nearest:
 ; 3.a)
 ; Calculate a / 2^n (truncated).
 ; a is now stored across R different general purpose registers starting at r1.
-; The upper bound for the number of cycles is 9 * R.
+; The upper bound for the number of cycles is 9 * R + 2.
 
 main_big_div_truncate:
     call    reset_big_a
@@ -166,6 +169,12 @@ big_div_truncate:
     ; (MSB). It is trivial to alter the algorithm to different R's, but
     ; readability is improved by using the .irpc assembler directive.
 
+    ; Store whether the nth bit is set or not (we need this in 3c).
+    ; This section always takes 2 cycles.
+
+    sbrs    0x01 + (n - 1) / 8, (n - 1) % 8
+    mov     upperhalf, zero
+
     ; Register move div8 times.
     ; Only perform register move if there is something to do.
 
@@ -175,7 +184,7 @@ big_div_truncate:
     ; 0xFF (for negative numbers) or 0x00 (otherwise). Prepare a register with
     ; the appropriate value so we can copy it over easily later.
 
-    sbrc    0x08    ; 1 cycles if n non-negative, 2 otherwise
+    sbrc    0x08, 7 ; 1 cycles if n non-negative, 2 otherwise
     com     sign    ; 1 cycle
 
     ; for (param = div8 + 1; param <= R; param++)
@@ -220,22 +229,24 @@ big_div_truncate:
 
     ; Summing up, we have exactly:
     ;
+    ; 2                 Save nth bit
     ; 2                 Prepare sign register (only if div8 != 0)
     ; R - div8 - 1      Register move (only if div8 != 0)
     ; R - div8 - 1      Register clear to sign (this could be optimized further)
     ; mod8 * (R - div8) Register shift
     ; --------------------------------
-    ; mod8 * (R - div8) 
+    ; mod8 * (R - div8) + 2
     ; +  2 * (R - div8 + - 1) + 2 (if div8 != 0).
     ;
     ; and at most:
     ;
     ; 2
+    ; 2
     ; R - 1
     ; R - 1
     ; 7 * R
     ; --------------------------------
-    ; 9 * R cycles.
+    ; 9 * R + 2 cycles.
     ;
     ; div8 = n / 8
     ; mod8 = n % 8
@@ -266,15 +277,17 @@ big_sub:
 ; 3.b)
 ; Calculate a / 2^n (rounded up).
 ; a is now stored across R different general purpose registers starting at r1.
-; The upper bound for the number of cycles is 11 * R + 2.
+; The upper bound for the number of cycles is 11 * R + 4.
 
 main_big_div_round_up:
     call    reset_big_a
 
+    ; See 2.b) for explanation.
+
     ldi     tmp, 1 ; 1 cycle
     call    big_sub ; R cycles
 
-    call    big_div_truncate ; At most 9 * R cycles
+    call    big_div_truncate ; At most 9 * R + 2 cycles
 
     ldi     tmp, 1 ; 1 cycle
     call    big_add ; R cycles
@@ -286,9 +299,17 @@ main_big_div_round_up:
 ; 3.c)
 ; Calculate a / 2^n (round to nearest).
 ; a is now stored across R different general purpose registers starting at r1.
-; The upper bound for the number of cycles is TODO.
+; The upper bound for the number of cycles is 10 * R + 3.
 
 main_big_div_round_to_nearest:
     call    reset_big_a
+
+    ; See 2.c) for explanation.
+
+    call    big_div_truncate ; At most 9 * R + 2 cycles
+
+    mov     tmp, upperhalf ; 1 cycle
+    call    big_add ; R cycles
+
     out     PORTF, a
     ret
