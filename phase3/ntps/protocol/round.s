@@ -7,6 +7,7 @@
 .equ mask, 0x12
 .equ sign, 0x13
 .equ upperhalf, 0x14
+.equ nibblemask, 0x15
 .equ a, 0x01
 
 .equ n, 5
@@ -43,6 +44,7 @@ main_init_misc:
     ldi     zero, 0x00
     ldi     sign, 0x00
     ldi     mask, 0b01111111
+    ldi     nibblemask, 0x0f
 
     call    main_div_truncate
     call    main_div_round_up
@@ -124,8 +126,9 @@ main_div_round_up:
 ; =============================================================================
 ; 2.c)
 ; Calculate a / 2^n (round to nearest).
-; -127 < a < 127. 0 < n < 8.
-; The upper bound for the number of cycles is n + 1.
+; 0 <= a < 127. 0 < n < 8.
+; The upper bound for the number of cycles is 6: n + 1 for n < 4, and n - 1
+; otherwise.
 
 main_div_round_to_nearest:
     call    reset_a
@@ -138,11 +141,29 @@ main_div_round_to_nearest:
     ; Adjust the final result by performing an add with carry (result, zero),
     ; which adds one to the result if the carry flag is set.
 
-    .rept n
-    asr     a           ; n cycles
+    ; Since we can now assume a to be non-negative, we can save two cycles by
+    ; swapping nibbles. This would not have made sense before since we'd have
+    ; needed to handle negative numbers and ended up at about the same cycle
+    ; count as with the naive shift solution.
+
+    .if n >= 4
+
+    swap    a               ; 1 cycle
+    and     a, nibblemask   ; 1 cycle
+
+    .rept n - 4
+    asr     a               ; n - 4 cycles
     .endr
 
-    adc     a, zero     ; 1 cycle
+    .else
+
+    .rept n
+    asr     a               ; n cycles
+    .endr
+
+    .endif
+
+    adc     a, zero         ; 1 cycle
 
     out     PORTC, a
     ret
