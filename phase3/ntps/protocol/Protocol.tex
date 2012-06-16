@@ -78,6 +78,12 @@
 
 \subsection{Quickstart}
 
+Connect the ethernet module and RS-232A to enable gpsfeed+ and network
+communication. Turn on the board. The current RTC time will be displayed on the
+GLCD. When a GPS time event arrives, it is also added to the GLCD display.
+Pressing the touchscreen buttons will set the RTC \emph{on arrival of the next
+GPS time event}. The board will respond to pings, NTP requests, and UDP packets
+on unused ports.
 
 %---------------------------------------------------------------------------
 \subsection{Connections,  External Pullups/Pulldowns}
@@ -151,6 +157,12 @@ All other dipswitches in SW12-SW15 should be disabled.
 
 \item Do not store GLCD string constants in PROGMEM
     The GLCD functions do not accept PROGMEM strings.
+
+\item Treat GPS time as UTC
+    gpsfeed+ sends the local time in its GPS sentences. This causes NTP replies
+    to have a two hour offset to the actual time (+1 timezone, +1 summer time).
+    Since the GPS signal should send UTC, we ignore this issue, blaming it on
+    gpsfeed+ upstream.
  
 \end{itemize}
 
@@ -301,9 +313,9 @@ reading manuals, datasheets	& 1 h	\\
 program design			& 1 h	\\
 programming			& 13 h	\\
 debugging			& 25 h	\\
-questions, protocol		& 5 h	\\
+questions, protocol		& 10 h	\\
 \hline
-{\bf Total}			& 45 h	\\
+{\bf Total}			& 50 h	\\
 \hline
 \end{tabular}
 
