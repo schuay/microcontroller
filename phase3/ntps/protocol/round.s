@@ -75,6 +75,7 @@ reset_big_a:
 ; =============================================================================
 ; 2.a)
 ; Calculate a / 2^n (truncated).
+; -127 < a < 127. 0 < n < 8.
 ; The upper bound for the number of cycles is n.
 
 main_div_truncate:
@@ -94,6 +95,7 @@ main_div_truncate:
 ; =============================================================================
 ; 2.b)
 ; Calculate a / 2^n (rounded up).
+; -127 < a < 127. 0 < n < 8.
 ; The upper bound for the number of cycles is n + 2.
 
 main_div_round_up:
@@ -122,6 +124,7 @@ main_div_round_up:
 ; =============================================================================
 ; 2.c)
 ; Calculate a / 2^n (round to nearest).
+; -127 < a < 127. 0 < n < 8.
 ; The upper bound for the number of cycles is n + 1.
 
 main_div_round_to_nearest:
@@ -147,6 +150,7 @@ main_div_round_to_nearest:
 ; =============================================================================
 ; 3.a)
 ; Calculate a / 2^n (truncated).
+; - 2^(8*R - 1) < a < 2^(8*R - 1). 0 < n < 8*R.
 ; a is now stored across R different general purpose registers starting at r1.
 ; The upper bound for the number of cycles is 9 * R + 2.
 
@@ -276,6 +280,7 @@ big_sub:
 ; =============================================================================
 ; 3.b)
 ; Calculate a / 2^n (rounded up).
+; - 2^(8*R - 1) < a < 2^(8*R - 1). 0 < n < 8*R.
 ; a is now stored across R different general purpose registers starting at r1.
 ; The upper bound for the number of cycles is 11 * R + 4.
 
@@ -298,6 +303,7 @@ main_big_div_round_up:
 ; =============================================================================
 ; 3.c)
 ; Calculate a / 2^n (round to nearest).
+; - 2^(8*R - 1) < a < 2^(8*R - 1). 0 < n < 8*R.
 ; a is now stored across R different general purpose registers starting at r1.
 ; The upper bound for the number of cycles is 10 * R + 3.
 
